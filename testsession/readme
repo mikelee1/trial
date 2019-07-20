@@ -1,0 +1,2 @@
+docker run -p 6379:6379 -v $PWD/data:/data  -d redis:latest redis-server --appendonly yes
+docker exec -it jolly_mirzakhani redis-cli --raw

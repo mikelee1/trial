@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package testuser;
+
+
+service EchoService{
+    rpc Echo (EchoRequest) returns (EchoResponse) {}
+
+}
+
+message EchoRequest{
+
+    string a = 2;
+
+}
+
+message EchoResponse{
+
+    string b = 2;
+
+}

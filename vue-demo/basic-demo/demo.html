@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <title>Title</title>
+</head>
+<body>
+<div id="app">
+    <p>{{ message }}</p>
+    <p>{{ reversedmessage }}</p>
+    <p>时间：{{ new Date() }}</p>
+    <p v-if="seen">现在你看到我了</p>
+    <p v-show="seen">现在你看到我了</p>
+    <a @click="doSomething">点击</a>
+
+    <h5 >{{name}}</h5>
+    <input v-model="name">
+
+
+    <span v-once>这个将不会改变: {{ message }}</span>
+    <p>Using v-html directive: <span v-html="rawHtml"></span></p>
+    <input v-model="message" />
+    <button @click="message = 'baz'">Change it</button>
+</div>
+<script src="demo.js"></script>
+</body>
+</html>

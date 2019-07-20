@@ -1,0 +1,8 @@
+mode: test
+test1: "hello"
+test:
+  test1: "world"
+clients:
+  client:
+    name: "lee"
+    ip: 127.0.0.1

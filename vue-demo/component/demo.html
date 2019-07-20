@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <title>Title</title>
+</head>
+<body>
+<div id="app">
+    <todo-item v-for="todo in todos" :todo="todo" :key="todo.key"></todo-item>
+    <solved-item v-for="item in solveds" :solved="item" :key="item.key"></solved-item>
+</div>
+<script src="demo.js"></script>
+</body>
+</html>

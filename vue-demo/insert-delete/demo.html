@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <title>Title</title>
+</head>
+<body>
+<div id="app">
+
+    <input v-model="name">
+    <input v-model="age">
+    <button @click="create">创建</button>
+
+    <table>
+        <thead>
+        <tr>
+            <th>id</th>
+            <th>Name</th>
+            <th>Age</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr v-for="(person,index) in persons">
+            <th>{{index}}</th>
+            <th>{{person.name}}</th>
+            <th>{{person.age}}</th>
+            <th @click="delete1(index)">删除</th>
+        </tr>
+        </tbody>
+
+    </table>
+</div>
+<script src="demo.js"></script>
+</body>
+</html>

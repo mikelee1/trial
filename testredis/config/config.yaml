@@ -1,0 +1,17 @@
+name: test
+info:
+  id: 1
+
+QabircConfig:
+  Redis:
+    Address: 127.0.0.1:6379
+
+ScaleMinute: true
+
+At:
+  1:
+    ID: "1"
+    Name: "lee"
+  2:
+    ID: "2"
+    Name: "mike"

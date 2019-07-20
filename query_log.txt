@@ -1,0 +1,150 @@
+2018-12-12 06:13:16.640 UTC [endorser] ProcessProposal -> DEBU 545 Entering: Got request from 172.19.0.1:49184
+2018-12-12 06:13:16.640 UTC [protoutils] ValidateProposalMessage -> DEBU 546 ValidateProposalMessage starts for signed proposal 0xc420366c30
+2018-12-12 06:13:16.640 UTC [protoutils] validateChannelHeader -> DEBU 547 validateChannelHeader info: header type 3
+2018-12-12 06:13:16.640 UTC [protoutils] checkSignatureFromCreator -> DEBU 548 begin
+2018-12-12 06:13:16.640 UTC [protoutils] checkSignatureFromCreator -> DEBU 549 creator is &{Org1MSP 3698d7d26b932a16e98e9c67fb267c053a8031cf1adc6c7991052cd735789091}
+2018-12-12 06:13:16.642 UTC [protoutils] checkSignatureFromCreator -> DEBU 54a creator is valid
+2018-12-12 06:13:16.643 UTC [protoutils] checkSignatureFromCreator -> DEBU 54b exits successfully
+2018-12-12 06:13:16.643 UTC [protoutils] validateChaincodeProposalMessage -> DEBU 54c validateChaincodeProposalMessage starts for proposal 0xc420403180, header 0xc420366fc0
+2018-12-12 06:13:16.643 UTC [protoutils] validateChaincodeProposalMessage -> DEBU 54d validateChaincodeProposalMessage info: header extension references chaincode name:"6usercc"
+2018-12-12 06:13:16.643 UTC [endorser] preProcess -> DEBU 54e [mychannel][b3113118] processing txid: b3113118fec26fc9eeb76c40ab6cd19244844633ff7c269db11db9b74e2bb609
+2018-12-12 06:13:16.643 UTC [fsblkstorage] retrieveTransactionByID -> DEBU 54f retrieveTransactionByID() - txId = [b3113118fec26fc9eeb76c40ab6cd19244844633ff7c269db11db9b74e2bb609]
+2018-12-12 06:13:16.645 UTC [endorser] ProcessProposal -> INFO 550 start to gettxsimulator
+2018-12-12 06:13:16.645 UTC [lockbasedtxmgr] NewTxSimulator -> DEBU 551 constructing new tx simulator
+2018-12-12 06:13:16.645 UTC [lockbasedtxmgr] newLockBasedTxSimulator -> DEBU 552 constructing new tx simulator txid = [b3113118fec26fc9eeb76c40ab6cd19244844633ff7c269db11db9b74e2bb609]
+2018-12-12 06:13:16.645 UTC [endorser] ProcessProposal -> INFO 553 start to gethistoryqueryexecutor
+
+开始simulateproposal
+2018-12-12 06:13:16.645 UTC [endorser] ProcessProposal -> INFO 554 start to simulateproposal
+2018-12-12 06:13:16.645 UTC [endorser] simulateProposal -> DEBU 555 [mychannel][b3113118] Entry chaincode: name:"6usercc"
+和lscc通信过程
+2018-12-12 06:13:16.646 UTC [ccprovider] NewCCContext -> DEBU 556 NewCCCC (chain=mychannel,chaincode=lscc,version=1.1.0-snapshot-6a8c2e8,txid=b3113118fec26fc9eeb76c40ab6cd19244844633ff7c269db11db9b74e2bb609,syscc=true,proposal=0xc420403180,canname=lscc:1.1.0-snapshot-6a8c2e8
+2018-12-12 06:13:16.646 UTC [chaincode] Launch -> DEBU 557 chaincode is running(no need to launch) : lscc:1.1.0-snapshot-6a8c2e8
+2018-12-12 06:13:16.646 UTC [chaincode] Execute -> DEBU 558 Entry
+2018-12-12 06:13:16.646 UTC [chaincode] Execute -> DEBU 559 chaincode canonical name: lscc:1.1.0-snapshot-6a8c2e8
+2018-12-12 06:13:16.646 UTC [chaincode] sendExecuteMessage -> DEBU 55a [b3113118]Inside sendExecuteMessage. Message TRANSACTION
+2018-12-12 06:13:16.646 UTC [chaincode] setChaincodeProposal -> DEBU 55b Setting chaincode proposal context...
+2018-12-12 06:13:16.646 UTC [chaincode] setChaincodeProposal -> DEBU 55c Proposal different from nil. Creating chaincode proposal context...
+2018-12-12 06:13:16.646 UTC [chaincode] sendExecuteMessage -> DEBU 55d [b3113118]sendExecuteMsg trigger event TRANSACTION
+向lscc发送请求获得用户合约的data
+2018-12-12 06:13:16.646 UTC [chaincode] serialSend -> ERRO 55e .......[peer<->chaincode] peer send msg to chaincode, now is:2018-12-12 06:13:16.646953105 +0000 UTC m=+353.509527034
+2018-12-12 06:13:16.647 UTC [shim] Recv -> INFO 55f procstream receive msg:type:TRANSACTION payload:"\n\tgetccdata\n\tmychannel\n\0076usercc" txid:"b3113118fec26fc9eeb76c40ab6cd19244844633ff7c269db11db9b74e2bb609" proposal:<proposal_bytes:"\n\302\007\nj\010\003\032\014\010\374\315\302\340\005\020\253\214\263\260\002\"\tmychannel*@b3113118fec26fc9eeb76c40ab6cd19244844633ff7c269db11db9b74e2bb609:\013\022\t\022\0076usercc\022\323\006\n\266\006\n\007Org1MSP\022\252\006-----BEGIN CERTIFICATE-----\nMIICKTCCAdCgAwIBAgIQS+L+tXjlmzohSAqX7+zM9TAKBggqhkjOPQQDAjBzMQsw\nCQYDVQQGEwJVUzETMBEGA1UECBMKQ2FsaWZvcm5pYTEWMBQGA1UEBxMNU2FuIEZy\nYW5jaXNjbzEZMBcGA1UEChMQb3JnMS5leGFtcGxlLmNvbTEcMBoGA1UEAxMTY2Eu\nb3JnMS5leGFtcGxlLmNvbTAeFw0xODEyMTIwNjAyMjBaFw0yODEyMDkwNjAyMjBa\nMGwxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpDYWxpZm9ybmlhMRYwFAYDVQQHEw1T\nYW4gRnJhbmNpc2NvMQ8wDQYDVQQLEwZjbGllbnQxHzAdBgNVBAMMFkFkbWluQG9y\nZzEuZXhhbXBsZS5jb20wWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAARAf2YQpapR\n8XZQaLfBxzUzx789oUD9C8sWTwxtgkWShghBCz1MKzKBLOwiiXNMBcVnAE4hk93T\ntPtumoQFaZTRo00wSzAOBgNVHQ8BAf8EBAMCB4AwDAYDVR0TAQH/BAIwADArBgNV\nHSMEJDAigCCe2GrnXHt4Q9ZQjEwwtxh3/2OBhEUFVPSgbT624IkG4DAKBggqhkjO\nPQQDAgNHADBEAiB1Bw6LdlN0NuMxNS13ZjC1GmbIfkPrnBNuVi9nrToCrAIgeOvY\neoEM5KyBBpKZx4XFzPC4RhQ7BlF7E3eNMkKdBn8=\n-----END CERTIFICATE-----\n\022\030qRv>Y\272\032\343t\034\360\334r^1[\316q\306\212\227\333\272\337\022\035\n\033\n\031\010\001\022\t\022\0076usercc\032\n\n\005query\n\001a" signature:"0E\002!\000\251\0062J\251l<\233\347H'\331\036\366v\333\247\331is\006\022C\355\255\t\t\302@\221Tv\002 AJ\0052\266\334[X:.\263\217u\273\036\355j\371\300e\212\216\212D\034\312\334A\311\356\217g" > channel_id:"mychannel"
+2018-12-12 06:13:16.647 UTC [shim] 1 -> ERRO 560 ..........[peer<->chaincode] chaincode got msg, now is:2018-12-12 06:13:16.647621163 +0000 UTC m=+353.510195092
+2018-12-12 06:13:16.647 UTC [shim] func1 -> ERRO 561 ..........msgavail
+2018-12-12 06:13:16.647 UTC [shim] func1 -> DEBU 562 [b3113118]Received message TRANSACTION from peer
+2018-12-12 06:13:16.647 UTC [shim] handleMessage -> DEBU 563 [b3113118]Handling ChaincodeMessage of type: TRANSACTION(state:ready)
+2018-12-12 06:13:16.647 UTC [shim] handleReady -> DEBU 564 [b3113118]Received TRANSACTION, invoking transaction on chaincode(state:ready)
+2018-12-12 06:13:16.649 UTC [shim] handleGetState -> DEBU 565 [b3113118]Sending GET_STATE
+2018-12-12 06:13:16.649 UTC [shim] func1 -> ERRO 566 .......[peer<->chaincode] chaincode send msg to peer, now is:2018-12-12 06:13:16.649816782 +0000 UTC m=+353.512390794
+2018-12-12 06:13:16.649 UTC [shim] Send -> INFO 567 procstream send msg:type:GET_STATE payload:"\n\0076usercc" txid:"b3113118fec26fc9eeb76c40ab6cd19244844633ff7c269db11db9b74e2bb609" channel_id:"mychannel"
+2018-12-12 06:13:16.650 UTC [chaincode] processStream -> ERRO 568 .......[peer<->chaincode] peer got msg from chaincode, now is:2018-12-12 06:13:16.650060915 +0000 UTC m=+353.512634970
+2018-12-12 06:13:16.650 UTC [chaincode] processStream -> DEBU 569 [b3113118]Received message GET_STATE from shim
+2018-12-12 06:13:16.650 UTC [chaincode] handleMessage -> DEBU 56a [b3113118]Fabric side Handling ChaincodeMessage of type: GET_STATE in state ready
+2018-12-12 06:13:16.650 UTC [chaincode] func1 -> DEBU 56b [b3113118]handling GET_STATE from chaincode
+2018-12-12 06:13:16.650 UTC [chaincode] func1 -> DEBU 56c [b3113118] getting state for chaincode lscc, key 6usercc, channel mychannel
+2018-12-12 06:13:16.650 UTC [stateleveldb] GetState -> DEBU 56d GetState(). ns=lscc, key=6usercc
+
+2018-12-12 06:13:16.650 UTC [chaincode] func1 -> DEBU 56e [b3113118]Got state. Sending RESPONSE
+2018-12-12 06:13:16.650 UTC [chaincode] deRegisterTxid -> DEBU 56f [b3113118]send RESPONSE(serial-false)
+2018-12-12 06:13:16.650 UTC [chaincode] serialSend -> ERRO 570 .......[peer<->chaincode] peer send msg to chaincode, now is:2018-12-12 06:13:16.650442737 +0000 UTC m=+353.513016663
+2018-12-12 06:13:16.650 UTC [shim] Recv -> INFO 571 procstream receive msg:type:RESPONSE payload:"\n\0076usercc\022\0031.0\032\004escc\"\004vscc*9\022\020\022\016\010\001\022\002\010\000\022\002\010\001\022\002\010\002\032\013\022\t\n\007Org1MSP\032\013\022\t\n\007Org2MSP\032\013\022\t\n\007Org3MSP2D\n \005$a\273\200\3042\347\206Yib\361W\366\373\313M\036\266\001\323\2204p\223\256\204c\036\024\332\022 \272\347\357\316\"p\266\302\352\007\212M\243\016\256JM\376\345\226\221\305\001\351\037\353!\364F\347\200\342: \320q\220\365\347v^\331\333\254l\276\305\332\304~\312\252?^m\344\233\240\254\007\036l\303B\320\270B?\022\020\022\016\010\001\022\002\010\000\022\002\010\001\022\002\010\002\032\r\022\013\n\007Org1MSP\020\001\032\r\022\013\n\007Org2MSP\020\001\032\r\022\013\n\007Org3MSP\020\001" txid:"b3113118fec26fc9eeb76c40ab6cd19244844633ff7c269db11db9b74e2bb609" channel_id:"mychannel"
+2018-12-12 06:13:16.650 UTC [shim] 1 -> ERRO 572 ..........[peer<->chaincode] chaincode got msg, now is:2018-12-12 06:13:16.650740244 +0000 UTC m=+353.513314233
+2018-12-12 06:13:16.650 UTC [shim] func1 -> ERRO 573 ..........msgavail
+2018-12-12 06:13:16.650 UTC [shim] func1 -> DEBU 574 [b3113118]Received message RESPONSE from peer
+2018-12-12 06:13:16.650 UTC [shim] handleMessage -> DEBU 575 [b3113118]Handling ChaincodeMessage of type: RESPONSE(state:ready)
+2018-12-12 06:13:16.650 UTC [shim] sendChannel -> DEBU 576 [b3113118]before send
+2018-12-12 06:13:16.650 UTC [shim] sendChannel -> DEBU 577 [b3113118]after send
+2018-12-12 06:13:16.650 UTC [shim] handleReady -> DEBU 578 [b3113118]Received RESPONSE, communicated (state:ready)
+2018-12-12 06:13:16.651 UTC [shim] handleGetState -> DEBU 579 [b3113118]GetState received payload RESPONSE
+2018-12-12 06:13:16.651 UTC [shim] func1 -> DEBU 57a [b3113118]Transaction completed. Sending COMPLETED
+2018-12-12 06:13:16.651 UTC [shim] triggerNextState -> DEBU 57b [b3113118]send state message COMPLETED
+2018-12-12 06:13:16.651 UTC [shim] func1 -> ERRO 57c .......[peer<->chaincode] chaincode send msg to peer, now is:2018-12-12 06:13:16.651140071 +0000 UTC m=+353.513713999
+2018-12-12 06:13:16.651 UTC [shim] Send -> INFO 57d procstream send msg:type:COMPLETED payload:"\010\310\001\032\376\001\n\0076usercc\022\0031.0\032\004escc\"\004vscc*9\022\020\022\016\010\001\022\002\010\000\022\002\010\001\022\002\010\002\032\013\022\t\n\007Org1MSP\032\013\022\t\n\007Org2MSP\032\013\022\t\n\007Org3MSP2D\n \005$a\273\200\3042\347\206Yib\361W\366\373\313M\036\266\001\323\2204p\223\256\204c\036\024\332\022 \272\347\357\316\"p\266\302\352\007\212M\243\016\256JM\376\345\226\221\305\001\351\037\353!\364F\347\200\342: \320q\220\365\347v^\331\333\254l\276\305\332\304~\312\252?^m\344\233\240\254\007\036l\303B\320\270B?\022\020\022\016\010\001\022\002\010\000\022\002\010\001\022\002\010\002\032\r\022\013\n\007Org1MSP\020\001\032\r\022\013\n\007Org2MSP\020\001\032\r\022\013\n\007Org3MSP\020\001" txid:"b3113118fec26fc9eeb76c40ab6cd19244844633ff7c269db11db9b74e2bb609" channel_id:"mychannel"
+2018-12-12 06:13:16.651 UTC [shim] func1 -> ERRO 57e ..........senderr is error
+2018-12-12 06:13:16.651 UTC [chaincode] processStream -> ERRO 57f .......[peer<->chaincode] peer got msg from chaincode, now is:2018-12-12 06:13:16.651432742 +0000 UTC m=+353.514006664
+2018-12-12 06:13:16.651 UTC [chaincode] processStream -> DEBU 580 [b3113118]Received message COMPLETED from shim
+2018-12-12 06:13:16.651 UTC [chaincode] handleMessage -> DEBU 581 [b3113118]Fabric side Handling ChaincodeMessage of type: COMPLETED in state ready
+2018-12-12 06:13:16.651 UTC [chaincode] notify -> DEBU 582 [b3113118]notifying Txid:b3113118fec26fc9eeb76c40ab6cd19244844633ff7c269db11db9b74e2bb609, channelID:mychannel
+2018-12-12 06:13:16.651 UTC [chaincode] Execute -> DEBU 583 Exit
+
+
+simulateproposal中的e.s.CheckInstantiationPolicy 检查该用户合约是否正常
+2018-12-12 06:13:16.651 UTC [ccprovider] GetChaincodeData -> DEBU 584 Getting chaincode data for <6usercc, 1.0> from cache
+2018-12-12 06:13:16.652 UTC [endorser] callChaincode -> DEBU 585 [mychannel][b3113118] Entry chaincode: name:"6usercc"  version: 1.0
+2018-12-12 06:13:16.652 UTC [ccprovider] NewCCContext -> DEBU 586 NewCCCC (chain=mychannel,chaincode=6usercc,version=1.0,txid=b3113118fec26fc9eeb76c40ab6cd19244844633ff7c269db11db9b74e2bb609,syscc=false,proposal=0xc420403180,canname=6usercc:1.0
+2018-12-12 06:13:16.652 UTC [chaincode] Launch -> DEBU 587 chaincode is running(no need to launch) : 6usercc:1.0
+2018-12-12 06:13:16.652 UTC [chaincode] Execute -> DEBU 588 Entry
+2018-12-12 06:13:16.652 UTC [chaincode] Execute -> DEBU 589 chaincode canonical name: 6usercc:1.0
+2018-12-12 06:13:16.652 UTC [chaincode] sendExecuteMessage -> DEBU 58a [b3113118]Inside sendExecuteMessage. Message TRANSACTION
+2018-12-12 06:13:16.652 UTC [chaincode] setChaincodeProposal -> DEBU 58b Setting chaincode proposal context...
+2018-12-12 06:13:16.652 UTC [chaincode] setChaincodeProposal -> DEBU 58c Proposal different from nil. Creating chaincode proposal context...
+2018-12-12 06:13:16.652 UTC [chaincode] sendExecuteMessage -> DEBU 58d [b3113118]sendExecuteMsg trigger event TRANSACTION
+启动完毕后peer发送msg给用户合约,中间的chaincode日志在chaincode容器中
+2018-12-12 06:13:16.652 UTC [chaincode] serialSend -> ERRO 58e .......[peer<->chaincode] peer send msg to chaincode, now is:2018-12-12 06:13:16.652480017 +0000 UTC m=+353.515053962
+2018-12-12 06:13:16.654 UTC [chaincode] processStream -> ERRO 58f .......[peer<->chaincode] peer got msg from chaincode, now is:2018-12-12 06:13:16.654937931 +0000 UTC m=+353.517511869
+处理用户合约的shim请求
+2018-12-12 06:13:16.655 UTC [chaincode] processStream -> DEBU 590 [b3113118]Received message GET_STATE from shim
+2018-12-12 06:13:16.655 UTC [chaincode] handleMessage -> DEBU 591 [b3113118]Fabric side Handling ChaincodeMessage of type: GET_STATE in state ready
+2018-12-12 06:13:16.655 UTC [chaincode] func1 -> DEBU 592 [b3113118]handling GET_STATE from chaincode
+2018-12-12 06:13:16.655 UTC [chaincode] func1 -> DEBU 593 [b3113118] getting state for chaincode 6usercc, key a, channel mychannel
+2018-12-12 06:13:16.655 UTC [stateleveldb] GetState -> DEBU 594 GetState(). ns=6usercc, key=a
+2018-12-12 06:13:16.656 UTC [chaincode] func1 -> DEBU 595 [b3113118]Got state. Sending RESPONSE
+2018-12-12 06:13:16.656 UTC [chaincode] deRegisterTxid -> DEBU 596 [b3113118]send RESPONSE(serial-false)
+中间的chaincode日志在chaincode容器中
+2018-12-12 06:13:16.656 UTC [chaincode] serialSend -> ERRO 597 .......[peer<->chaincode] peer send msg to chaincode, now is:2018-12-12 06:13:16.656327611 +0000 UTC m=+353.518901586
+2018-12-12 06:13:16.657 UTC [chaincode] processStream -> ERRO 598 .......[peer<->chaincode] peer got msg from chaincode, now is:2018-12-12 06:13:16.657253071 +0000 UTC m=+353.519826981
+2018-12-12 06:13:16.657 UTC [chaincode] processStream -> DEBU 599 [b3113118]Received message COMPLETED from shim
+2018-12-12 06:13:16.657 UTC [chaincode] handleMessage -> DEBU 59a [b3113118]Fabric side Handling ChaincodeMessage of type: COMPLETED in state ready
+2018-12-12 06:13:16.657 UTC [chaincode] notify -> DEBU 59b [b3113118]notifying Txid:b3113118fec26fc9eeb76c40ab6cd19244844633ff7c269db11db9b74e2bb609, channelID:mychannel
+2018-12-12 06:13:16.657 UTC [chaincode] Execute -> DEBU 59c Exit
+2018-12-12 06:13:16.657 UTC [endorser] callChaincode -> DEBU 59d [mychannel][b3113118] Exit
+2018-12-12 06:13:16.657 UTC [lockbasedtxmgr] GetTxSimulationResults -> DEBU 59e Simulation completed, getting simulation results
+2018-12-12 06:13:16.658 UTC [lockbasedtxmgr] Done -> DEBU 59f Done with transaction simulation / query execution [b3113118fec26fc9eeb76c40ab6cd19244844633ff7c269db11db9b74e2bb609]
+2018-12-12 06:13:16.658 UTC [endorser] simulateProposal -> DEBU 5a0 [mychannel][b3113118] Exit
+2018-12-12 06:13:16.658 UTC [endorser] ProcessProposal -> ERRO 5a1 ..........[peer<->chaincode] total cost in simulateproposal:12.632147ms
+
+
+
+
+endorser proposal
+2018-12-12 06:13:16.658 UTC [endorser] ProcessProposal -> INFO 5a2 chainid is mychannel
+2018-12-12 06:13:16.658 UTC [endorser] ProcessProposal -> INFO 5a3 chainid is:mychannel
+2018-12-12 06:13:16.658 UTC [endorser] endorseProposal -> DEBU 5a4 [mychannel][b3113118] Entry chaincode: name:"6usercc"
+2018-12-12 06:13:16.658 UTC [endorser] endorseProposal -> DEBU 5a5 issyscc is :false
+2018-12-12 06:13:16.658 UTC [endorser] endorseProposal -> DEBU 5a6 [mychannel][b3113118] escc for chaincode name:"6usercc"  is escc
+2018-12-12 06:13:16.658 UTC [endorser] callChaincode -> DEBU 5a7 [mychannel][b3113118] Entry chaincode: name:"escc"  version: 1.1.0-snapshot-6a8c2e8
+2018-12-12 06:13:16.658 UTC [ccprovider] NewCCContext -> DEBU 5a8 NewCCCC (chain=mychannel,chaincode=escc,version=1.1.0-snapshot-6a8c2e8,txid=b3113118fec26fc9eeb76c40ab6cd19244844633ff7c269db11db9b74e2bb609,syscc=true,proposal=0xc420403180,canname=escc:1.1.0-snapshot-6a8c2e8
+2018-12-12 06:13:16.658 UTC [chaincode] Launch -> DEBU 5a9 chaincode is running(no need to launch) : escc:1.1.0-snapshot-6a8c2e8
+2018-12-12 06:13:16.658 UTC [chaincode] Execute -> DEBU 5aa Entry
+2018-12-12 06:13:16.658 UTC [chaincode] Execute -> DEBU 5ab chaincode canonical name: escc:1.1.0-snapshot-6a8c2e8
+2018-12-12 06:13:16.659 UTC [chaincode] sendExecuteMessage -> DEBU 5ac [b3113118]Inside sendExecuteMessage. Message TRANSACTION
+2018-12-12 06:13:16.659 UTC [chaincode] setChaincodeProposal -> DEBU 5ad Setting chaincode proposal context...
+2018-12-12 06:13:16.659 UTC [chaincode] setChaincodeProposal -> DEBU 5ae Proposal different from nil. Creating chaincode proposal context...
+2018-12-12 06:13:16.659 UTC [chaincode] sendExecuteMessage -> DEBU 5af [b3113118]sendExecuteMsg trigger event TRANSACTION
+调用escc
+2018-12-12 06:13:16.659 UTC [chaincode] serialSend -> ERRO 5b0 .......[peer<->chaincode] peer send msg to chaincode, now is:2018-12-12 06:13:16.659474596 +0000 UTC m=+353.522048572
+2018-12-12 06:13:16.659 UTC [shim] Recv -> INFO 5b1 procstream receive msg:type:TRANSACTION payload:"\n\000\n\302\007\nj\010\003\032\014\010\374\315\302\340\005\020\253\214\263\260\002\"\tmychannel*@b3113118fec26fc9eeb76c40ab6cd19244844633ff7c269db11db9b74e2bb609:\013\022\t\022\0076usercc\022\323\006\n\266\006\n\007Org1MSP\022\252\006-----BEGIN CERTIFICATE-----\nMIICKTCCAdCgAwIBAgIQS+L+tXjlmzohSAqX7+zM9TAKBggqhkjOPQQDAjBzMQsw\nCQYDVQQGEwJVUzETMBEGA1UECBMKQ2FsaWZvcm5pYTEWMBQGA1UEBxMNU2FuIEZy\nYW5jaXNjbzEZMBcGA1UEChMQb3JnMS5leGFtcGxlLmNvbTEcMBoGA1UEAxMTY2Eu\nb3JnMS5leGFtcGxlLmNvbTAeFw0xODEyMTIwNjAyMjBaFw0yODEyMDkwNjAyMjBa\nMGwxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpDYWxpZm9ybmlhMRYwFAYDVQQHEw1T\nYW4gRnJhbmNpc2NvMQ8wDQYDVQQLEwZjbGllbnQxHzAdBgNVBAMMFkFkbWluQG9y\nZzEuZXhhbXBsZS5jb20wWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAARAf2YQpapR\n8XZQaLfBxzUzx789oUD9C8sWTwxtgkWShghBCz1MKzKBLOwiiXNMBcVnAE4hk93T\ntPtumoQFaZTRo00wSzAOBgNVHQ8BAf8EBAMCB4AwDAYDVR0TAQH/BAIwADArBgNV\nHSMEJDAigCCe2GrnXHt4Q9ZQjEwwtxh3/2OBhEUFVPSgbT624IkG4DAKBggqhkjO\nPQQDAgNHADBEAiB1Bw6LdlN0NuMxNS13ZjC1GmbIfkPrnBNuVi9nrToCrAIgeOvY\neoEM5KyBBpKZx4XFzPC4RhQ7BlF7E3eNMkKdBn8=\n-----END CERTIFICATE-----\n\022\030qRv>Y\272\032\343t\034\360\334r^1[\316q\306\212\227\333\272\337\n\035\n\033\n\031\010\001\022\t\022\0076usercc\032\n\n\005query\n\001a\n\016\022\0076usercc\032\0031.0\n\010\010\310\001\032\003500\n/\022\024\n\0076usercc\022\t\n\007\n\001a\022\002\010\001\022\027\n\004lscc\022\017\n\r\n\0076usercc\022\002\010\001\n\000\n\000" txid:"b3113118fec26fc9eeb76c40ab6cd19244844633ff7c269db11db9b74e2bb609" proposal:<proposal_bytes:"\n\302\007\nj\010\003\032\014\010\374\315\302\340\005\020\253\214\263\260\002\"\tmychannel*@b3113118fec26fc9eeb76c40ab6cd19244844633ff7c269db11db9b74e2bb609:\013\022\t\022\0076usercc\022\323\006\n\266\006\n\007Org1MSP\022\252\006-----BEGIN CERTIFICATE-----\nMIICKTCCAdCgAwIBAgIQS+L+tXjlmzohSAqX7+zM9TAKBggqhkjOPQQDAjBzMQsw\nCQYDVQQGEwJVUzETMBEGA1UECBMKQ2FsaWZvcm5pYTEWMBQGA1UEBxMNU2FuIEZy\nYW5jaXNjbzEZMBcGA1UEChMQb3JnMS5leGFtcGxlLmNvbTEcMBoGA1UEAxMTY2Eu\nb3JnMS5leGFtcGxlLmNvbTAeFw0xODEyMTIwNjAyMjBaFw0yODEyMDkwNjAyMjBa\nMGwxCzAJBgNVBAYTAlVTMRMwEQYDVQQIEwpDYWxpZm9ybmlhMRYwFAYDVQQHEw1T\nYW4gRnJhbmNpc2NvMQ8wDQYDVQQLEwZjbGllbnQxHzAdBgNVBAMMFkFkbWluQG9y\nZzEuZXhhbXBsZS5jb20wWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAARAf2YQpapR\n8XZQaLfBxzUzx789oUD9C8sWTwxtgkWShghBCz1MKzKBLOwiiXNMBcVnAE4hk93T\ntPtumoQFaZTRo00wSzAOBgNVHQ8BAf8EBAMCB4AwDAYDVR0TAQH/BAIwADArBgNV\nHSMEJDAigCCe2GrnXHt4Q9ZQjEwwtxh3/2OBhEUFVPSgbT624IkG4DAKBggqhkjO\nPQQDAgNHADBEAiB1Bw6LdlN0NuMxNS13ZjC1GmbIfkPrnBNuVi9nrToCrAIgeOvY\neoEM5KyBBpKZx4XFzPC4RhQ7BlF7E3eNMkKdBn8=\n-----END CERTIFICATE-----\n\022\030qRv>Y\272\032\343t\034\360\334r^1[\316q\306\212\227\333\272\337\022\035\n\033\n\031\010\001\022\t\022\0076usercc\032\n\n\005query\n\001a" signature:"0E\002!\000\251\0062J\251l<\233\347H'\331\036\366v\333\247\331is\006\022C\355\255\t\t\302@\221Tv\002 AJ\0052\266\334[X:.\263\217u\273\036\355j\371\300e\212\216\212D\034\312\334A\311\356\217g" > channel_id:"mychannel"
+2018-12-12 06:13:16.660 UTC [shim] func1 -> ERRO 5b3 ..........msgavail
+2018-12-12 06:13:16.660 UTC [shim] func1 -> DEBU 5b4 [b3113118]Received message TRANSACTION from peer
+2018-12-12 06:13:16.660 UTC [shim] handleMessage -> DEBU 5b5 [b3113118]Handling ChaincodeMessage of type: TRANSACTION(state:ready)
+2018-12-12 06:13:16.660 UTC [shim] handleReady -> DEBU 5b6 [b3113118]Received TRANSACTION, invoking transaction on chaincode(state:ready)
+2018-12-12 06:13:16.660 UTC [escc] Invoke -> DEBU 5b7 ESCC starts: 8 args
+2018-12-12 06:13:16.661 UTC [escc] Invoke -> DEBU 5b8 ESCC exits successfully
+2018-12-12 06:13:16.661 UTC [shim] func1 -> DEBU 5b9 [b3113118]Transaction completed. Sending COMPLETED
+2018-12-12 06:13:16.661 UTC [shim] triggerNextState -> DEBU 5ba [b3113118]send state message COMPLETED
+2018-12-12 06:13:16.661 UTC [shim] func1 -> ERRO 5bb .......[peer<->chaincode] chaincode send msg to peer, now is:2018-12-12 06:13:16.661736365 +0000 UTC m=+353.524310286
+2018-12-12 06:13:16.661 UTC [chaincode] processStream -> ERRO 5bd .......[peer<->chaincode] peer got msg from chaincode, now is:2018-12-12 06:13:16.661932026 +0000 UTC m=+353.524506044
+2018-12-12 06:13:16.662 UTC [chaincode] processStream -> DEBU 5be [b3113118]Received message COMPLETED from shim
+2018-12-12 06:13:16.662 UTC [chaincode] handleMessage -> DEBU 5bf [b3113118]Fabric side Handling ChaincodeMessage of type: COMPLETED in state ready
+2018-12-12 06:13:16.662 UTC [chaincode] notify -> DEBU 5c0 [b3113118]notifying Txid:b3113118fec26fc9eeb76c40ab6cd19244844633ff7c269db11db9b74e2bb609, channelID:mychannel
+2018-12-12 06:13:16.662 UTC [chaincode] Execute -> DEBU 5c1 Exit
+2018-12-12 06:13:16.662 UTC [endorser] callChaincode -> DEBU 5c2 [mychannel][b3113118] Exit
+2018-12-12 06:13:16.662 UTC [endorser] endorseProposal -> DEBU 5c3 [mychannel][b3113118] Exit
+2018-12-12 06:13:16.661 UTC [shim] Send -> INFO 5bc procstream send msg:type:COMPLETED payload:"\010\310\001\032\201\010\010\001\"\007\010\310\001\022\002OK*o\n 9\374\355\260f\021CK\225j\364\010\300N\303\260\253\266\333\223\330\363\016\371~\256?`\t\276s\013\022K\n/\022\024\n\0076usercc\022\t\n\007\n\001a\022\002\010\001\022\027\n\004lscc\022\017\n\r\n\0076usercc\022\002\010\001\032\010\010\310\001\032\003500\"\016\022\0076usercc\032\0031.02\202\007\n\266\006\n\007Org1MSP\022\252\006-----BEGIN CERTIFICATE-----\nMIICKDCCAc+gAwIBAgIRAIzukJYML3eqCH6VembdLBYwCgYIKoZIzj0EAwIwczEL\nMAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExFjAUBgNVBAcTDVNhbiBG\ncmFuY2lzY28xGTAXBgNVBAoTEG9yZzEuZXhhbXBsZS5jb20xHDAaBgNVBAMTE2Nh\nLm9yZzEuZXhhbXBsZS5jb20wHhcNMTgxMjEyMDYwMjIwWhcNMjgxMjA5MDYwMjIw\nWjBqMQswCQYDVQQGEwJVUzETMBEGA1UECBMKQ2FsaWZvcm5pYTEWMBQGA1UEBxMN\nU2FuIEZyYW5jaXNjbzENMAsGA1UECxMEcGVlcjEfMB0GA1UEAxMWcGVlcjAub3Jn\nMS5leGFtcGxlLmNvbTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABLTm4tmJXHrh\nxhrAc3Ds/QPbF8bZZS7MUxQn2vdX8xX/XbhuIDRvVZj9Z1lSDqRBiER97L8WXiNx\n7ZT18HnM+ZGjTTBLMA4GA1UdDwEB/wQEAwIHgDAMBgNVHRMBAf8EAjAAMCsGA1Ud\nIwQkMCKAIJ7Yaudce3hD1lCMTDC3GHf/Y4GERQVU9KBtPrbgiQbgMAoGCCqGSM49\nBAMCA0cAMEQCIDiwEjpwZ+D98fQWATG4xJekmTGk3x4GDoEjQZYShVIBAiBYWFWs\npXOQdgEyL1jEc/b8fDfN+QPG81aKarib3EI7dA==\n-----END CERTIFICATE-----\n\022G0E\002!\000\355b\313d(\017\326\034\237/*_h\221\n\206\"\300\007\362\245\031{\314NV!S1~\007\005\002 ~M\007B\007G\t't\313\376\014f+J\327%f\0072^)\332\027V\014t|\311\020\315\251" txid:"b3113118fec26fc9eeb76c40ab6cd19244844633ff7c269db11db9b74e2bb609" channel_id:"mychannel"
+2018-12-12 06:13:16.662 UTC [lockbasedtxmgr] Done -> DEBU 5c4 Done with transaction simulation / query execution [b3113118fec26fc9eeb76c40ab6cd19244844633ff7c269db11db9b74e2bb609]
+2018-12-12 06:13:16.662 UTC [endorser] ProcessProposal -> DEBU 5c5 Exit: request from%!(EXTRA string=172.19.0.1:49184)
+2018-12-12 06:13:16.662 UTC [shim] func1 -> ERRO 5c6 ..........senderr is error
+2018-12-12 06:13:16.660 UTC [shim] 1 -> ERRO 5b2 ..........[peer<->chaincode] chaincode got msg, now is:2018-12-12 06:13:16.660182608 +0000 UTC m=+353.522756514
+
+
+
