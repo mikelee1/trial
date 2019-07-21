@@ -15,4 +15,7 @@ func init() {
 
 func Run()  {
 	logger.Infof("what")
+	logger.Error("err")
+	logger.Fatal("fatal")
+	logger.Info("info")
 }
