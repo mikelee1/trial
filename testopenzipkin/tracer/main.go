@@ -13,7 +13,7 @@ func NewTracer() (*zipkin.Tracer, error) {
 	reporter := reporterhttp.NewReporter(endpointURL)
 
 	// Local endpoint represent the local service information
-	localEndpoint := &model.Endpoint{ServiceName: "my_service", Port: 8080}
+	localEndpoint := &model.Endpoint{ServiceName: "my_service", Port: 8081}
 
 	// Sampler tells you which traces are going to be sampled or not. In this case we will record 100% (1.00) of traces.
 	sampler, err := zipkin.NewCountingSampler(1)

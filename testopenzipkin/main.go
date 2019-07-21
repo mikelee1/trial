@@ -36,26 +36,32 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/hello", client.HelloHandler)
 
+	//启动grpc的server端
+	go StartGrpcServer()
+
 	//设置server的中间件
 	r.Use(zipkinhttp.NewServerMiddleware(
 		tracer,
 		zipkinhttp.SpanName("request")), // name for request span
 	)
 
-	//启动grpc的server端
-	go StartGrpcServer()
 	http.ListenAndServe("0.0.0.0:8080",r)
 }
 
 func StartGrpcServer()  {
 	//生成grpcserver
 	server := grpc.NewServer(grpc.StatsHandler(zipkingrpc.NewServerHandler(tracer)))
+
 	//注册到上面的grpcserver
 	protos.RegisterHelloServiceServer(server,handler.HelloService{})
 	listener, err := net.Listen("tcp", ":1080")
 	if err != nil {
 		logger.Fatal("ListenTCP error:", err)
 	}
-	logger.Info("start listen grpc request...")
-	server.Serve(listener)
+
+	logger.Info("listening grpc request...")
+	err = server.Serve(listener)
+	if err != nil{
+		logger.Fatal("fail to start grpc server")
+	}
 }

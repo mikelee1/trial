@@ -10,6 +10,8 @@ import (
 	"github.com/go-ego/ego/mid/json"
 	"github.com/openzipkin/zipkin-go"
 	tracer2 "myproj/try/testopenzipkin/tracer"
+	"google.golang.org/grpc/metadata"
+	"github.com/openzipkin/zipkin-go/propagation/b3"
 )
 
 var (
@@ -25,30 +27,42 @@ func init()  {
 }
 
 func CheckDB(ctx context.Context)  {
-	span,ctx := tracer.StartSpanFromContext(ctx,"CheckDB",[]zipkin.SpanOption{}...)
+	span,ctx := tracer.StartSpanFromContext(ctx,"CheckDB")
 	defer span.Finish()
 }
 
 func HelloHandler(w http.ResponseWriter, r *http.Request)  {
 	ctx := r.Context()
+
+	//调用一次span
+	CheckDB(ctx)
+
+	//调用一次span
+	span,ctx := tracer.StartSpanFromContext(ctx,"test")
+	defer span.Finish()
+
+	//调用一次span
+	span,ctx = tracer.StartSpanFromContext(ctx,"test2")
+	defer span.Finish()
+
+	//向grpc中存储父span
+	md := &metadata.MD{"key1": []string{"val1"}, "key2": []string{"val2"}}
+	err := b3.InjectGRPC(md)(span.Context())
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+	ctx = metadata.NewOutgoingContext(ctx, *md)
+
 	hsclient := protos.NewHelloServiceClient(conn)
 	res,err := hsclient.Hello(ctx,&protos.String{Value:"mike"})
 	if err != nil {
 		logger.Error(err)
 		return
 	}
-	logger.Info("res is: ",res)
-	if err != nil {
-		logger.Error(err)
-		return
-	}
 
-	CheckDB(ctx)
-
-	span,ctx := tracer.StartSpanFromContext(ctx,"test",[]zipkin.SpanOption{}...)
-	defer span.Finish()
-
-	span,ctx = tracer.StartSpanFromContext(ctx,"test1",[]zipkin.SpanOption{}...)
+	//调用一次span
+	span,ctx = tracer.StartSpanFromContext(ctx,"test1")
 	defer span.Finish()
 
 	resp,_ := json.Marshal(
