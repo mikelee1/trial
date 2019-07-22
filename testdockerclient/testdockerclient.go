@@ -1,44 +1,33 @@
 package main
 
 import (
+	"context"
+	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/filters"
+	"github.com/docker/docker/client"
 	dc "github.com/fsouza/go-dockerclient"
 	"github.com/op/go-logging"
-	"os"
 	"myproj/try/common/fmtstruct"
+	logger2 "myproj/try/common/logger"
+	"time"
 )
 
 var logger = &logging.Logger{}
-var format = logging.MustStringFormatter(
-	`%{color}%{time:15:04:05.000} %{shortfunc} ▶ %{level:.4s} %{id:03x}%{color:reset} %{message}`,
-)
+
 var (
-	containerName = "test11"
-	host = "http://192.168.9.82:2375"
+	containerName  = "test11"
+	host           = "http://192.168.9.82:2375"
+	standardCli, _ = client.NewClientWithOpts(client.WithHost(host))
+	fsouzaCli, _   = dc.NewClient(host)
 )
 
 func init() {
-	logger = logging.MustGetLogger("testdockerclient")
-	backend1 := logging.NewLogBackend(os.Stderr, "", 0)
-	backend2 := logging.NewLogBackend(os.Stderr, "", 0)
-
-	//设置正常的输出format走backend2
-	backend2Formatter := logging.NewBackendFormatter(backend2, format)
-	//设置异常的输出走backend1
-	backend1Leveled := logging.AddModuleLevel(backend1)
-	backend1Leveled.SetLevel(logging.ERROR, "")
-
-	logging.SetBackend(backend1Leveled,backend2Formatter)
+	logger = logger2.GetLogger()
 }
 
 func main() {
-	cli, err := dc.NewClient(host)
-	if err != nil {
-		panic(err)
-		return
-	}
-
 	//获取容器列表
-	conlist, err := cli.ListContainers(dc.ListContainersOptions{
+	conlist, err := fsouzaCli.ListContainers(dc.ListContainersOptions{
 		All: true,
 	})
 	if err != nil {
@@ -48,9 +37,10 @@ func main() {
 
 	//删除容器
 	for _, value := range conlist {
+		logger.Info(value.Names[0])
 		//删除test容器
 		if value.Names[0] == "/"+containerName {
-			err = cli.RemoveContainer(dc.RemoveContainerOptions{
+			err = fsouzaCli.RemoveContainer(dc.RemoveContainerOptions{
 				Force: true,
 				ID:    value.ID,
 			})
@@ -60,13 +50,14 @@ func main() {
 			}
 		}
 	}
-
-	resp, err := cli.CreateContainer(dc.CreateContainerOptions{
+	//创建容器
+	resp, err := fsouzaCli.CreateContainer(dc.CreateContainerOptions{
 		Name: containerName,
 		Config: &dc.Config{
 			Image: "alpine",
 			Tty:   true,
-			Cmd:   []string{"sh"},
+			Cmd:   []string{"sh","-c","ls & sh"},
+			WorkingDir:"/home",
 		},
 		HostConfig: &dc.HostConfig{
 			Binds: []string{
@@ -84,33 +75,51 @@ func main() {
 	}
 	logger.Info(resp.ID)
 
-	if err = cli.StartContainer(resp.ID, nil); err != nil {
+	if err = fsouzaCli.StartContainer(resp.ID, nil); err != nil {
 		panic(err)
 	}
 
-	////暂停
-	//time.Sleep(5 * time.Second)
-	//err = cli.PauseContainer(containerName)
-	//if err != nil {
-	//	logger.Error(err)
-	//	return
-	//}
-	//logger.Info("pause well")
-	//
-	////启动
-	//time.Sleep(5 * time.Second)
-	//err = cli.UnpauseContainer(containerName)
-	//if err != nil {
-	//	logger.Error(err)
-	//	return
-	//}
-	//logger.Info("unpause well")
+	//暂停
+	time.Sleep(5 * time.Second)
+	err = fsouzaCli.PauseContainer(containerName)
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+	logger.Info("pause well")
 
+	//启动
+	time.Sleep(5 * time.Second)
+	err = fsouzaCli.UnpauseContainer(containerName)
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+	logger.Info("unpause well")
 
+	//容器状态
+	logger.Error(resp.ID)
+	cs, err := fsouzaCli.InspectContainer(resp.ID)
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+	logger.Info(cs.State.Status)
 
-	dcInfo,err := cli.Info()
-	logger.Info(fmtstruct.String(dcInfo))
+	//dcInfo,err := fsouzaCli.Info()
+	//logger.Info(fmtstruct.String(dcInfo))
 
+	//根据容器名获取容器状态
+	a, err := fsouzaCli.ListContainers(dc.ListContainersOptions{
+		Filters: map[string][]string{"name": []string{containerName}},
+	})
+	logger.Info(fmtstruct.String(a))
+
+	//根据容器名获取容器状态
+	fsArgs := filters.NewArgs()
+	fsArgs.Add("name", containerName)
+	fcl, err := standardCli.ContainerList(context.TODO(), types.ContainerListOptions{
+		Filters: fsArgs,
+	})
+	logger.Info(fmtstruct.String(fcl))
 }
-
-
