@@ -15,6 +15,9 @@ import (
 	logger2 "myproj/try/common/logger"
 	"myproj/try/testopenzipkin/handler"
 	"myproj/try/testopenzipkin/client"
+	_ "golang.org/x/net/netutil"
+	"golang.org/x/net/netutil"
+	"myproj/try/common/ratelimit"
 )
 
 var (
@@ -36,8 +39,15 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/hello", client.HelloHandler)
 
-	//启动grpc的server端
+	//启动grpc的server端，内有限流器
 	go StartGrpcServer()
+
+	//对外server层的限流器
+	rl := ratelimit.NewLimit(3)
+	r.Use(func(f http.Handler) http.Handler{
+		rl.Wait()
+		return f
+	})
 
 	//设置server的中间件
 	r.Use(zipkinhttp.NewServerMiddleware(
@@ -45,7 +55,11 @@ func main() {
 		zipkinhttp.SpanName("request")), // name for request span
 	)
 
-	http.ListenAndServe("0.0.0.0:8080",r)
+	err = http.ListenAndServe("0.0.0.0:8080",r)
+	if err != nil {
+		logger.Error(err)
+		return
+	}
 }
 
 func StartGrpcServer()  {
@@ -58,6 +72,8 @@ func StartGrpcServer()  {
 	if err != nil {
 		logger.Fatal("ListenTCP error:", err)
 	}
+	//grpc层的限流器
+	listener = netutil.LimitListener(listener,3)
 
 	logger.Info("listening grpc request...")
 	err = server.Serve(listener)

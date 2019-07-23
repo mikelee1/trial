@@ -12,6 +12,9 @@ import (
 	tracer2 "myproj/try/testopenzipkin/tracer"
 	"google.golang.org/grpc/metadata"
 	"github.com/openzipkin/zipkin-go/propagation/b3"
+	"time"
+	"math/rand"
+	"myproj/try/common/ratelimit"
 )
 
 var (
@@ -27,13 +30,25 @@ func init()  {
 }
 
 func CheckDB(ctx context.Context)  {
+	rand.Seed(time.Now().Unix())
+	rs := (rand.Intn(20)+50)*100
+	logger.Infof("wait %d ms\n",rs)
+
 	span,ctx := tracer.StartSpanFromContext(ctx,"CheckDB")
 	defer span.Finish()
+	//模拟延时
+	time.Sleep(time.Duration(rs)*time.Millisecond)
 }
 
 func HelloHandler(w http.ResponseWriter, r *http.Request)  {
+	rl := ratelimit.NewLimit(3)
+	defer rl.Release()
+	logger.Info("start")
+	defer logger.Info("complete")
 	ctx := r.Context()
-
+	////超时退出
+	//ctx,cancel := context.WithTimeout(ctx,5*time.Second)
+	//defer cancel()
 	//调用一次span
 	CheckDB(ctx)
 

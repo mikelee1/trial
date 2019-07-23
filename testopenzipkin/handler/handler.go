@@ -9,7 +9,6 @@ import (
 	logger2 "myproj/try/common/logger"
 	"myproj/try/testopenzipkin/protos"
 	tracer2 "myproj/try/testopenzipkin/tracer"
-	"myproj/try/common/fmtstruct"
 )
 
 var (
@@ -26,13 +25,14 @@ type HelloService struct{}
 
 func (h HelloService) Hello(ctx context.Context, req *protos.String) (*protos.String, error) {
 	//从grpc的client ctx中获取信息
-	md, ok := metadata.FromIncomingContext(ctx)
+	_, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		logger.Info("not found md in context")
 		return &protos.String{Value: "oops"}, errors.New("not found md in context")
 	}
-	logger.Info(fmtstruct.String(md))
-	logger.Warning(fmtstruct.String(zipkin.SpanFromContext(ctx)))
+	//logger.Info(md)
+	//logger.Info(fmtstruct.String(md))
+	//logger.Warning(fmtstruct.String(zipkin.SpanFromContext(ctx)))
 	//上报
 	span, ctx := tracer.StartSpanFromContext(ctx, "grpc server")
 	defer span.Finish()
