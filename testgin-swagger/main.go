@@ -37,7 +37,6 @@
 //	}
 //}
 
-
 /**
  * Created by martin on 01/02/2019
  */
@@ -63,7 +62,7 @@ func main() {
 	// 创建路由组
 	v1 := r.Group("/api/v1")
 
-	v1.GET("/record/:userId",record)
+	v1.GET("/record/:userId", record)
 	v1.GET("/hello/:name", hello)
 
 	// 文档界面访问URL
@@ -92,6 +91,6 @@ func record(c *gin.Context) {
 // @Success 200 {string} string	"ok"
 // @Router /hello/{name} [get]
 func hello(c *gin.Context) {
-	time.Sleep(2*time.Second)
-	c.String(http.StatusOK,"hello,"+c.Param("name"))
+	time.Sleep(2 * time.Second)
+	c.String(http.StatusOK, "hello,"+c.Param("name"))
 }

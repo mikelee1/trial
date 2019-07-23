@@ -1,10 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"github.com/op/go-logging"
 	"myproj/try/testlogger/impl"
 	"os"
-	"fmt"
 )
 
 func init() {

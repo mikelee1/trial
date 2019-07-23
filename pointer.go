@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-func main()  {
+func main() {
 	one := 1
 	changevalue(one)
 	fmt.Println(one)
@@ -12,10 +12,10 @@ func main()  {
 	fmt.Println(two)
 }
 
-func changevalue(a int)  {
+func changevalue(a int) {
 	a = 0
 }
 
-func changepointer(a *int)  {
+func changepointer(a *int) {
 	*a = 0
 }

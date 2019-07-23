@@ -1,17 +1,16 @@
-
 package main
 
 import (
-"encoding/json"
-"fmt"
-"log"
-"net/http"
-"strings"
-"time"
+	"encoding/json"
+	"fmt"
+	"log"
+	"net/http"
+	"strings"
+	"time"
 
-"github.com/codegangsta/negroni"
-"github.com/dgrijalva/jwt-go"
-"github.com/dgrijalva/jwt-go/request"
+	"github.com/codegangsta/negroni"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/dgrijalva/jwt-go/request"
 )
 
 const (

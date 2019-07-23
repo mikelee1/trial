@@ -20,7 +20,7 @@ func main() {
 	contaier, err := dockercli.CreateContainer(docker.CreateContainerOptions{
 		Name: "testetcd",
 		Config: &docker.Config{
-			Cmd:[]string{
+			Cmd: []string{
 				"/usr/local/bin/etcd",
 				"--name", "etcd1",
 				"--data-dir", "/etcd-data",
@@ -32,33 +32,32 @@ func main() {
 				"--initial-cluster-token", "etcd-cluster-1",
 				"--initial-cluster-state", "new",
 			},
-			Image: "etcd:v3.3.9",
-			ExposedPorts:map[docker.Port]struct{}{"2379/tcp":{},"2380/tcp":{}},
+			Image:        "etcd:v3.3.9",
+			ExposedPorts: map[docker.Port]struct{}{"2379/tcp": {}, "2380/tcp": {}},
 		},
-		HostConfig:&docker.HostConfig{
-			PortBindings:map[docker.Port][]docker.PortBinding{
-				"2379/tcp":[]docker.PortBinding{
+		HostConfig: &docker.HostConfig{
+			PortBindings: map[docker.Port][]docker.PortBinding{
+				"2379/tcp": []docker.PortBinding{
 					docker.PortBinding{
-						HostIP:"localhost",
-						HostPort:"2379",
+						HostIP:   "localhost",
+						HostPort: "2379",
 					},
 				},
 
-				"2380/tcp":[]docker.PortBinding{
+				"2380/tcp": []docker.PortBinding{
 					docker.PortBinding{
-						HostIP:"localhost",
-						HostPort:"2380",
+						HostIP:   "localhost",
+						HostPort: "2380",
 					},
 				},
 			},
 		},
-
 	})
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	err = dockercli.StartContainer(contaier.ID,nil)
+	err = dockercli.StartContainer(contaier.ID, nil)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -74,7 +73,7 @@ func main() {
 		panic(err)
 	}
 	defer client.Close()
-	fmt.Println(client.Status(context.Background(),"http://localhost:2379"))
+	fmt.Println(client.Status(context.Background(), "http://localhost:2379"))
 	kv := clientv3.NewKV(client)
 	fmt.Println(client.Endpoints())
 	ctx, cancleFunc := context.WithTimeout(context.TODO(), 15*time.Second)

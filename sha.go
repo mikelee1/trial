@@ -1,4 +1,3 @@
-
 package main
 
 // Go implements several hash functions in various

@@ -1,15 +1,15 @@
 package service
 
 import (
-	"github.com/hyperledger/fabric/sdk"
-	"os"
 	"errors"
+	"github.com/hyperledger/fabric/sdk"
 	"github.com/op/go-logging"
+	"os"
 )
 
 var logger *logging.Logger
 
-func init()  {
+func init() {
 	logger = logging.MustGetLogger("service")
 }
 

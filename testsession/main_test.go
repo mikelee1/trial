@@ -3,21 +3,21 @@ package main_test
 import (
 	"net/http"
 
+	"github.com/gin-gonic/gin"
+	"github.com/go-session/gin-session"
 	"github.com/go-session/redis"
 	"github.com/go-session/session"
 	"testing"
-	"github.com/gin-gonic/gin"
-	"github.com/go-session/gin-session"
 )
 
-func Test1(t *testing.T)  {
+func Test1(t *testing.T) {
 
 	app := gin.Default()
 
 	store := redis.NewRedisStore(&redis.Options{
-			Addr: "127.0.0.1:6379",
-			DB:   1,
-		})
+		Addr: "127.0.0.1:6379",
+		DB:   1,
+	})
 
 	app.Use(
 		ginsession.New(

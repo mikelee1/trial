@@ -6,46 +6,46 @@
 package main
 
 import (
-	"time"
 	"fmt"
 	"github.com/hyperledger/fabric/gossip/util"
+	"time"
 )
-type T10 struct{
+
+type T10 struct {
 	Test10 chan interface{}
 }
 
-func (t *T10)send()  {
-	var test = make(chan interface{},1)
+func (t *T10) send() {
+	var test = make(chan interface{}, 1)
 	test = t.Test10
-	for{
-		content := [2]interface{}{"10",nil}
+	for {
+		content := [2]interface{}{"10", nil}
 		k := util.RandomInt(2)
-		time.Sleep(2*time.Second)
+		time.Sleep(2 * time.Second)
 		test <- content[k]
 	}
 
 }
 
 func main() {
-	var test10 = make(chan interface{},1)
-	var test = &T10{Test10:test10}
+	var test10 = make(chan interface{}, 1)
+	var test = &T10{Test10: test10}
 
 	closech := make(chan string)
 	go test.send()
 	go func() {
 		for {
-			time.Sleep(1*time.Second)
+			time.Sleep(1 * time.Second)
 			select {
 			case ok := <-test.Test10:
 				fmt.Println(ok)
-			case <-time.After(10*time.Second):
+			case <-time.After(10 * time.Second):
 				close(test.Test10)
 				close(closech)
 				return
 			}
 		}
 	}()
-
 
 	<-closech
 

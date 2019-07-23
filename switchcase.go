@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-func test(a int)  {
+func test(a int) {
 	switch a {
 	case 1:
 	case 2:
@@ -12,15 +12,17 @@ func test(a int)  {
 
 	}
 }
+
 var ch chan interface{}
-func test1()  {
+
+func test1() {
 	select {
 	case ch <- struct{}{}:
 
 	}
 }
 
-func main()  {
+func main() {
 	test(1)
 	test(2)
 	test(3)

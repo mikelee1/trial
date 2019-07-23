@@ -1,8 +1,8 @@
 package main
 
 import (
-	"golang.org/x/crypto/bcrypt"
 	"fmt"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func CreatePassword(pwd string) string {
@@ -14,7 +14,7 @@ func CreatePassword(pwd string) string {
 	}
 	return string(bytes)
 }
-func main()  {
+func main() {
 	res := CreatePassword("1")
 	fmt.Println(res)
 }

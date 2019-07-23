@@ -54,10 +54,10 @@ func main() {
 	resp, err := fsouzaCli.CreateContainer(dc.CreateContainerOptions{
 		Name: containerName,
 		Config: &dc.Config{
-			Image: "alpine",
-			Tty:   true,
-			Cmd:   []string{"sh","-c","ls & sh"},
-			WorkingDir:"/home",
+			Image:      "alpine",
+			Tty:        true,
+			Cmd:        []string{"sh", "-c", "ls & sh"},
+			WorkingDir: "/home",
 		},
 		HostConfig: &dc.HostConfig{
 			Binds: []string{

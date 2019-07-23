@@ -1,16 +1,16 @@
 package main
 
 import (
-	"github.com/spf13/viper"
 	"aria/core"
 	"fmt"
 	"github.com/op/go-logging"
+	"github.com/spf13/viper"
 	"os"
 )
 
 var logger *logging.Logger
 
-func init()  {
+func init() {
 	logger = logging.MustGetLogger("test config")
 }
 
@@ -28,23 +28,23 @@ func main() {
 	var err error
 	c := Config{}
 	v := viper.New()
-	cwd,err := os.Getwd()
-	if err != nil{
+	cwd, err := os.Getwd()
+	if err != nil {
 		logger.Error(err)
 		return
 	}
-	v.SetConfigFile(cwd+"/config/config.yaml")
+	v.SetConfigFile(cwd + "/config/config.yaml")
 	err = v.ReadInConfig()
-	if err != nil{
+	if err != nil {
 		logger.Error(err)
 		return
 	}
 	err = v.Unmarshal(&c)
-	if err != nil{
+	if err != nil {
 		logger.Error(err)
 		return
 	}
-	for _,v1 := range core.Flatten(c){
+	for _, v1 := range core.Flatten(c) {
 		fmt.Println(v1)
 	}
 }

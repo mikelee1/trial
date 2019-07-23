@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/astaxie/beego/orm"
 	"fmt"
+	"github.com/astaxie/beego/orm"
 	_ "github.com/go-sql-driver/mysql" // import mysql driver
 	"github.com/op/go-logging"
 	"time"
@@ -29,7 +29,6 @@ type Auth struct {
 	Chaincode string
 }
 
-
 type OrgChannel struct {
 	Id         int
 	Channel    string `orm:"unique"`
@@ -48,7 +47,8 @@ var dbport = "38255"
 var dbcharset = "utf8"
 
 var logger1 *logging.Logger
-func init()  {
+
+func init() {
 
 	orm.RegisterModel(new(Auth))
 	orm.RegisterModel(new(ChaincodeInfo))
@@ -110,7 +110,6 @@ func main() {
 	//}
 	//logger1.Info("ccAmount: ",ccAmount)
 
-
 	//defer func() {
 	//	a,err := Oconnect.Insert(&OrgChannel{
 	//		Channel: "channel10",
@@ -127,10 +126,10 @@ func main() {
 }
 
 //修改orgchannel表
-func addOrgChannel()  {
+func addOrgChannel() {
 	chname := "channel2"
 	tmp := &OrgChannel{}
-	if err := Oconnect.QueryTable("org_channel").Filter("channel", chname).One(tmp);err != nil{
+	if err := Oconnect.QueryTable("org_channel").Filter("channel", chname).One(tmp); err != nil {
 		fmt.Println("insert")
 		_, err := Oconnect.Insert(&OrgChannel{
 			Channel:    chname,
@@ -145,17 +144,17 @@ func addOrgChannel()  {
 	fmt.Println(tmp.Id)
 
 	a, err := Oconnect.Update(&OrgChannel{
-		Id:tmp.Id,
+		Id:         tmp.Id,
 		Channel:    chname,
 		Createorg:  "baas11",
 		Currentorg: "baas33",
 	})
-	fmt.Println(a,err)
+	fmt.Println(a, err)
 }
 
-func addInform()  {
-	tmp := &Inform{InformDetail:InformDetail{Title:"快乐圣诞节开发",Time:time.Now(),Informdata:"S"}}
-	if _,err := Oconnect.Insert(tmp);err != nil{
+func addInform() {
+	tmp := &Inform{InformDetail: InformDetail{Title: "快乐圣诞节开发", Time: time.Now(), Informdata: "S"}}
+	if _, err := Oconnect.Insert(tmp); err != nil {
 
 		fmt.Println(err)
 		return

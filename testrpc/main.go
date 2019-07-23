@@ -1,13 +1,13 @@
 package main
 
 import (
-	"net/rpc"
-	"net"
-	"log"
-	"fmt"
-	"myproj/try/testrpc/protos"
-	"google.golang.org/grpc"
 	"context"
+	"fmt"
+	"google.golang.org/grpc"
+	"log"
+	"myproj/try/testrpc/protos"
+	"net"
+	"net/rpc"
 )
 
 //type HelloService struct {}
@@ -17,15 +17,15 @@ import (
 //	return nil
 //}
 
-type HelloService1 struct {}
+type HelloService1 struct{}
 
-func (p *HelloService1) Hello(ctx context.Context,args *protos.String) (*protos.String,error) {
-	return  &protos.String{Value:"hello1:" + args.GetValue()},nil
+func (p *HelloService1) Hello(ctx context.Context, args *protos.String) (*protos.String, error) {
+	return &protos.String{Value: "hello1:" + args.GetValue()}, nil
 }
 
 func main() {
 	grpcServer := grpc.NewServer()
-	protos.RegisterHelloServiceServer(grpcServer,new(HelloService1))
+	protos.RegisterHelloServiceServer(grpcServer, new(HelloService1))
 
 	listener, err := net.Listen("tcp", ":1234")
 	if err != nil {
@@ -42,7 +42,6 @@ func main() {
 		go rpc.ServeConn(conn)
 	}
 }
-
 
 const HelloServiceName = "path/to/pkg.HelloService"
 

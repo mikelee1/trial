@@ -1,19 +1,19 @@
 package main
 
 import (
-	"time"
 	"fmt"
+	"time"
 )
 
-func main()  {
+func main() {
 	trans(nil)
 }
 
-func trans(t interface{})  {
-	_,ok := t.(time.Time)
-	if ok{
+func trans(t interface{}) {
+	_, ok := t.(time.Time)
+	if ok {
 		fmt.Println("is time.time")
-	}else{
+	} else {
 		fmt.Println("not time.time")
 	}
 }

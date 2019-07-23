@@ -1,15 +1,14 @@
 package midtree_test
 
 import (
-	"testing"
-	"myproj/try/leetcode/midtree"
 	"github.com/magiconair/properties/assert"
+	"myproj/try/leetcode/midtree"
+	"testing"
 )
-
 
 func Test_main(t *testing.T) {
 	var p *midtree.TreeNode
-	var a,res []int
+	var a, res []int
 	//p = &midtree.TreeNode{
 	//	Val:  1,
 	//	Left: nil,
@@ -24,12 +23,11 @@ func Test_main(t *testing.T) {
 	//res = midtree.InorderTraversal(p)
 	//assert.Equal(t,res,a)
 
-
 	p = &midtree.TreeNode{}
 	nilTree := &midtree.TreeNode{}
 	a = []int{}
-	assert.Equal(t,p,nilTree)
+	assert.Equal(t, p, nilTree)
 	res = midtree.InorderTraversal(p)
-	assert.Equal(t,res,a)
+	assert.Equal(t, res, a)
 
 }

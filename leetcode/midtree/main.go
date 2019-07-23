@@ -3,10 +3,10 @@ package midtree
 import "github.com/op/go-logging"
 
 var Logger *logging.Logger
-func init()  {
+
+func init() {
 	Logger = logging.MustGetLogger("test")
 }
-
 
 type TreeNode struct {
 	Val   int
@@ -35,4 +35,3 @@ func InorderTraversal(root *TreeNode) []int {
 	}()
 	return res
 }
-

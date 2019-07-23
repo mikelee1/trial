@@ -1,23 +1,25 @@
-
 package main
+
 import (
-"fmt"
-_ "github.com/go-sql-driver/mysql"
-"github.com/jinzhu/gorm"
-_ "github.com/jinzhu/gorm/dialects/postgres"
+	"fmt"
+	_ "github.com/go-sql-driver/mysql"
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
+
 type Customer struct {
-	CustomerID int `gorm:"primary_key"`
+	CustomerID   int `gorm:"primary_key"`
 	CustomerName string
-	Contacts []Contact `gorm:"ForeignKey:CustId"` //you need to do like this
+	Contacts     []Contact `gorm:"ForeignKey:CustId"` //you need to do like this
 }
 
 type Contact struct {
-	ContactID int `gorm:"primary_key"`
+	ContactID   int `gorm:"primary_key"`
 	CountryCode int
-	MobileNo uint
-	CustId int
+	MobileNo    uint
+	CustId      int
 }
+
 const (
 	host     = "localhost"
 	port     = 5432
@@ -25,7 +27,6 @@ const (
 	password = "toor"
 	dbname   = "postgres"
 )
-
 
 func main() {
 
@@ -68,7 +69,7 @@ func main() {
 	customers := &Customer{}
 	contacts := &Contact{}
 
-	db.Debug().Where("customer_name=?","Martin").Preload("Contacts").Find(&customers) //db.Debug().Where("customer_name=?","John").Preload("Contacts").Find(&customers)
+	db.Debug().Where("customer_name=?", "Martin").Preload("Contacts").Find(&customers) //db.Debug().Where("customer_name=?","John").Preload("Contacts").Find(&customers)
 	fmt.Println("Customers", customers)
 	fmt.Println("Contacts", contacts)
 

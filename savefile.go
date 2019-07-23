@@ -1,10 +1,9 @@
 package main
 
 import (
-	"os"
 	"io/ioutil"
+	"os"
 )
-
 
 func check(e error) {
 	if e != nil {
@@ -12,20 +11,20 @@ func check(e error) {
 	}
 }
 
-/** 
-* 判断文件是否存在 存在返回 true 不存在返回false 
-*/
-func checkFileIsExist(filename string) (bool) {
-	var exist = true;
+/**
+* 判断文件是否存在 存在返回 true 不存在返回false
+ */
+func checkFileIsExist(filename string) bool {
+	var exist = true
 	if _, err := os.Stat(filename); os.IsNotExist(err) {
-		exist = false;
+		exist = false
 	}
-	return exist;
+	return exist
 }
 
 /**
 
-*/
+ */
 
 func main() {
 	var wireteString = "测试n"
@@ -46,8 +45,8 @@ func main() {
 	//fmt.Printf("写入 %d 个字节n", n);
 
 	/******************* 第二种方式: 使用 ioutil.WriteFile 写入文件 *************************************/
-	var d1 = []byte(wireteString);
-	err2 := ioutil.WriteFile("./output2.txt", d1, 0666) //写入文件(字节数组) 
+	var d1 = []byte(wireteString)
+	err2 := ioutil.WriteFile("./output2.txt", d1, 0666) //写入文件(字节数组)
 	check(err2)
 	//
 	///******************* 第三种方式: 使用 File(Write,WriteString) 写入文件 *************************************/

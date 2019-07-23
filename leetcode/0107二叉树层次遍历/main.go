@@ -9,11 +9,11 @@ func main() {
 		Val: 1,
 		Left: &TreeNode{
 			Val: 2,
-			Left:&TreeNode{
-				Val:3,
-				Left:&TreeNode{
-					Val:4,
-					Left:&TreeNode{
+			Left: &TreeNode{
+				Val: 3,
+				Left: &TreeNode{
+					Val: 4,
+					Left: &TreeNode{
 						Val: 5,
 					},
 				},
@@ -59,11 +59,11 @@ func levelOrderBottom(root *TreeNode) [][]int {
 			hang = append(hang, headhang+1)
 		}
 		if len(res) < hang[i] {
-			res = append([][]int{[]int{headNode.Val}},res...)
+			res = append([][]int{[]int{headNode.Val}}, res...)
 		} else {
 			res[0] = append(res[0], headNode.Val)
 		}
-		if headhang == 1||(i+1 <len(hang) && headhang < hang[i+1]) {
+		if headhang == 1 || (i+1 < len(hang) && headhang < hang[i+1]) {
 			headhang++
 		}
 		i++

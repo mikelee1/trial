@@ -1,10 +1,11 @@
 package main
 
 import (
-	"regexp"
 	"fmt"
+	"regexp"
 )
-func main()  {
+
+func main() {
 	var Password string
 	regp := `^[a-zA-Z0-9]{3,6}$`
 	rgxp := regexp.MustCompile(regp)
@@ -13,7 +14,7 @@ func main()  {
 		fmt.Scanln(&Password)
 		fmt.Println(Password)
 		passwordverified := rgxp.MatchString(Password)
-		if !passwordverified{
+		if !passwordverified {
 			fmt.Println("no pass")
 			return
 		}

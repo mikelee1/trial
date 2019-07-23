@@ -1,12 +1,12 @@
 package main
 
 import (
-	"os/exec"
 	"fmt"
 	"io/ioutil"
+	"os/exec"
 )
 
-func Execcmd(cmdstring string) ([]byte) {
+func Execcmd(cmdstring string) []byte {
 	cmd := exec.Command("/bin/ash", "-c", cmdstring)
 
 	//创建获取命令输出管道
@@ -33,7 +33,6 @@ func Execcmd(cmdstring string) ([]byte) {
 		fmt.Println("wait:", err.Error())
 		return nil
 	}
-
 
 	return bytes
 }

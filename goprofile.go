@@ -11,7 +11,7 @@ import (
 func main() {
 	go func() {
 		for {
-			time.Sleep(1*time.Second)
+			time.Sleep(1 * time.Second)
 			fmt.Println("hello world")
 		}
 	}()

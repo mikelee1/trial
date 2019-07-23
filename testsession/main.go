@@ -1,12 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/go-session/redis"
 	"github.com/go-session/gin-session"
+	"github.com/go-session/redis"
 	"github.com/go-session/session"
 	"net/http"
-	"fmt"
 )
 
 func main() {
@@ -16,7 +16,6 @@ func main() {
 		Addr: "127.0.0.1:6379",
 		DB:   1,
 	})
-
 
 	g.Use(
 		ginsession.New(
@@ -33,26 +32,26 @@ func main() {
 		//store is session.store, it is an interface
 		store := ginsession.FromContext(ctx)
 		//store is session.Manager, it is an interface, to communicate with
-		ms,err := ginsession.GetManage(ctx)
-		if err == nil{
+		ms, err := ginsession.GetManage(ctx)
+		if err == nil {
 			//mike 检测自己的sessionid是否存在，仅对本浏览器有效。
-			fmt.Println("this is sessionid:",store.SessionID())
-			fmt.Println("this is sessionid1:",store.SessionID())
-			exist,_ := ms.GetOpts().GetStore().Check(ctx,store.SessionID())
+			fmt.Println("this is sessionid:", store.SessionID())
+			fmt.Println("this is sessionid1:", store.SessionID())
+			exist, _ := ms.GetOpts().GetStore().Check(ctx, store.SessionID())
 
 			fmt.Println(exist)
 			if exist {
 				//ctx.AbortWithStatus(404)
-				ctx.String(http.StatusOK,"error:already login")
+				ctx.String(http.StatusOK, "error:already login")
 				return
-			}else{
-				exist,_ := ms.GetOpts().GetStore().Check(ctx,"110")
-				if exist{
-					ctx.String(http.StatusOK,"error:another already login")
+			} else {
+				exist, _ := ms.GetOpts().GetStore().Check(ctx, "110")
+				if exist {
+					ctx.String(http.StatusOK, "error:another already login")
 					return
 				}
 			}
-		}else {
+		} else {
 			panic(err)
 		}
 
@@ -76,7 +75,7 @@ func main() {
 		foo, ok := store.Get("foo")
 		if !ok {
 			//ctx.AbortWithStatus(404)
-			ctx.String(http.StatusOK,"error:cant get foo")
+			ctx.String(http.StatusOK, "error:cant get foo")
 			return
 		}
 		ctx.String(http.StatusOK, "foo:%s", foo)

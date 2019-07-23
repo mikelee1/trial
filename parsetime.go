@@ -1,13 +1,13 @@
 package main
 
 import (
-	"time"
 	"fmt"
+	"time"
 )
 
 func main() {
-	t,err := time.Parse("20060102","199201041")
-	if err != nil{
+	t, err := time.Parse("20060102", "199201041")
+	if err != nil {
 		fmt.Println(err)
 		return
 	}

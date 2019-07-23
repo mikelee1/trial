@@ -1,63 +1,63 @@
 package client
 
 import (
-	"net/http"
-	"google.golang.org/grpc"
-	"myproj/try/testopenzipkin/protos"
 	"context"
-	"github.com/op/go-logging"
-	logger2 "myproj/try/common/logger"
 	"github.com/go-ego/ego/mid/json"
+	"github.com/op/go-logging"
 	"github.com/openzipkin/zipkin-go"
-	tracer2 "myproj/try/testopenzipkin/tracer"
-	"google.golang.org/grpc/metadata"
 	"github.com/openzipkin/zipkin-go/propagation/b3"
-	"time"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/metadata"
 	"math/rand"
+	logger2 "myproj/try/common/logger"
 	"myproj/try/common/ratelimit"
+	"myproj/try/testopenzipkin/protos"
+	tracer2 "myproj/try/testopenzipkin/tracer"
+	"net/http"
+	"time"
 )
 
 var (
 	logger *logging.Logger
 	tracer *zipkin.Tracer
-	conn *grpc.ClientConn
+	conn   *grpc.ClientConn
 )
 
-func init()  {
+func init() {
 	logger = logger2.GetLogger()
 	tracer, _ = tracer2.NewTracer()
-	conn,_ = grpc.Dial("127.0.0.1:1080",grpc.WithInsecure())
+	conn, _ = grpc.Dial("127.0.0.1:1080", grpc.WithInsecure())
 }
 
-func CheckDB(ctx context.Context)  {
+func CheckDB(ctx context.Context) {
 	rand.Seed(time.Now().Unix())
-	rs := (rand.Intn(20)+50)*100
-	logger.Infof("wait %d ms\n",rs)
+	rs := (rand.Intn(20) + 50) * 100
+	logger.Infof("wait %d ms\n", rs)
 
-	span,ctx := tracer.StartSpanFromContext(ctx,"CheckDB")
+	span, ctx := tracer.StartSpanFromContext(ctx, "CheckDB")
 	defer span.Finish()
 	//模拟延时
-	time.Sleep(time.Duration(rs)*time.Millisecond)
+	time.Sleep(time.Duration(rs) * time.Millisecond)
 }
 
-func HelloHandler(w http.ResponseWriter, r *http.Request)  {
+func HelloHandler(w http.ResponseWriter, r *http.Request) {
 	rl := ratelimit.NewLimit(3)
 	defer rl.Release()
 	logger.Info("start")
 	defer logger.Info("complete")
 	ctx := r.Context()
-	////超时退出
-	//ctx,cancel := context.WithTimeout(ctx,5*time.Second)
-	//defer cancel()
+	//超时退出
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
 	//调用一次span
 	CheckDB(ctx)
 
 	//调用一次span
-	span,ctx := tracer.StartSpanFromContext(ctx,"test")
+	span, ctx := tracer.StartSpanFromContext(ctx, "test")
 	defer span.Finish()
 
 	//调用一次span
-	span,ctx = tracer.StartSpanFromContext(ctx,"test2")
+	span, ctx = tracer.StartSpanFromContext(ctx, "test2")
 	defer span.Finish()
 
 	//向grpc中存储父span
@@ -70,21 +70,21 @@ func HelloHandler(w http.ResponseWriter, r *http.Request)  {
 	ctx = metadata.NewOutgoingContext(ctx, *md)
 
 	hsclient := protos.NewHelloServiceClient(conn)
-	res,err := hsclient.Hello(ctx,&protos.String{Value:"mike"})
+	res, err := hsclient.Hello(ctx, &protos.String{Value: "mike"})
 	if err != nil {
 		logger.Error(err)
 		return
 	}
 
 	//调用一次span
-	span,ctx = tracer.StartSpanFromContext(ctx,"test1")
+	span, ctx = tracer.StartSpanFromContext(ctx, "test1")
 	defer span.Finish()
 
-	resp,_ := json.Marshal(
+	resp, _ := json.Marshal(
 		struct {
 			StatusCode int
-			Data string
-		}{http.StatusOK,res.Value},
+			Data       string
+		}{http.StatusOK, res.Value},
 	)
 	w.Write(resp)
 }

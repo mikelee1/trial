@@ -1,10 +1,10 @@
 package main
 
 import (
-"database/sql"
-"fmt"
+	"database/sql"
+	"fmt"
 
-_ "github.com/go-sql-driver/mysql"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 func main() {

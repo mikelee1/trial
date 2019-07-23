@@ -1,10 +1,10 @@
 package main
 
 import (
-	e "myproj/try/eventdispatch/core"
-	"time"
 	"github.com/op/go-logging"
+	e "myproj/try/eventdispatch/core"
 	"os"
+	"time"
 )
 
 const HELLO_WORLD = "helloWorld"
@@ -13,13 +13,12 @@ const Sample = "sample"
 
 var logger *logging.Logger
 
-func init()  {
+func init() {
 	stdoutBackend := logging.NewBackendFormatter(
 		logging.NewLogBackend(os.Stdout, "", 0),
 		logging.MustStringFormatter(`%{color}[%{time:2006-01-02 15:04:05.000}] [%{module}] <%{shortfile}> %{shortfunc} ▶ %{level:.4s} %{id:03x}%{color:reset} %{message}`),
 	)
 	logging.SetBackend(stdoutBackend)
-
 
 	logger = logging.MustGetLogger("main")
 }
@@ -36,19 +35,18 @@ func main() {
 	time.Sleep(time.Second * 2)
 	logger.Info("to remove")
 	res := dispatcher.RemoveEventListener(HELLO_WORLD, listener)
-	if res{
+	if res {
 		logger.Info("removed")
-	}else{
+	} else {
 		logger.Info("no removed")
 	}
 	//mike 分发新建的event
 	dispatcher.DispatchEvent(e.NewEvent(HELLO_WORLD, nil))
-	res =dispatcher.DispatchEvent(e.NewEvent(Sample,nil))
-	if !res{
+	res = dispatcher.DispatchEvent(e.NewEvent(Sample, nil))
+	if !res {
 		logger.Error("e")
 	}
 }
-
 
 //mike 处理函数
 func myEventListener(event e.Event) {

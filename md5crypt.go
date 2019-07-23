@@ -1,11 +1,11 @@
 package main
 
 import (
-	"fmt"
-	"crypto/cipher"
-	"crypto/aes"
 	"bytes"
+	"crypto/aes"
+	"crypto/cipher"
 	"encoding/base64"
+	"fmt"
 )
 
 func PKCS5Padding(ciphertext []byte, blockSize int) []byte {
@@ -58,7 +58,7 @@ func main() {
 	}
 
 	pass64 := base64.StdEncoding.EncodeToString(xpass)
-	fmt.Printf("加密后:%v\n",pass64)
+	fmt.Printf("加密后:%v\n", pass64)
 
 	bytesPass, err := base64.StdEncoding.DecodeString(pass64)
 	if err != nil {

@@ -17,5 +17,5 @@ func main() {
 	})
 	c.Start()
 
-	select{}
+	select {}
 }

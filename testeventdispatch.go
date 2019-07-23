@@ -1,9 +1,9 @@
 package main
 
 import (
-"fmt"
-e "alex/ax_events"
-"time"
+	e "alex/ax_events"
+	"fmt"
+	"time"
 )
 
 const HELLO_WORLD = "helloWorld"

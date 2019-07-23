@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/docker/docker/client"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"github.com/docker/docker/client"
 )
 
 var data = `
@@ -29,7 +29,7 @@ type T struct {
 
 type Info struct {
 	Name string
-} 
+}
 
 func main() {
 	t := T{}
@@ -45,8 +45,8 @@ func main() {
 		log.Fatalf("error: %v", err)
 	}
 	fmt.Printf("--- t dump:\n%s\n\n", string(d))
-	a,err:=client.ParseHostURL(t.A)
-	fmt.Println(a,err)
+	a, err := client.ParseHostURL(t.A)
+	fmt.Println(a, err)
 
 	//
 	//m := make(map[interface{}]interface{})

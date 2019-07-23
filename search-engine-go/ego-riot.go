@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"github.com/go-ego/riot"
 	"github.com/go-ego/riot/types"
+	"log"
 	"os"
 )
 
@@ -21,13 +21,13 @@ var (
 		IndexerOpts: &types.IndexerOpts{
 			IndexType: types.DocIdsIndex,
 		},
-		UseStore: true,
+		UseStore:    true,
 		StoreFolder: path,
 		StoreEngine: "bg", // bg: badger, lbd: leveldb, bolt: bolt
 		// GseDict: "../../data/dict/dictionary.txt",
 		GseDict:       "./search-engine-go/data/test_dict.txt",
 		StopTokenFile: "./search-engine-go/data/stop_tokens.txt",
-		StoreShards: 6,
+		StoreShards:   6,
 	}
 )
 
@@ -40,7 +40,6 @@ func initEngine() {
 	// Add the document to the index, docId starts at 1
 	searcher.Index(1, types.DocData{Content: text})
 	searcher.Index(2, types.DocData{Content: text1})
-
 
 	//searcher.RemoveDoc(5)
 

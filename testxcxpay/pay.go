@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/medivhzhan/weapp/payment"
 	"fmt"
+	"github.com/medivhzhan/weapp/payment"
 	"net/http"
 )
 
@@ -24,8 +24,8 @@ func main() {
 		TotalFee:   10,
 
 		// 选填 ...
-		NoCredit:  false,
-		Detail:    "商品详情",
+		NoCredit: false,
+		Detail:   "商品详情",
 	}
 
 	res, err := form.Unify("支付密钥")
@@ -46,7 +46,7 @@ func main() {
 }
 
 func nofity(w http.ResponseWriter, req *http.Request) error {
-	err := payment.HandlePaidNotify(w , req ,  func(ntf payment.PaidNotify) (bool, string) {
+	err := payment.HandlePaidNotify(w, req, func(ntf payment.PaidNotify) (bool, string) {
 		// 处理通知
 		fmt.Printf("%#v", ntf)
 

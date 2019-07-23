@@ -1,20 +1,19 @@
 package main
 
 import (
-	"strings"
 	"fmt"
+	"strings"
 )
 
-func main()  {
+func main() {
 	c := "杭州市"
-	a := strings.Split(c,"")
-	if a[len(a)-1]=="市"{
-		fmt.Println(Substr(c,0,len(a)-1))
-	}else{
-		fmt.Println(Substr(c,0,2))
+	a := strings.Split(c, "")
+	if a[len(a)-1] == "市" {
+		fmt.Println(Substr(c, 0, len(a)-1))
+	} else {
+		fmt.Println(Substr(c, 0, 2))
 	}
 }
-
 
 // Substr returns the substr from start to length.
 func Substr(s string, start, length int) string {

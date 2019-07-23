@@ -1,8 +1,8 @@
 package testpprof__test
 
 import (
-	"testing"
 	"myproj/try/testpprof/util"
+	"testing"
 )
 
 const text = `

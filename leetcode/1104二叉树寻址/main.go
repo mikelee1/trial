@@ -28,16 +28,16 @@ func pathInZigZagTree(label int) []int {
 	closec := make(chan bool)
 	datac := make(chan int)
 	go func() {
-		digui(label,datac)
+		digui(label, datac)
 	}()
 	res := []int{}
 	go func() {
 		for {
-			v,ok := <-datac
-			if !ok{
+			v, ok := <-datac
+			if !ok {
 				closec <- true
 				break
-			}else{
+			} else {
 				res = append([]int{v}, res...)
 			}
 		}
@@ -46,7 +46,7 @@ func pathInZigZagTree(label int) []int {
 	return res
 }
 
-func digui(label int,datac chan int) {
+func digui(label int, datac chan int) {
 	if label == 1 {
 		datac <- 1
 		close(datac)
@@ -55,5 +55,5 @@ func digui(label int,datac chan int) {
 	hang := powToInt(label)
 	former := pow(2, hang-2) + (pow(2, hang-2) - 1 - (label-pow(2, hang-1))/2)
 	datac <- label
-	digui(former,datac)
+	digui(former, datac)
 }

@@ -3,7 +3,7 @@ package model
 import "github.com/hyperledger/fabric/sdk"
 
 const (
-	AcceptAllPolicy             = "OutOf(0, 'None.member')"
+	AcceptAllPolicy = "OutOf(0, 'None.member')"
 )
 
 type OrgInfo struct {
@@ -31,8 +31,6 @@ type InvokeRequest struct {
 	OrdererNodes []*ServiceNode
 }
 
-
-
 type JoinChannelRequest struct {
 	Orgs        []*OrgInfo
 	ChannelName string
@@ -58,7 +56,6 @@ type ServiceNode struct {
 	Public           bool
 }
 
-
 type InstantiateChainCodeRequest struct {
 	Org          string
 	ChannelName  string
@@ -71,7 +68,6 @@ type InstantiateChainCodeRequest struct {
 }
 
 type IndirectInvokeRequest struct {
-
 	Org          string //直参机构的org
 	ChannelName  string
 	CcName       string

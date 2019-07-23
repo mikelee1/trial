@@ -1,29 +1,28 @@
 package main
 
 import (
-	"vnt-candy-box/utils/phone"
-	"fmt"
-	"strings"
-	"io/ioutil"
 	"encoding/json"
-	"github.com/op/go-logging"
-	"net/http"
 	"errors"
+	"fmt"
+	"github.com/op/go-logging"
+	"io/ioutil"
+	"net/http"
+	"strings"
+	"vnt-candy-box/utils/phone"
 )
 
 var logger *logging.Logger
 
-func init()  {
+func init() {
 	logger = logging.MustGetLogger("vnt")
 }
 
 func main() {
 	//a,err := phone.ParseToInternational("5856533056","US")
 	//fmt.Println(a,err)
-	err := SendVerifyMessage("18724006865","1231","CN")
+	err := SendVerifyMessage("18724006865", "1231", "CN")
 	logger.Debug(err)
 }
-
 
 func SendVerifyMessage(phoneNumber string, code string, country string) error {
 	url := "http://" + "47.75.188.96" + ":" + "10001" + "/verifycode"
@@ -49,7 +48,7 @@ func SendVerifyMessage(phoneNumber string, code string, country string) error {
 		return err
 	}
 	p := strings.NewReader(string(payload))
-	logger.Debug(url,p)
+	logger.Debug(url, p)
 	res, err := http.Post(url, "application/json", p)
 	if err != nil {
 		logger.Errorf("Error sending request to %s : %s", url, err)
@@ -84,7 +83,6 @@ func SendVerifyMessage(phoneNumber string, code string, country string) error {
 		return err
 	}
 }
-
 
 type MsgServiceError struct {
 	Message   string `json:"Message"`

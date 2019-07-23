@@ -1,8 +1,8 @@
 package impl
 
 import (
-	"github.com/op/go-logging"
 	"fmt"
+	"github.com/op/go-logging"
 )
 
 var logger *logging.Logger
@@ -13,7 +13,7 @@ func init() {
 	fmt.Println("in impl")
 }
 
-func Run()  {
+func Run() {
 	logger.Infof("what")
 	logger.Error("err")
 	logger.Fatal("fatal")

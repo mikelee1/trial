@@ -22,8 +22,8 @@ func intTrim0(a []int) []int {
 		}
 		break
 	}
-	fmt.Println("intreim:",a[i : max(j+1,len(a))])
-	return a[i : max(j+1,len(a))]
+	fmt.Println("intreim:", a[i:max(j+1, len(a))])
+	return a[i:max(j+1, len(a))]
 }
 
 func LocalMax(l []int) []int {
@@ -32,45 +32,45 @@ func LocalMax(l []int) []int {
 	for i := 0; i < len(l); i++ {
 		if i == 0 {
 			if l[i] > l[i+1] {
-				lmdata = append(lmdata,l[i])
+				lmdata = append(lmdata, l[i])
 				lm = append(lm, i)
 			}
 			continue
 		}
 		if i == len(l)-1 {
 			if l[i] > l[i-1] {
-				lmdata = append(lmdata,l[i])
+				lmdata = append(lmdata, l[i])
 				lm = append(lm, i)
 			}
 			continue
 		}
 		if l[i] >= l[i+1] && l[i] >= l[i-1] {
-			lmdata = append(lmdata,l[i])
+			lmdata = append(lmdata, l[i])
 			lm = append(lm, i)
 		}
 	}
-	fmt.Println("localmax:",lm)
-	fmt.Println("lmdata:",lmdata)
-	lm = check(lm,lmdata)
+	fmt.Println("localmax:", lm)
+	fmt.Println("lmdata:", lmdata)
+	lm = check(lm, lmdata)
 	return lm
 }
 
-func check(lm,lmdata []int) []int {
+func check(lm, lmdata []int) []int {
 	res := []int{}
 	tmpres := []int{}
 	big := 0
 	for key, value := range lmdata {
-		big = max(value,big)
-		if value==big{
+		big = max(value, big)
+		if value == big {
 			tmpres = []int{}
-			res = append(res,lm[key])
+			res = append(res, lm[key])
 			continue
-		}else{
-			tmpres = append(tmpres,lm[key])
+		} else {
+			tmpres = append(tmpres, lm[key])
 		}
 	}
-	res = append(res,tmpres...)
-	fmt.Println("check:",res)
+	res = append(res, tmpres...)
+	fmt.Println("check:", res)
 	return res
 }
 
@@ -92,10 +92,10 @@ func countRain(height, localMax []int) int {
 	}
 	for i := 0; i < len(localMax)-1; i++ {
 		min := min(height[localMax[i]], height[localMax[i+1]])
-		fmt.Println(localMax[i],localMax[i+1])
+		fmt.Println(localMax[i], localMax[i+1])
 		for j := localMax[i]; j < localMax[i+1]; j++ {
 			c += max(min-height[j], 0)
-			fmt.Println("add:",max(min-height[j], 0))
+			fmt.Println("add:", max(min-height[j], 0))
 		}
 	}
 	return c

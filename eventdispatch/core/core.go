@@ -7,7 +7,7 @@ import (
 
 var logger *logging.Logger
 
-func init()  {
+func init() {
 	logger = logging.MustGetLogger("eventdispatcher")
 }
 
@@ -16,7 +16,7 @@ type Event struct {
 	//事件触发实例
 	Target IEventDispatcher
 	//事件类型
-	Type   string
+	Type string
 	//事件携带数据源
 	Object interface{}
 }
@@ -66,24 +66,24 @@ func NewEventListener(h EventHandler) *EventListener {
 
 // 创建事件
 func NewEvent(eventType string, object interface{}) Event {
-	e := Event{Type:eventType, Object:object}
+	e := Event{Type: eventType, Object: object}
 	return e
 }
 
 // 克隆事件
-func (this *Event)Clone() *Event {
+func (this *Event) Clone() *Event {
 	e := new(Event)
 	e.Type = this.Type
 	e.Target = e.Target
 	return e
 }
 
-func (this *Event)ToString() string {
+func (this *Event) ToString() string {
 	return fmt.Sprintf("Event Type %v", this.Type)
 }
 
 // 事件调度器添加事件
-func (this *EventDispatcher)AddEventListener(eventType string, listener *EventListener) {
+func (this *EventDispatcher) AddEventListener(eventType string, listener *EventListener) {
 	for _, saver := range this.savers {
 		if saver.Type == eventType {
 			saver.Listeners = append(saver.Listeners, listener)
@@ -91,18 +91,18 @@ func (this *EventDispatcher)AddEventListener(eventType string, listener *EventLi
 		}
 	}
 
-	saver := &EventSaver{Type:eventType, Listeners:[]*EventListener{listener}}
+	saver := &EventSaver{Type: eventType, Listeners: []*EventListener{listener}}
 	this.savers = append(this.savers, saver)
 }
 
 // 事件调度器移除某个监听
-func (this *EventDispatcher)RemoveEventListener(eventType string, listener *EventListener) bool {
+func (this *EventDispatcher) RemoveEventListener(eventType string, listener *EventListener) bool {
 
 	for _, saver := range this.savers {
 		if saver.Type == eventType {
 			for i, l := range saver.Listeners {
 				if listener == l {
-					saver.Listeners = append(saver.Listeners[:i], saver.Listeners[i + 1:]...)
+					saver.Listeners = append(saver.Listeners[:i], saver.Listeners[i+1:]...)
 					return true
 				}
 			}
@@ -112,7 +112,7 @@ func (this *EventDispatcher)RemoveEventListener(eventType string, listener *Even
 }
 
 // 事件调度器是否包含某个类型的监听
-func (this *EventDispatcher)HasEventListener(eventType string) bool {
+func (this *EventDispatcher) HasEventListener(eventType string) bool {
 	for _, saver := range this.savers {
 		if saver.Type == eventType {
 			return true
@@ -122,7 +122,7 @@ func (this *EventDispatcher)HasEventListener(eventType string) bool {
 }
 
 // 事件调度器派发事件
-func (this *EventDispatcher)DispatchEvent(event Event) bool {
+func (this *EventDispatcher) DispatchEvent(event Event) bool {
 	for _, saver := range this.savers {
 		//logger.Info(saver.Type,event.Type)
 		if saver.Type == event.Type {

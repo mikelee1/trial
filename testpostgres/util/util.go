@@ -1,8 +1,8 @@
 package util
 
 import (
-	"github.com/jinzhu/gorm"
 	"fmt"
+	"github.com/jinzhu/gorm"
 	"time"
 )
 
@@ -30,4 +30,3 @@ func CreateConn() *gorm.DB {
 	}
 	return db
 }
-

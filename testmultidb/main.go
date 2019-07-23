@@ -1,28 +1,28 @@
 package main
 
 import (
-	"github.com/jinzhu/gorm"
-	"time"
 	"fmt"
+	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
-
+	"time"
 )
 
 func main() {
 
 	u := User{}
-	for k,_ := range [10]int{}{
+	for k, _ := range [10]int{} {
 		go func(v int) {
 			db := CreateConn()
-			if err := db.Raw("select * from breakfast_user").Scan(&u).Error;err != nil{
+			if err := db.Raw("select * from breakfast_user").Scan(&u).Error; err != nil {
 				fmt.Println(err)
 			}
-			fmt.Println(v,u)
+			fmt.Println(v, u)
 		}(k)
 	}
 
-	time.Sleep(2*time.Second)
+	time.Sleep(2 * time.Second)
 }
+
 type DBConfig struct {
 	Host     string
 	Port     string
@@ -39,14 +39,16 @@ type User struct {
 	Inuse    string
 	Phone    string
 }
-var db  *gorm.DB
+
+var db *gorm.DB
+
 func CreateConn() *gorm.DB {
 
 	var dbConfig = &DBConfig{
-		Host: "127.0.0.1",
-		Port: "5432",
-		Name: "breakfast",
-		User: "yunphant",
+		Host:     "127.0.0.1",
+		Port:     "5432",
+		Name:     "breakfast",
+		User:     "yunphant",
 		Password: "yunphant2018",
 	}
 	var err error

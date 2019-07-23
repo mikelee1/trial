@@ -11,26 +11,23 @@ var trips = [][]string{
 
 type Trip struct {
 	Index int
-	From string
-	To string
+	From  string
+	To    string
 }
-
 
 func main() {
 	//本题时间为20分钟
 	//trips是小明出差的行程， 请找出小明这次行程，并注释时间复杂度与空间复杂度
 	//结果 [北京"，"上海", "广州", "南京", "西藏", "重庆"，"新疆"]
 	newTrips := []Trip{}
-	for k,v := range trips{
+	for k, v := range trips {
 		oneTrip := Trip{
-			Index:k,
-			From:v[0],
-			To:v[1],
+			Index: k,
+			From:  v[0],
+			To:    v[1],
 		}
-		newTrips = append(newTrips,oneTrip)
+		newTrips = append(newTrips, oneTrip)
 	}
-
-
 
 	//head := make(map[string]int,len(trips))
 	//tail := make(map[string]int,len(trips))

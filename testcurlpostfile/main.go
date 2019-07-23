@@ -2,13 +2,13 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
 	"os"
-	"encoding/json"
 )
 
 func postFile(url, filename, filePath string) error {
@@ -45,11 +45,10 @@ func postFile(url, filename, filePath string) error {
 	//这个很关键,必须这样写关闭,不能使用defer关闭,不然会导致错误
 	bodyWriter.Close()
 
-
 	//这里就是上传的其他参数设置,可以使用 bodyWriter.WriteField(key, val) 方法
 	//也可以自己在重新使用  multipart.NewWriter 重新建立一项,这个再server 会有例子
 	params := map[string]string{
-		"filename" : filename,
+		"filename": filename,
 	}
 	//这种设置值得仿佛 和下面再从新创建一个的一样
 	for key, val := range params {
@@ -72,25 +71,25 @@ func postFile(url, filename, filePath string) error {
 }
 
 type Resp struct {
-	Fid string
-	Url string
+	Fid       string
+	Url       string
 	PublicUrl string
-	Count int32
+	Count     int32
 }
+
 // sample usage
 func main() {
 	url := "http://192.168.9.78:8010/dir/assign"
-	response,_ := http.Get(url)
+	response, _ := http.Get(url)
 	bytes, _ := ioutil.ReadAll(response.Body)
 	resp := &Resp{}
 
-	json.Unmarshal(bytes,resp)
+	json.Unmarshal(bytes, resp)
 
-
-	urlpost := "http://"+resp.PublicUrl+"/"+resp.Fid
+	urlpost := "http://" + resp.PublicUrl + "/" + resp.Fid
 	fmt.Println(urlpost)
 	filename := "sorting.go"
 
 	file := "./sorting.go" //上传的文件
-	postFile(urlpost, filename,  file)
+	postFile(urlpost, filename, file)
 }

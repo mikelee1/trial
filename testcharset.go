@@ -1,15 +1,15 @@
 package main
 
 import (
-	"fmt"
-	"golang.org/x/text/transform"
 	"bytes"
+	"fmt"
+	"github.com/PuerkitoBio/goquery"
+	"github.com/op/go-logging"
 	"golang.org/x/text/encoding/simplifiedchinese"
+	"golang.org/x/text/transform"
+	"gopkg.in/iconv.v1"
 	"io/ioutil"
 	"net/http"
-	"gopkg.in/iconv.v1"
-	"github.com/op/go-logging"
-	"github.com/PuerkitoBio/goquery"
 )
 
 func GbkToUtf8(s []byte) ([]byte, error) {
@@ -32,7 +32,7 @@ func Utf8ToGbk(s []byte) ([]byte, error) {
 
 var logger *logging.Logger
 
-func init()  {
+func init() {
 	logger = logging.MustGetLogger("main")
 }
 
@@ -47,7 +47,7 @@ func main() {
 	resp, err := http.Get("http://www.aoshu.com/e/20180925/5baa00ca11932_2.shtml")
 	doc, err := goquery.NewDocumentFromReader(resp.Body)
 
-	cont,_ := doc.Find("div.content").Find("p").Eq(1).GBKHtml()
+	cont, _ := doc.Find("div.content").Find("p").Eq(1).GBKHtml()
 
 	if err != nil {
 		logger.Info(err)

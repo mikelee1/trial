@@ -1,24 +1,23 @@
 package config
 
 import (
-	"github.com/spf13/viper"
-	"strings"
 	"fmt"
 	"github.com/op/go-logging"
+	"github.com/spf13/viper"
+	"strings"
 )
 
 type Config struct {
-	Name string
-	Info Info
+	Name         string
+	Info         Info
 	QabircConfig QabircConfig
-	ScaleMinute bool
-	AT map[int]Atype
+	ScaleMinute  bool
+	AT           map[int]Atype
 }
 type Atype struct {
-	ID string
+	ID   string
 	Name string
 }
-
 
 type Info struct {
 	Id int32
@@ -37,17 +36,18 @@ var logger *logging.Logger
 var Globalconfig *Config
 
 var defaultconfigpath = "./config/config.yaml"
+
 //var defaultconfigpath = "./testredis/config/config.yaml"
 
-func init()  {
+func init() {
 	logger = logging.MustGetLogger("logger")
 }
 
 func GetConfig() *Config {
-	if Globalconfig != nil{
+	if Globalconfig != nil {
 		return Globalconfig
 	}
-	Init("web",defaultconfigpath)
+	Init("web", defaultconfigpath)
 	return Globalconfig
 }
 

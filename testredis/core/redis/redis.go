@@ -9,21 +9,21 @@ import (
 var client *redis.Client
 var logger *logging.Logger
 
-func init()  {
+func init() {
 	logger = logging.MustGetLogger("redis")
 }
 
-func Init()  {
+func Init() {
 	rediscli := GetClient()
-	if rediscli != nil{
+	if rediscli != nil {
 		logger.Info("good")
 	}
 }
 
 func GetClient() *redis.Client {
-	if client == nil{
+	if client == nil {
 		client = redis.NewClient(&redis.Options{
-			Addr:config.Globalconfig.QabircConfig.Redis.Address,
+			Addr: config.Globalconfig.QabircConfig.Redis.Address,
 		})
 	}
 	return client

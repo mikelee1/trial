@@ -1,25 +1,25 @@
 package main
 
 import (
-"fmt"
+	"fmt"
 )
 
-type Address struct{
+type Address struct {
 	City string
 	Area string
 }
 
-type Student struct{
+type Student struct {
 	Address
 	Name string
-	Age int
+	Age  int
 }
 
-func (this Student) Say(){
+func (this Student) Say() {
 	fmt.Println("hello, i am ", this.Name, "and i am ", this.Age)
 }
 
-func (this Student) Hello(word string){
+func (this Student) Hello(word string) {
 	fmt.Println("hello", word, ". i am ", this.Name)
 }
 
@@ -76,11 +76,6 @@ func (this Student) Hello(word string){
 //	m2 := val.MethodByName("Hello")
 //	m2.Call([]reflect.Value{reflect.ValueOf("iris")})
 //}
-
-
-
-
-
 
 //
 //type Foo struct {

@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"io/ioutil"
+	"net/http"
 )
 
 //func main() {
@@ -16,7 +16,6 @@ import (
 //	}
 //	println(x)        // 1
 //}
-
 
 // map 错误示例
 //func main() {
@@ -34,7 +33,6 @@ import (
 //	}(x)
 //	fmt.Println(x)            // [1 2 3]    // 并不是你以为的 [7 2 3]
 //}
-
 
 //// slice 正确示例
 //func main() {
@@ -78,7 +76,6 @@ import (
 //	}
 //}
 
-
 //mike?为什么没有2 send result
 //func main() {
 //	ch := make(chan int)
@@ -117,7 +114,7 @@ import (
 //	fmt.Println(v)
 //}
 
-func main()  {
+func main() {
 	var err error
 	js_code := "023Xsn8J063fXg2OQV8J0T1J8J0Xsn8j"
 	appid := "wx259f7a8178103266"

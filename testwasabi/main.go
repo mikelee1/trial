@@ -2,18 +2,20 @@ package main
 
 import (
 	"bytes"
-	"io/ioutil"
-	"fmt"
 	"encoding/json"
-	"net/http"
+	"fmt"
 	"github.com/op/go-logging"
+	"io/ioutil"
+	"net/http"
 )
+
 var logger = logging.MustGetLogger("testwasabi")
 var baseurl = "http://192.168.9.21:8080"
 var contenttype = "application/json;charset=utf-8"
 
 var globaldirectsession string
 var globalindirectsession string
+
 func main() {
 	DirectLogin()
 	InDirectLogin()
@@ -30,26 +32,26 @@ type LoginRequest struct {
 }
 
 func DirectLogin() {
-	u := LoginRequest{Username:"admin",Password:"222"}
+	u := LoginRequest{Username: "admin", Password: "222"}
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(u)
 
-	resp, _ := http.Post(baseurl+"/login",contenttype,b)
+	resp, _ := http.Post(baseurl+"/login", contenttype, b)
 
 	defer resp.Body.Close()
-	body,_ := ioutil.ReadAll(resp.Body)
+	body, _ := ioutil.ReadAll(resp.Body)
 	fmt.Println(string(body))
 	globaldirectsession = string(body)
 }
 
 func InDirectLogin() {
-	u := LoginRequest{Username:"333",Password:"333"}
+	u := LoginRequest{Username: "333", Password: "333"}
 	b := new(bytes.Buffer)
 	json.NewEncoder(b).Encode(u)
 
-	resp, _ := http.Post(baseurl+"/login",contenttype,b)
+	resp, _ := http.Post(baseurl+"/login", contenttype, b)
 	defer resp.Body.Close()
-	body,_ := ioutil.ReadAll(resp.Body)
+	body, _ := ioutil.ReadAll(resp.Body)
 	fmt.Println(string(body))
 	globalindirectsession = string(body)
 }

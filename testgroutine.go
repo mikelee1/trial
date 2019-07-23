@@ -1,14 +1,14 @@
 package main
 
 import (
-	"time"
 	"fmt"
 	"runtime"
+	"time"
 )
 
-func main()  {
+func main() {
 	a := [100]int{}
-	for i := 0; i <100; i++{
+	for i := 0; i < 100; i++ {
 		go func(ii int) {
 			for {
 				a[ii]++

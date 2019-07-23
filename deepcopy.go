@@ -15,21 +15,20 @@ import (
 //	fmt.Println(b)
 //}
 
-
 type AA1 struct {
 	Value string
 }
 
-func main()  {
+func main() {
 
-	specs := []AA1{{Value:"1"},{Value:"2"},{Value:"3"}}
-	for _,_ = range []int{1,2}{
-		var specscopy = make([]AA1,len(specs[:]))
-		copy(specscopy,specs[:])
+	specs := []AA1{{Value: "1"}, {Value: "2"}, {Value: "3"}}
+	for _, _ = range []int{1, 2} {
+		var specscopy = make([]AA1, len(specs[:]))
+		copy(specscopy, specs[:])
 
 		specscopy[0].Value = "0"
 
-		fmt.Printf("%#v\n",specs)
+		fmt.Printf("%#v\n", specs)
 		fmt.Println(specscopy[0])
 	}
 

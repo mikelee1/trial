@@ -1,31 +1,27 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"regexp"
 	"strings"
-	"bytes"
 )
 
-func main() {  
-    fmt.Println("------FindString------")  
-  
-    str := "测试"
-	match,_:=regexp.MatchString("^[a-z0-9-\u4e00-\u9fa5]+$",str)
+func main() {
+	fmt.Println("------FindString------")
+
+	str := "测试"
+	match, _ := regexp.MatchString("^[a-z0-9-\u4e00-\u9fa5]+$", str)
 	fmt.Println(match)
-	fmt.Printf("len is:%s\n",len(str))
-	if len(str)>20{
+	fmt.Printf("len is:%s\n", len(str))
+	if len(str) > 20 {
 		fmt.Printf("over 20\n")
 		errMsg := fmt.Sprintf("[checkMultiPartForm] Chaincode Name should be less than 20\n")
 		fmt.Printf(errMsg)
 	}
 
-
-    reg := regexp.MustCompile("[a-zA-Z0-9]") //六位连续的数字  
-    fmt.Println(reg.MatchString(str))
-
-
-
+	reg := regexp.MustCompile("[a-zA-Z0-9]") //六位连续的数字
+	fmt.Println(reg.MatchString(str))
 
 	str = " welcome to baidu.com "
 
@@ -38,16 +34,12 @@ func main() {
 	str = strings.TrimSpace(str)
 	fmt.Println(str)
 
-
-
-
 	str = "1.8"
-	match,_=regexp.MatchString("^[0-9]+(\\.[0-9]+)+$",str)
+	match, _ = regexp.MatchString("^[0-9]+(\\.[0-9]+)+$", str)
 	fmt.Println(match)
-	fmt.Printf("count is:%v\n",strings.Count(str,"."))
+	fmt.Printf("count is:%v\n", strings.Count(str, "."))
 	fmt.Println(match)
-	fmt.Printf("len is:%s\n",len(str))
-
+	fmt.Printf("len is:%s\n", len(str))
 
 	fmt.Println("----------------")
 	// This tests whether a pattern matches a string.
@@ -119,13 +111,12 @@ func main() {
 	out := r.ReplaceAllFunc(in, bytes.ToUpper)
 	fmt.Println(string(out))
 
-
 }
 
-func Invokeme()  {
+func Invokeme() {
 	searchIn := "John: 2578.34 William: 4567.23 Steve: 5632.18"
 	pat := "[0-9]+.[0-9]+" //正则
-	re,_ := regexp.Compile(pat)
-	searchIn1 := re.ReplaceAllString(searchIn,"##.#")
-	fmt.Printf("%v",string(searchIn1))
+	re, _ := regexp.Compile(pat)
+	searchIn1 := re.ReplaceAllString(searchIn, "##.#")
+	fmt.Printf("%v", string(searchIn1))
 }

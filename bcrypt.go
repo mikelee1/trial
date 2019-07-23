@@ -1,8 +1,8 @@
 package main
 
 import (
-"fmt"
-"golang.org/x/crypto/bcrypt"
+	"fmt"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func main() {
@@ -16,7 +16,7 @@ func main() {
 	}
 	//fmt.Println(hash)
 
-	encodePW := string(hash)  // 保存在数据库的密码，虽然每次生成都不同，只需保存一份即可
+	encodePW := string(hash) // 保存在数据库的密码，虽然每次生成都不同，只需保存一份即可
 	fmt.Println(encodePW)
 
 	// 正确密码验证

@@ -9,7 +9,7 @@ type AA struct {
 	Value string
 }
 
-func main()  {
+func main() {
 	//A1 := AA{"a1"}
 	//A2 := AA{"a2"}
 	//a := []AA{A1,A2}
@@ -18,11 +18,11 @@ func main()  {
 	//}
 	//fmt.Println(a)
 	forgoroutine()
-	time.Sleep(5*time.Second)
+	time.Sleep(5 * time.Second)
 }
 
-func forgoroutine()  {
-	for _, node := range []int{1,2,3,4} {
+func forgoroutine() {
+	for _, node := range []int{1, 2, 3, 4} {
 		go func() {
 			fmt.Println(node)
 		}()

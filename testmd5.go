@@ -1,52 +1,51 @@
 package main
 
 import (
-	"sort"
-	"fmt"
-	"strings"
-	"encoding/hex"
 	"crypto/md5"
+	"encoding/hex"
+	"fmt"
+	"sort"
 	"strconv"
+	"strings"
 )
 
 func main() {
 	a := map[string]interface{}{
-		"appid": "wx2f19daf67101a3a2",
-		"fee_type": "CNY",
+		"appid":     "wx2f19daf67101a3a2",
+		"fee_type":  "CNY",
 		"sign_type": "MD5",
 		"total_fee": 10,
 		//"sign": "BB39F3CF35392255D56EE21AB31E2961",
-		"out_trade_no": "wx1559141108300384492",//一个
-		"trade_type": "JSAPI",
-		"body": "预定早餐",
-		"device_info": "WEB",
-		"mch_id": "1537102541",
-		"nonce_str": "20190529224508�",//一个
-		"notify_url": "https://yidaizi.liyuanye.club/order/wxpay/notify",
-		"openid": "oRWOm5M02GuQVTJ_nxdtUJunbC28",
+		"out_trade_no": "wx1559141108300384492", //一个
+		"trade_type":   "JSAPI",
+		"body":         "预定早餐",
+		"device_info":  "WEB",
+		"mch_id":       "1537102541",
+		"nonce_str":    "20190529224508�", //一个
+		"notify_url":   "https://yidaizi.liyuanye.club/order/wxpay/notify",
+		"openid":       "oRWOm5M02GuQVTJ_nxdtUJunbC28",
 	}
-	b := WxPayCalcSign(a,"aaa")
+	b := WxPayCalcSign(a, "aaa")
 	fmt.Println(b)
 
 	d := map[string]string{
-		"appid": "wx2f19daf67101a3a2",
-		"fee_type": "CNY",
+		"appid":     "wx2f19daf67101a3a2",
+		"fee_type":  "CNY",
 		"sign_type": "MD5",
 		"total_fee": strconv.Itoa(10),
 		//"sign": "BB39F3CF35392255D56EE21AB31E2961",
-		"out_trade_no": "wx1559141108300384492",//一个
-		"trade_type": "JSAPI",
-		"body": "预定早餐",
-		"device_info": "WEB",
-		"mch_id": "1537102541",
-		"nonce_str": "20190529224508�",//一个
-		"notify_url": "https://yidaizi.liyuanye.club/order/wxpay/notify",
-		"openid": "oRWOm5M02GuQVTJ_nxdtUJunbC28",
+		"out_trade_no": "wx1559141108300384492", //一个
+		"trade_type":   "JSAPI",
+		"body":         "预定早餐",
+		"device_info":  "WEB",
+		"mch_id":       "1537102541",
+		"nonce_str":    "20190529224508�", //一个
+		"notify_url":   "https://yidaizi.liyuanye.club/order/wxpay/notify",
+		"openid":       "oRWOm5M02GuQVTJ_nxdtUJunbC28",
 	}
-	c := WxPayCalcSignString(d,"aaa")
+	c := WxPayCalcSignString(d, "aaa")
 	fmt.Println(c)
 }
-
 
 //微信支付计算签名的函数
 func WxPayCalcSign(mReq map[string]interface{}, key string) (sign string) {
@@ -81,7 +80,6 @@ func WxPayCalcSign(mReq map[string]interface{}, key string) (sign string) {
 	//fmt.Println("加密后-----", upperSign)
 	return upperSign
 }
-
 
 //微信支付计算签名的函数
 func WxPayCalcSignString(mReq map[string]string, key string) (sign string) {

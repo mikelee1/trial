@@ -1,9 +1,9 @@
 package main
 
 import (
-	"net/http"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/op/go-logging"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"net/http"
 )
 
 func main() {

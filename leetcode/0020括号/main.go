@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 	"sync/atomic"
-	"reflect"
 )
 
 func main() {
@@ -12,52 +12,54 @@ func main() {
 	fmt.Println(t)
 }
 
-var allBracts = []string{"(",")","[","]","{","}"}
+var allBracts = []string{"(", ")", "[", "]", "{", "}"}
+
 func Contains(array interface{}, val interface{}) (index int) {
 	index = -1
 	switch reflect.TypeOf(array).Kind() {
-	case reflect.Slice: {
-		s := reflect.ValueOf(array)
-		for i := 0; i < s.Len(); i++ {
-			if reflect.DeepEqual(val, s.Index(i).Interface()) {
-				index = i
-				return
+	case reflect.Slice:
+		{
+			s := reflect.ValueOf(array)
+			for i := 0; i < s.Len(); i++ {
+				if reflect.DeepEqual(val, s.Index(i).Interface()) {
+					index = i
+					return
+				}
 			}
 		}
-	}
 	}
 	return
 }
 
 func isValid(s string) bool {
 
-	bs := strings.Split(s,"")
+	bs := strings.Split(s, "")
 	storelist := []string{}
-	bmap := make(map[string]int32,3)
+	bmap := make(map[string]int32, 3)
 	for _, value := range bs {
-		i := Contains(allBracts,value)
-		if i == -1{
+		i := Contains(allBracts, value)
+		if i == -1 {
 			return false
 		}
-		if i % 2 == 1{
-			b,ok := bmap[allBracts[i-1]]
-			if !ok{
+		if i%2 == 1 {
+			b, ok := bmap[allBracts[i-1]]
+			if !ok {
 				return false
 			}
-			i1 := Contains(allBracts,storelist[len(storelist)-1])
-			if i1+1 != Contains(allBracts,value){
+			i1 := Contains(allBracts, storelist[len(storelist)-1])
+			if i1+1 != Contains(allBracts, value) {
 				return false
 			}
-			bmap[allBracts[i-1]] = atomic.AddInt32(&b,-1)
+			bmap[allBracts[i-1]] = atomic.AddInt32(&b, -1)
 			storelist = storelist[:len(storelist)-1]
-		}else{
+		} else {
 			b := bmap[value]
-			bmap[value] = atomic.AddInt32(&b,1)
-			storelist = append(storelist,value)
+			bmap[value] = atomic.AddInt32(&b, 1)
+			storelist = append(storelist, value)
 		}
 	}
 	for _, value := range bmap {
-		if value != 0{
+		if value != 0 {
 			return false
 		}
 	}

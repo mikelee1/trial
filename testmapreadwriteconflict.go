@@ -1,8 +1,8 @@
 package main
 
 import (
-	"sync"
 	"fmt"
+	"sync"
 	"time"
 )
 
@@ -15,13 +15,13 @@ type threadSafeSet struct {
 
 func (set *threadSafeSet) Iter() <-chan interface{} {
 	//ch := make(chan interface{}) // 解除注释看看！
-	ch := make(chan interface{},len(set.s))
+	ch := make(chan interface{}, len(set.s))
 	go func() {
 		set.RLock()
 
-		for elem,value := range set.s {
+		for elem, value := range set.s {
 			ch <- elem
-			println("Iter:",elem,value)
+			println("Iter:", elem, value)
 		}
 
 		close(ch)
@@ -31,13 +31,13 @@ func (set *threadSafeSet) Iter() <-chan interface{} {
 	return ch
 }
 
-func main()  {
+func main() {
 
-	th:=threadSafeSet{
-		s:[]interface{}{"1","2"},
+	th := threadSafeSet{
+		s: []interface{}{"1", "2"},
 	}
-	v:=<-th.Iter()
-	a := fmt.Sprintf("%s%v","ch",v)
+	v := <-th.Iter()
+	a := fmt.Sprintf("%s%v", "ch", v)
 	fmt.Println(a)
-	time.Sleep(1*time.Second)
+	time.Sleep(1 * time.Second)
 }

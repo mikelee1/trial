@@ -38,12 +38,11 @@ func main() {
 
 }
 
-
 func cli(db *gorm.DB) {
 	outUser := &user2.User{}
 	//order.Order{}
 	//order.OrderDanpin{}
-	if err := db.Raw("select * FROM breakfast_order WHERE orderor = ?",18).Scan(outUser).Error;err != nil{
+	if err := db.Raw("select * FROM breakfast_order WHERE orderor = ?", 18).Scan(outUser).Error; err != nil {
 		fmt.Println(err)
 		return
 	}
@@ -51,8 +50,7 @@ func cli(db *gorm.DB) {
 
 }
 
-
-func cli1(db *gorm.DB,wg *sync.WaitGroup) {
+func cli1(db *gorm.DB, wg *sync.WaitGroup) {
 
 	//defer db.Close()
 	defer wg.Done()

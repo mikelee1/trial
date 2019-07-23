@@ -4,9 +4,7 @@ import (
 	"testing"
 )
 
-
-
-func Test_main1(t *testing.T)  {
+func Test_main1(t *testing.T) {
 
 	//x := [3]int{1,2,3}
 	//

@@ -8,12 +8,12 @@ import (
 
 type cc struct {
 	Name string
-	Info []struct{
+	Info []struct {
 		Status string
 	}
 }
 
-func main()  {
+func main() {
 	var ccone cc
 	st1 := []string{`{
 			"name":"A",
@@ -21,18 +21,17 @@ func main()  {
 			{"status":"yes"},
 			{"status":"no"}
 			]}`}
-	err := json.Unmarshal(convertStringsToBytes(st1),&ccone)
+	err := json.Unmarshal(convertStringsToBytes(st1), &ccone)
 	//err := json.Unmarshal(str,&ccone)
-	if err != nil{
-		fmt.Printf("",err)
-	}	else{
+	if err != nil {
+		fmt.Printf("", err)
+	} else {
 		fmt.Printf("god")
 	}
 	fmt.Println(ccone)
 }
 
-
 func convertStringsToBytes(stringContent []string) []byte {
-	byteContent :=  strings.Join(stringContent, "")  // x20 = space and x00 = null
+	byteContent := strings.Join(stringContent, "") // x20 = space and x00 = null
 	return []byte(byteContent)
 }

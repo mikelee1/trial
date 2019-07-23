@@ -1,11 +1,11 @@
 package main
 
 import (
-	"github.com/spf13/cobra"
 	"fmt"
-	"github.com/spf13/viper"
 	"github.com/hyperledger/fabric/common/flogging"
 	"github.com/hyperledger/fabric/peer/version"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 	"os"
 )
 
@@ -14,6 +14,7 @@ const (
 	shortDes     = "Operate a peer node: start|status."
 	longDes      = "Operate a peer node: start|status."
 )
+
 var versionFlag bool
 var mainCmd = &cobra.Command{
 	Use: "peer",
@@ -41,7 +42,7 @@ var mainCmd = &cobra.Command{
 	},
 }
 
-func main()  {
+func main() {
 	mainCmd.AddCommand(Cmd())
 	if mainCmd.Execute() != nil {
 		os.Exit(1)

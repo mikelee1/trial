@@ -48,6 +48,7 @@ func measure(g geometry) {
 	fmt.Println(g.area())
 	fmt.Println(g.perim())
 }
+
 //
 //func main() {
 //	r := rect1{width: 3, height: 4}
@@ -73,12 +74,13 @@ type T2 interface {
 type Data struct {
 	A T2
 }
-func (d Data)Add1() string {
+
+func (d Data) Add1() string {
 	fmt.Println("a")
 	return ""
 }
 
-func (d Data)Minus() string {
+func (d Data) Minus() string {
 	fmt.Println("a")
 	return ""
 }
@@ -86,6 +88,7 @@ func (d Data)Minus() string {
 type Test1 struct {
 	A Data
 }
+
 //
 //func main()  {
 //	t := Test1{}
@@ -100,7 +103,7 @@ type Staff struct {
 	Grade int
 }
 
-func (s Staff)PaySalary()  {
+func (s Staff) PaySalary() {
 	switch s.Grade {
 	case 1:
 		fmt.Println("2w")
@@ -109,7 +112,7 @@ func (s Staff)PaySalary()  {
 	}
 }
 
-func main()  {
+func main() {
 	var s Manager = Staff{1}
 	s.PaySalary()
 

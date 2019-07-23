@@ -1,23 +1,24 @@
 package main_test
 
 import (
-	"testing"
 	"bytes"
-	"io/ioutil"
-	"net/http"
 	"encoding/json"
-	"os"
-	models "myproj/try/testwasabi/model"
-	"time"
-	"mime/multipart"
-	"path/filepath"
 	"io"
+	"io/ioutil"
+	"mime/multipart"
+	models "myproj/try/testwasabi/model"
+	"net/http"
+	"os"
+	"path/filepath"
+	"testing"
+	"time"
 )
 
 type NewCreateChannelRequest struct {
 	Orgs        []string
 	ChannelName string
 }
+
 //创建channel,注意no baas2
 func TestCreateChannel(t *testing.T) {
 	channelname := "testchannel1"
@@ -44,11 +45,11 @@ func TestCreateChannel(t *testing.T) {
 	t.Log(string(ret))
 }
 
-
 type JoinChannelRequest struct {
 	Peers       []string
 	ChannelName string
 }
+
 //加入链
 func TestJoinChannel(t *testing.T) {
 	channelname := "testchannel1"
@@ -136,10 +137,12 @@ func TestIdentity(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
 type LoginRequest struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
 }
+
 func login(t *testing.T) {
 	url := "http://192.168.9.21:8080/login"
 	lr, err := json.Marshal(&LoginRequest{"admin", "yunphant"})
@@ -175,7 +178,6 @@ func TestUpload(t *testing.T) {
 	t.Log(res)
 	t.Log(string(body))
 }
-
 
 // 新建上传请求
 func newUploadRequest(link string, params map[string]string, name, path string) (*http.Request, error) {
@@ -381,20 +383,18 @@ func TestQueryInvoke(t *testing.T) {
 	t.Log(string(ret))
 }
 
-
 func TestQuery(t *testing.T) {
 	org := "baas1"
 	channelName := "testchannel1"
 	ccName := "mycc3"
 	args := []string{
-		"query","a",
+		"query", "a",
 	}
 	icr := &models.IndirectInvokeRequest{
 		Org:         org,
 		CcName:      ccName,
 		ChannelName: channelName,
 		Args:        args,
-
 	}
 
 	data, err := json.Marshal(icr)

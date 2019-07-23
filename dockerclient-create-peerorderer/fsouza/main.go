@@ -142,8 +142,8 @@ func main() {
 
 	resp, err := cli.client.CreateContainer(docker2.CreateContainerOptions{
 		Config: &docker2.Config{
-			ExposedPorts:map[docker2.Port]struct{}{
-				docker2.Port("17050"): struct {}{},
+			ExposedPorts: map[docker2.Port]struct{}{
+				docker2.Port("17050"): struct{}{},
 			},
 			Tty:   true,
 			Image: "hyperledger/fabric-peer:amd64-latest",
@@ -151,7 +151,7 @@ func main() {
 			Cmd: []string{"sh"},
 		},
 		HostConfig: &docker2.HostConfig{
-			PortBindings:map[docker2.Port][]docker2.PortBinding{
+			PortBindings: map[docker2.Port][]docker2.PortBinding{
 				"17050/tcp": []docker2.PortBinding{{
 					HostIP:   "0.0.0.0",
 					HostPort: "7050",
@@ -176,9 +176,7 @@ func main() {
 			ExtraHosts: []string{"host1:192.168.9.82"},
 		},
 		NetworkingConfig: &docker2.NetworkingConfig{
-			EndpointsConfig:map[string]*docker2.EndpointConfig{
-
-			},
+			EndpointsConfig: map[string]*docker2.EndpointConfig{},
 		},
 		Name: "peer-0-baas2",
 	})
@@ -187,9 +185,7 @@ func main() {
 		return
 	}
 	logger.Info("start container")
-	if err := cli.client.StartContainer(resp.ID, &docker2.HostConfig{
-
-	}); err != nil {
+	if err := cli.client.StartContainer(resp.ID, &docker2.HostConfig{}); err != nil {
 		panic(err)
 		return
 	}

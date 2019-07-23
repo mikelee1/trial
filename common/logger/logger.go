@@ -7,7 +7,7 @@ import (
 
 var logger *logging.Logger
 
-func init()  {
+func init() {
 	logger = logging.MustGetLogger("common.logger")
 	stdoutBackend := logging.NewBackendFormatter(
 		logging.NewLogBackend(os.Stdout, "", 0),
@@ -17,7 +17,7 @@ func init()  {
 }
 
 func GetLogger() *logging.Logger {
-	if logger == nil{
+	if logger == nil {
 		panic("no logger")
 	}
 	return logger

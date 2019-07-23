@@ -1,11 +1,9 @@
-
-
 package main
 
 import (
-"encoding/json"
-"fmt"
-"log"
+	"encoding/json"
+	"fmt"
+	"log"
 )
 
 type movie struct {
@@ -16,14 +14,12 @@ type movie struct {
 		Id   int // string
 		Name string
 	}
-
 }
 
 type AccessToken struct {
 	Access_token string
 	Expires_in   int64
 }
-
 
 func main() {
 	var movieData movie
@@ -46,10 +42,6 @@ func main() {
         ]
     }`
 
-
-
-
-
 	err := json.Unmarshal([]byte(str), &movieData)
 	if err != nil {
 		log.Fatal(err)
@@ -57,7 +49,7 @@ func main() {
 	fmt.Println(movieData)
 
 	var a AccessToken
-	str1  := `{"access_token":"asdfasfd","expires_in":7200}`
-	json.Unmarshal([]byte(str1),&a)
+	str1 := `{"access_token":"asdfasfd","expires_in":7200}`
+	json.Unmarshal([]byte(str1), &a)
 	fmt.Println(a)
 }

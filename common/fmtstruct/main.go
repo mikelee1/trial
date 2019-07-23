@@ -1,9 +1,9 @@
 package fmtstruct
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
-	"bytes"
 )
 
 func String(data interface{}) string {

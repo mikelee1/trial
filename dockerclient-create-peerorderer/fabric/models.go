@@ -1,9 +1,9 @@
 package service
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
-	"bytes"
 )
 
 // Constructor ...
@@ -85,6 +85,7 @@ type SeparatePeerInfo struct {
 	// ExternalIp    string
 	Public bool
 }
+
 // OrdererInfo ...
 type OrdererInfo struct {
 	ID              string
@@ -94,12 +95,12 @@ type OrdererInfo struct {
 	Debugserverport PortMapping
 	RaftId          uint32
 }
+
 // PortMapping ...
 type PortMapping struct {
 	Port             uint32
 	ExternalEndpoint string
 }
-
 
 // ResultPack ...
 type ResultPack struct {
@@ -121,14 +122,11 @@ type ServiceNode struct {
 	Public            bool
 }
 
-
 // InitiatorSupport ...
 type InitiatorSupport interface {
 	Constructor
 	Storge
 }
-
-
 
 // IdentityPack ...
 type IdentityPack struct {

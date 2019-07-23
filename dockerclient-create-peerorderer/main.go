@@ -1,31 +1,30 @@
 package main
 
 import (
+	"context"
+	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
+	"github.com/docker/docker/api/types/mount"
+	"github.com/docker/docker/api/types/network"
+	"github.com/docker/docker/client"
+	"github.com/docker/docker/pkg/stdcopy"
+	docker2 "github.com/fsouza/go-dockerclient"
+	"github.com/hyperledger/fabric/sdk"
 	"github.com/op/go-logging"
 	"myproj/try/dockerclient-create-peerorderer/fabric"
-	_ "path"
-	"github.com/hyperledger/fabric/sdk"
-	"path"
-	docker2 "github.com/fsouza/go-dockerclient"
 	"net/url"
-	"github.com/docker/docker/client"
-	"github.com/docker/docker/api/types"
-	"context"
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/api/types/network"
-	"github.com/docker/docker/pkg/stdcopy"
-	"time"
-	"github.com/docker/docker/api/types/mount"
 	"os"
+	"path"
+	_ "path"
+	"time"
 )
 
 const (
 	NFS                = "nfs"
 	LOCAL              = "local"
 	ContainerMountPath = "/var/hyperledger"
-	host = "http://192.168.9.82:2375"
-	endpoint = "http://192.168.9.82:2375"
-
+	host               = "http://192.168.9.82:2375"
+	endpoint           = "http://192.168.9.82:2375"
 )
 
 var logger *logging.Logger
@@ -34,12 +33,12 @@ func init() {
 	logger = logging.MustGetLogger("docker-client")
 }
 
-var	(
-	org string
+var (
+	org    string
 	mspDir string
-	gm bool
-	orgCA *sdk.CA
-	kafkas = []string{"192.168.9.82:9092","192.168.9.82:9192","192.168.9.82:9292","192.168.9.82:9392"}
+	gm     bool
+	orgCA  *sdk.CA
+	kafkas = []string{"192.168.9.82:9092", "192.168.9.82:9192", "192.168.9.82:9292", "192.168.9.82:9392"}
 )
 
 // Initiator ...
@@ -51,8 +50,6 @@ type Initiator struct {
 
 	client *sdk.Client
 }
-
-
 
 func main() {
 	logger.Info("start main")
@@ -122,32 +119,30 @@ func main() {
 	logger.Info(string(block))
 
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
-			//Env:peerEnv,
-			Tty:true,
-			Image: "hyperledger/fabric-peer:amd64-latest",
-			Cmd:   []string{"/bin/sh","-c","ln -s & peer node start"},
-		},
+		//Env:peerEnv,
+		Tty:   true,
+		Image: "hyperledger/fabric-peer:amd64-latest",
+		Cmd:   []string{"/bin/sh", "-c", "ln -s & peer node start"},
+	},
 		&container.HostConfig{
-			Binds:[]string{"/var/lib/docker/volumes/a92f8bd649169bf8da0e45eed8e395ea1f812a5cf3cec447984543bc9d438bda/_data:/tmp"},
-			Mounts:[]mount.Mount{
+			Binds: []string{"/var/lib/docker/volumes/a92f8bd649169bf8da0e45eed8e395ea1f812a5cf3cec447984543bc9d438bda/_data:/tmp"},
+			Mounts: []mount.Mount{
 				mount.Mount{
-					Type: "bind",
-					Source: "/var/run",
-					Target: "/host/var/run",
+					Type:     "bind",
+					Source:   "/var/run",
+					Target:   "/host/var/run",
 					ReadOnly: false,
 				},
 				mount.Mount{
-					Type: "volume",
-					Source: "todoooooooooooo",
-					Target: ContainerMountPath,
-					ReadOnly:false,
+					Type:     "volume",
+					Source:   "todoooooooooooo",
+					Target:   ContainerMountPath,
+					ReadOnly: false,
 				},
 			},
 			UsernsMode: "host",
 			ExtraHosts: []string{"host1:192.168.9.82"},
-		}, &network.NetworkingConfig{
-
-		}, "peer-0-baas2")
+		}, &network.NetworkingConfig{}, "peer-0-baas2")
 	if err != nil {
 		logger.Error(err)
 		return
@@ -197,7 +192,6 @@ func main() {
 
 }
 
-
 // NewInitiator ...
 func NewInitiator(org string, orgMSP string, orgCA *sdk.CA, support service.InitiatorSupport, gm bool) (*Initiator, error) {
 	client, err := sdk.NewClient(orgCA.AdminCommonName(), orgMSP, orgCA.AdminMSPDir(), gm)
@@ -207,11 +201,11 @@ func NewInitiator(org string, orgMSP string, orgCA *sdk.CA, support service.Init
 	}
 
 	return &Initiator{
-		org:     org,
-		orgMSP:  orgMSP,
-		orgCA:   orgCA,
+		org:    org,
+		orgMSP: orgMSP,
+		orgCA:  orgCA,
 		//support: support,
-		client:  client,
+		client: client,
 	}, nil
 
 }
@@ -238,7 +232,6 @@ func createInitiator() (*Initiator, error) {
 
 	return NewInitiator(org, org, orgCA, support, gm)
 }
-
 
 type Docker struct {
 	client    *docker2.Client
@@ -274,4 +267,3 @@ func NewDockerClient(endpoints []string) (*Docker, error) {
 		endpoints: eps,
 	}, nil
 }
-

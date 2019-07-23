@@ -22,15 +22,15 @@ func climbLadder(n int) int {
 	if n == 1 || n == 2 {
 		return 1
 	}
-	if res,ok := history[n];ok{
+	if res, ok := history[n]; ok {
 		return res
 	}
-	a := climbLadder(n-2)
+	a := climbLadder(n - 2)
 	history[n-2] = a
-	b := climbLadder(n-1)
+	b := climbLadder(n - 1)
 	history[n-1] = b
 
-	return a+b
+	return a + b
 }
 
 func climbLadder2(n int) int {
@@ -38,7 +38,7 @@ func climbLadder2(n int) int {
 		return 1
 	}
 
-	a := climbLadder2(n-2)
-	b := climbLadder2(n-1)
-	return a+b
+	a := climbLadder2(n - 2)
+	b := climbLadder2(n - 1)
+	return a + b
 }

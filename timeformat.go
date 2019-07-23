@@ -1,14 +1,16 @@
 package main
 
 import (
-	"time"
 	"fmt"
 	"github.com/op/go-logging"
+	"time"
 )
+
 var format = logging.MustStringFormatter(
 	`%{color}%{time:2006-01-02 15:04:05.000 MST} [%{shortfile}] [%{module}] %{shortfunc} -> %{level:.4s} %{id:03x} %{message}%{color:reset}`,
 )
-func main()  {
+
+func main() {
 	//var a = time.Now().Format("2017-08-04")
 	//
 	//fmt.Printf("today is:%v\n",a)
@@ -41,7 +43,6 @@ func main()  {
 
 	//Test_1()
 
-
 	time := time.Now()
 	// 默认UTC
 
@@ -52,7 +53,6 @@ func main()  {
 	//// CST
 	//loc, _:= time.Local("Asia/Chongqing")
 
-
 }
 
 func BoottimeTimingSettlement() {
@@ -62,14 +62,12 @@ func BoottimeTimingSettlement() {
 	t := time.NewTimer(next.Sub(now))
 	for {
 		select {
-			case <-t.C:
-			fmt.Printf("完成: %v\n",time.Now())
-			t.Reset(time.Second*10)//10秒后重新t.c
+		case <-t.C:
+			fmt.Printf("完成: %v\n", time.Now())
+			t.Reset(time.Second * 10) //10秒后重新t.c
 		}
 	}
 }
-
-
 
 func demo(input chan interface{}) {
 	t1 := time.NewTimer(time.Second * 5)
@@ -91,8 +89,8 @@ func demo(input chan interface{}) {
 	}
 }
 
-func Test_1()  {
+func Test_1() {
 	t := time.Now()
-	fmt.Printf(".......to processproposal:%v\n",t)
-	fmt.Printf("---%v",time.Since(t))
+	fmt.Printf(".......to processproposal:%v\n", t)
+	fmt.Printf("---%v", time.Since(t))
 }

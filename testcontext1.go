@@ -1,12 +1,12 @@
 package main
 
 import (
-"fmt"
-"time"
+	"fmt"
+	"time"
 
-"golang.org/x/net/context"
-	"sync"
+	"golang.org/x/net/context"
 	"math/rand"
+	"sync"
 )
 
 var (
@@ -18,8 +18,8 @@ func work(ctx context.Context) error {
 	go work1(ctx)
 	for i := 0; i < 1000; i++ {
 		rand.Seed(time.Now().UnixNano())
-		randtime := rand.Int63n(8)+1
-		fmt.Println("randtime:",randtime)
+		randtime := rand.Int63n(8) + 1
+		fmt.Println("randtime:", randtime)
 		select {
 		case <-time.After(time.Duration(randtime) * time.Second):
 			fmt.Println("Doing some work ", i)
@@ -38,8 +38,8 @@ func work1(ctx context.Context) error {
 	defer wg1.Done()
 	for i := 0; i < 1000; i++ {
 		rand.Seed(time.Now().UnixNano())
-		randtime := rand.Int63n(8)+1
-		fmt.Println("work1 randtime:",randtime)
+		randtime := rand.Int63n(8) + 1
+		fmt.Println("work1 randtime:", randtime)
 		select {
 		case <-time.After(time.Duration(randtime) * time.Second):
 			fmt.Println("work1 Doing some work ", i)
@@ -68,4 +68,3 @@ func main() {
 
 	fmt.Println("Finished. I'm going home")
 }
-

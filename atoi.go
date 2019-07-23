@@ -1,13 +1,13 @@
 package main
 
 import (
-	"strconv"
 	"fmt"
 	"github.com/hyperledger/fabric/sdk"
+	"strconv"
 	"time"
 )
 
-func main()  {
+func main() {
 	//s := "0101"
 	//if strings.Split(s,"")[0]=="0"{
 	//	fmt.Println("wrong")
@@ -17,12 +17,9 @@ func main()  {
 	//fmt.Println(a)
 	var b float64
 	b = 19.2323
-	c := strconv.FormatFloat(b,'f',-1,32)
+	c := strconv.FormatFloat(b, 'f', -1, 32)
 	fmt.Println(c)
 }
-
-
-
 
 //service/chaincode/chaincode.go
 func (cc *Chaincode) InvokeOrQuery(invoke bool, channelName string, peers []*sdk.Endpoint, orderers []*sdk.Endpoint, args [][]byte) (*pp.ProposalResponse, error) {
@@ -51,7 +48,7 @@ func (cc *Chaincode) InvokeOrQuery(invoke bool, channelName string, peers []*sdk
 			return resps[0], errors.New("invoke is not valid, please try again")
 		}
 	}
-	logger.Info("resps are:%v\n",resps)
+	logger.Info("resps are:%v\n", resps)
 	if len(resps) == 0 {
 		return nil, errors.New("no proposal responses received - this might indicate a bug")
 	}

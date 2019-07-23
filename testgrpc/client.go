@@ -25,7 +25,7 @@ func main() {
 	//}
 	//log.Printf("Greeting: %s", r.UserToken)
 	data := make(map[string]map[string]string)
-	data["keyword1"] = map[string]string{"value":"1"}
-	data["keyword2"] = map[string]string{"value":"1"}
+	data["keyword1"] = map[string]string{"value": "1"}
+	data["keyword2"] = map[string]string{"value": "1"}
 
 }

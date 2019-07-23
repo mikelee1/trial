@@ -1,8 +1,8 @@
 package ratelimit
 
 import (
-	"sync"
 	"fmt"
+	"sync"
 )
 
 var limiter = &limitListener{}
@@ -22,7 +22,7 @@ func NewLimit(n int) *limitListener {
 
 func (l *limitListener) Wait() {
 	done := false
-	fmt.Println(cap(l.sem)-len(l.sem))
+	fmt.Println(cap(l.sem) - len(l.sem))
 	select {
 	case <-l.done:
 		done = true
@@ -37,7 +37,7 @@ func (l *limitListener) Wait() {
 	}
 }
 
-func (l *limitListener)Release() {
+func (l *limitListener) Release() {
 	l.release()
 }
 

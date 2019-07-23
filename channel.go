@@ -1,4 +1,3 @@
-
 package main
 
 import (
@@ -11,10 +10,10 @@ func main() {
 
 	// Create a new channel with `make(chan val-type)`.
 	// Channels are typed by the values they convey.
-	messages := make(chan string,1)
-	res := make(chan string,1)
-	clo1 := make(chan string,1)
-	clo2 := make(chan string,1)
+	messages := make(chan string, 1)
+	res := make(chan string, 1)
+	clo1 := make(chan string, 1)
+	clo2 := make(chan string, 1)
 
 	// _Send_ a value into a channel using the `channel <-`
 	// syntax. Here we send `"ping"`  to the `messages`
@@ -29,22 +28,21 @@ func main() {
 		sign := false
 		for {
 			select {
-				case b:=<-res:
-					fmt.Println(b)
-					time.Sleep(1*time.Second)
-					messages <- "ping"+b
-				case <-clo1:
-					sign = true
-					break
-				case <-time.After(time.Second * 2):
-					fmt.Println("timeout 2 seconds")
+			case b := <-res:
+				fmt.Println(b)
+				time.Sleep(1 * time.Second)
+				messages <- "ping" + b
+			case <-clo1:
+				sign = true
+				break
+			case <-time.After(time.Second * 2):
+				fmt.Println("timeout 2 seconds")
 			}
-			if sign{
+			if sign {
 				break
 			}
 
 		}
-
 
 		fmt.Println("doen func1")
 
@@ -56,9 +54,9 @@ func main() {
 		sign := false
 		for {
 			select {
-			case a:=<-messages:
+			case a := <-messages:
 				fmt.Println(a)
-				time.Sleep(1*time.Second)
+				time.Sleep(1 * time.Second)
 				res <- a
 			case <-clo2:
 				sign = true
@@ -66,7 +64,7 @@ func main() {
 			case <-time.After(time.Second * 2):
 				fmt.Println("timeout 2 seconds")
 			}
-			if sign{
+			if sign {
 				break
 			}
 
@@ -84,12 +82,11 @@ func main() {
 
 		defer wg.Done()
 
-		time.Sleep(10*time.Second)
-		clo1<-"close"
-		clo2<-"close"
+		time.Sleep(10 * time.Second)
+		clo1 <- "close"
+		clo2 <- "close"
 
 	}(&wg)
-
 
 	wg.Wait()
 }
