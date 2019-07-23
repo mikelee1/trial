@@ -44,8 +44,11 @@ func Test_main1(t *testing.T) {
 	wg = &sync.WaitGroup{}
 	wg.Add(4)
 	go OneTime()
+	time.Sleep(10*time.Millisecond)
 	go OneTime()
+	time.Sleep(10*time.Millisecond)
 	go OneTime()
+	time.Sleep(10*time.Millisecond)
 	go OneTime()
 	wg.Wait()
 }

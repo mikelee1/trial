@@ -17,13 +17,6 @@ func NewLimit(n int) *limitListener {
 		}
 
 	})
-	//if limiter == nil{
-	//	limiter = &limitListener{
-	//		sem:  make(chan struct{}, n),
-	//		done: make(chan struct{}),
-	//	}
-	//	return limiter
-	//}
 	return limiter
 }
 
@@ -49,6 +42,7 @@ func (l *limitListener)Release() {
 }
 
 type limitListener struct {
+	lock      sync.RWMutex
 	sem       chan struct{}
 	closeOnce sync.Once     // ensures the done chan is only closed once
 	done      chan struct{} // no values sent; closed when Close is called
