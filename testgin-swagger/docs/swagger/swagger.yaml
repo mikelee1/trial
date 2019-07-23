@@ -1,0 +1,45 @@
+basePath: /api/v1/
+info:
+  contact: {}
+  description: greet
+  license: {}
+  title: 测试swagger
+  version: 1.0.0
+paths:
+  /hello/{name}:
+    get:
+      consumes:
+      - application/json
+      description: greet
+      parameters:
+      - description: name
+        in: path
+        name: name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+  /record/{some_id}:
+    get:
+      consumes:
+      - application/json
+      description: get record by ID
+      parameters:
+      - description: userId
+        in: path
+        name: some_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            type: string
+swagger: "2.0"
