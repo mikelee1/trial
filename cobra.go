@@ -16,6 +16,8 @@ const (
 )
 
 var versionFlag bool
+
+//usage ./cobra node start
 var mainCmd = &cobra.Command{
 	Use: "peer",
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
