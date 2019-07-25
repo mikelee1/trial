@@ -19,7 +19,7 @@ b:
 // Note: struct fields must be public in order for unmarshal to
 // correctly populate the data.
 type T struct {
-	A string
+	A string `yaml:"aa"`
 	//B struct {
 	//	RenamedC int   `yaml:"c"`
 	//	D        []int `yaml:",flow"`
@@ -38,13 +38,8 @@ func main() {
 	if err != nil {
 		log.Fatalf("error: %v", err)
 	}
-	fmt.Printf("--- t:\n%v\n\n", t)
 
-	d, err := yaml.Marshal(&t)
-	if err != nil {
-		log.Fatalf("error: %v", err)
-	}
-	fmt.Printf("--- t dump:\n%s\n\n", string(d))
+
 	a, err := client.ParseHostURL(t.A)
 	fmt.Println(a, err)
 

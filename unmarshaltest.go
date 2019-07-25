@@ -9,6 +9,13 @@ import (
 type A struct {
 	ID                     string
 	AffiliationProjectName string
+	Content                *string
+	CreateTime             time.Time
+}
+
+type B struct {
+	ID                     string
+	AffiliationProjectName string
 	Content                string
 	CreateTime             time.Time
 }
@@ -18,5 +25,11 @@ func main() {
 	tmpa := [][]*A{}
 	json.Unmarshal([]byte(a), &tmpa)
 	fmt.Printf("%#v\n", tmpa)
-	fmt.Println(tmpa[0][0].Content)
+	fmt.Println(*tmpa[0][0].Content)
+
+	tmpb := [][]*B{}
+	tmpadata,_ := json.Marshal(tmpa)
+	json.Unmarshal([]byte(tmpadata), &tmpb)
+	fmt.Printf("%#v\n", tmpb)
+	fmt.Println(tmpb[0][0].Content)
 }
