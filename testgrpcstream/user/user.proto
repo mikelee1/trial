@@ -5,6 +5,15 @@ package testuser;
 
 service EchoService{
     rpc Echo (stream EchoRequest) returns (stream EchoResponse) {}
+    rpc PingPong (stream PingRequest) returns (stream PongResponse) {}
+}
+
+message PingRequest{
+    string data = 2;
+}
+
+message PongResponse{
+    string data = 2;
 }
 
 message EchoRequest{

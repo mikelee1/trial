@@ -29,6 +29,33 @@ func main() {
 
 type UserEcho struct {}
 
+func (u *UserEcho)PingPong(p testuser.EchoService_PingPongServer) error {
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+	go func() {
+		for {
+			r,_ := p.Recv()
+			if r != nil{
+				fmt.Println(r)
+			}
+		}
+	}()
+
+	go func() {
+		for {
+			p.Send(&testuser.PongResponse{Data:"pong"})
+			time.Sleep(time.Second)
+		}
+	}()
+
+
+
+	select {
+
+	}
+	return nil
+}
+
 
 
 func (u *UserEcho)Echo(a testuser.EchoService_EchoServer) error {

@@ -51,4 +51,33 @@ func Test_main(t *testing.T) {
 
 }
 
+func Test_Pingpong(t *testing.T) {
+	conn,_ := grpc.Dial(ADDRESS,grpc.WithInsecure())
+	ppclient := testuser.NewEchoServiceClient(conn)
+	stream,_ := ppclient.PingPong(context.TODO())
+	c1 := make(chan string,1)
+	go func() {
+		for {
+			data,_ := stream.Recv()
+			if data != nil{
+				c1 <- data.Data
+				fmt.Println(data)
+			}
+		}
+	}()
 
+	go func() {
+		for {
+			select {
+			case bdata := <- c1:
+				stream.Send(&testuser.PingRequest{Data:bdata})
+				time.Sleep(time.Second)
+			}
+		}
+	}()
+
+	c1 <- "ping"
+	select {
+
+	}
+}

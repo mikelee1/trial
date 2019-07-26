@@ -23,6 +23,82 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
+type PingRequest struct {
+	Data                 string   `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *PingRequest) Reset()         { *m = PingRequest{} }
+func (m *PingRequest) String() string { return proto.CompactTextString(m) }
+func (*PingRequest) ProtoMessage()    {}
+func (*PingRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_user_7d5134ca956228ec, []int{0}
+}
+func (m *PingRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_PingRequest.Unmarshal(m, b)
+}
+func (m *PingRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_PingRequest.Marshal(b, m, deterministic)
+}
+func (dst *PingRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PingRequest.Merge(dst, src)
+}
+func (m *PingRequest) XXX_Size() int {
+	return xxx_messageInfo_PingRequest.Size(m)
+}
+func (m *PingRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_PingRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_PingRequest proto.InternalMessageInfo
+
+func (m *PingRequest) GetData() string {
+	if m != nil {
+		return m.Data
+	}
+	return ""
+}
+
+type PongResponse struct {
+	Data                 string   `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
+}
+
+func (m *PongResponse) Reset()         { *m = PongResponse{} }
+func (m *PongResponse) String() string { return proto.CompactTextString(m) }
+func (*PongResponse) ProtoMessage()    {}
+func (*PongResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_user_7d5134ca956228ec, []int{1}
+}
+func (m *PongResponse) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_PongResponse.Unmarshal(m, b)
+}
+func (m *PongResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_PongResponse.Marshal(b, m, deterministic)
+}
+func (dst *PongResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_PongResponse.Merge(dst, src)
+}
+func (m *PongResponse) XXX_Size() int {
+	return xxx_messageInfo_PongResponse.Size(m)
+}
+func (m *PongResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_PongResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_PongResponse proto.InternalMessageInfo
+
+func (m *PongResponse) GetData() string {
+	if m != nil {
+		return m.Data
+	}
+	return ""
+}
+
 type EchoRequest struct {
 	A                    int32    `protobuf:"varint,2,opt,name=a,proto3" json:"a,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
@@ -34,7 +110,7 @@ func (m *EchoRequest) Reset()         { *m = EchoRequest{} }
 func (m *EchoRequest) String() string { return proto.CompactTextString(m) }
 func (*EchoRequest) ProtoMessage()    {}
 func (*EchoRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_9550b0c78674240f, []int{0}
+	return fileDescriptor_user_7d5134ca956228ec, []int{2}
 }
 func (m *EchoRequest) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_EchoRequest.Unmarshal(m, b)
@@ -72,7 +148,7 @@ func (m *EchoResponse) Reset()         { *m = EchoResponse{} }
 func (m *EchoResponse) String() string { return proto.CompactTextString(m) }
 func (*EchoResponse) ProtoMessage()    {}
 func (*EchoResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_user_9550b0c78674240f, []int{1}
+	return fileDescriptor_user_7d5134ca956228ec, []int{3}
 }
 func (m *EchoResponse) XXX_Unmarshal(b []byte) error {
 	return xxx_messageInfo_EchoResponse.Unmarshal(m, b)
@@ -100,6 +176,8 @@ func (m *EchoResponse) GetB() int32 {
 }
 
 func init() {
+	proto.RegisterType((*PingRequest)(nil), "testuser.PingRequest")
+	proto.RegisterType((*PongResponse)(nil), "testuser.PongResponse")
 	proto.RegisterType((*EchoRequest)(nil), "testuser.EchoRequest")
 	proto.RegisterType((*EchoResponse)(nil), "testuser.EchoResponse")
 }
@@ -117,6 +195,7 @@ const _ = grpc.SupportPackageIsVersion4
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type EchoServiceClient interface {
 	Echo(ctx context.Context, opts ...grpc.CallOption) (EchoService_EchoClient, error)
+	PingPong(ctx context.Context, opts ...grpc.CallOption) (EchoService_PingPongClient, error)
 }
 
 type echoServiceClient struct {
@@ -158,9 +237,41 @@ func (x *echoServiceEchoClient) Recv() (*EchoResponse, error) {
 	return m, nil
 }
 
+func (c *echoServiceClient) PingPong(ctx context.Context, opts ...grpc.CallOption) (EchoService_PingPongClient, error) {
+	stream, err := c.cc.NewStream(ctx, &_EchoService_serviceDesc.Streams[1], "/testuser.EchoService/PingPong", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &echoServicePingPongClient{stream}
+	return x, nil
+}
+
+type EchoService_PingPongClient interface {
+	Send(*PingRequest) error
+	Recv() (*PongResponse, error)
+	grpc.ClientStream
+}
+
+type echoServicePingPongClient struct {
+	grpc.ClientStream
+}
+
+func (x *echoServicePingPongClient) Send(m *PingRequest) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *echoServicePingPongClient) Recv() (*PongResponse, error) {
+	m := new(PongResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // EchoServiceServer is the server API for EchoService service.
 type EchoServiceServer interface {
 	Echo(EchoService_EchoServer) error
+	PingPong(EchoService_PingPongServer) error
 }
 
 func RegisterEchoServiceServer(s *grpc.Server, srv EchoServiceServer) {
@@ -193,6 +304,32 @@ func (x *echoServiceEchoServer) Recv() (*EchoRequest, error) {
 	return m, nil
 }
 
+func _EchoService_PingPong_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(EchoServiceServer).PingPong(&echoServicePingPongServer{stream})
+}
+
+type EchoService_PingPongServer interface {
+	Send(*PongResponse) error
+	Recv() (*PingRequest, error)
+	grpc.ServerStream
+}
+
+type echoServicePingPongServer struct {
+	grpc.ServerStream
+}
+
+func (x *echoServicePingPongServer) Send(m *PongResponse) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *echoServicePingPongServer) Recv() (*PingRequest, error) {
+	m := new(PingRequest)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 var _EchoService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "testuser.EchoService",
 	HandlerType: (*EchoServiceServer)(nil),
@@ -204,21 +341,30 @@ var _EchoService_serviceDesc = grpc.ServiceDesc{
 			ServerStreams: true,
 			ClientStreams: true,
 		},
+		{
+			StreamName:    "PingPong",
+			Handler:       _EchoService_PingPong_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
+		},
 	},
 	Metadata: "user.proto",
 }
 
-func init() { proto.RegisterFile("user.proto", fileDescriptor_user_9550b0c78674240f) }
+func init() { proto.RegisterFile("user.proto", fileDescriptor_user_7d5134ca956228ec) }
 
-var fileDescriptor_user_9550b0c78674240f = []byte{
-	// 133 bytes of a gzipped FileDescriptorProto
+var fileDescriptor_user_7d5134ca956228ec = []byte{
+	// 188 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0xe2, 0x2a, 0x2d, 0x4e, 0x2d,
-	0xd2, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0xe2, 0x28, 0x49, 0x2d, 0x2e, 0x01, 0xf1, 0x95, 0xa4,
-	0xb9, 0xb8, 0x5d, 0x93, 0x33, 0xf2, 0x83, 0x52, 0x0b, 0x4b, 0x53, 0x8b, 0x4b, 0x84, 0x78, 0xb8,
-	0x18, 0x13, 0x25, 0x98, 0x14, 0x18, 0x35, 0x58, 0x83, 0x18, 0x13, 0x95, 0x64, 0xb8, 0x78, 0x20,
-	0x92, 0xc5, 0x05, 0xf9, 0x79, 0xc5, 0xa9, 0x20, 0xd9, 0x24, 0x98, 0x6c, 0x92, 0x91, 0x17, 0x44,
-	0x6b, 0x70, 0x6a, 0x51, 0x59, 0x66, 0x72, 0xaa, 0x90, 0x35, 0x17, 0x0b, 0x88, 0x2b, 0x24, 0xaa,
-	0x07, 0x33, 0x5c, 0x0f, 0xc9, 0x64, 0x29, 0x31, 0x74, 0x61, 0x88, 0x99, 0x4a, 0x0c, 0x1a, 0x8c,
-	0x06, 0x8c, 0x49, 0x6c, 0x60, 0x77, 0x19, 0x03, 0x02, 0x00, 0x00, 0xff, 0xff, 0x64, 0x4e, 0x4d,
-	0xa2, 0xa5, 0x00, 0x00, 0x00,
+	0xd2, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0xe2, 0x28, 0x49, 0x2d, 0x2e, 0x01, 0xf1, 0x95, 0x14,
+	0xb9, 0xb8, 0x03, 0x32, 0xf3, 0xd2, 0x83, 0x52, 0x0b, 0x4b, 0x53, 0x8b, 0x4b, 0x84, 0x84, 0xb8,
+	0x58, 0x52, 0x12, 0x4b, 0x12, 0x25, 0x98, 0x14, 0x18, 0x35, 0x38, 0x83, 0xc0, 0x6c, 0x25, 0x25,
+	0x2e, 0x9e, 0x80, 0x7c, 0x90, 0x92, 0xe2, 0x82, 0xfc, 0xbc, 0xe2, 0x54, 0xac, 0x6a, 0xa4, 0xb9,
+	0xb8, 0x5d, 0x93, 0x33, 0xf2, 0x61, 0xc6, 0xf0, 0x70, 0x31, 0x42, 0xe4, 0x59, 0x83, 0x18, 0x13,
+	0x95, 0x64, 0xb8, 0x78, 0x20, 0x92, 0x50, 0x03, 0x78, 0xb8, 0x18, 0x93, 0x60, 0xb2, 0x49, 0x46,
+	0xdd, 0x8c, 0x10, 0xbd, 0xc1, 0xa9, 0x45, 0x65, 0x99, 0xc9, 0xa9, 0x42, 0xd6, 0x5c, 0x2c, 0x20,
+	0xae, 0x90, 0xa8, 0x1e, 0xcc, 0x91, 0x7a, 0x48, 0x46, 0x4b, 0x89, 0xa1, 0x0b, 0x43, 0x0c, 0x55,
+	0x62, 0xd0, 0x60, 0x34, 0x60, 0x14, 0xb2, 0xe7, 0xe2, 0x00, 0x79, 0x07, 0xe4, 0x5e, 0x64, 0x03,
+	0x90, 0xbc, 0x88, 0x6c, 0x00, 0xb2, 0xb7, 0x20, 0x06, 0x24, 0xb1, 0x81, 0x03, 0xc8, 0x18, 0x10,
+	0x00, 0x00, 0xff, 0xff, 0xc4, 0x5d, 0x6e, 0x22, 0x2e, 0x01, 0x00, 0x00,
 }
