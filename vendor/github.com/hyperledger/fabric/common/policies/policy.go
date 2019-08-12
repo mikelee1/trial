@@ -10,13 +10,12 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/golang/protobuf/proto"
 	"github.com/hyperledger/fabric/common/flogging"
 	cb "github.com/hyperledger/fabric/protos/common"
-
-	"github.com/golang/protobuf/proto"
 	"github.com/hyperledger/fabric/protos/msp"
-	"github.com/op/go-logging"
 	"github.com/pkg/errors"
+	"go.uber.org/zap/zapcore"
 )
 
 const (
@@ -248,7 +247,7 @@ type policyLogger struct {
 }
 
 func (pl *policyLogger) Evaluate(signatureSet []*cb.SignedData) error {
-	if logger.IsEnabledFor(logging.DEBUG) {
+	if logger.IsEnabledFor(zapcore.DebugLevel) {
 		logger.Debugf("== Evaluating %T Policy %s ==", pl.policy, pl.policyName)
 		defer logger.Debugf("== Done Evaluating %T Policy %s", pl.policy, pl.policyName)
 	}
@@ -272,9 +271,7 @@ func (pm *ManagerImpl) GetPolicy(id string) (Policy, bool) {
 
 	if strings.HasPrefix(id, PathSeparator) {
 		if !strings.HasPrefix(id, PathSeparator+pm.path) {
-			if logger.IsEnabledFor(logging.DEBUG) {
-				logger.Debugf("Requested absolute policy %s from %s, returning rejectAll", id, pm.path)
-			}
+			logger.Debugf("Requested absolute policy %s from %s, returning rejectAll", id, pm.path)
 			return rejectPolicy(id), false
 		}
 		// strip off the leading slash, the path, and the trailing slash
@@ -285,9 +282,7 @@ func (pm *ManagerImpl) GetPolicy(id string) (Policy, bool) {
 
 	policy, ok := pm.policies[relpath]
 	if !ok {
-		if logger.IsEnabledFor(logging.DEBUG) {
-			logger.Debugf("Returning dummy reject all policy because %s could not be found in %s/%s", id, pm.path, relpath)
-		}
+		logger.Debugf("Returning dummy reject all policy because %s could not be found in %s/%s", id, pm.path, relpath)
 		return rejectPolicy(relpath), false
 	}
 

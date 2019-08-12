@@ -62,6 +62,7 @@ func main() {
 		panic(err)
 	}
 	cli.NegotiateAPIVersion(ctx)
+
 	logger.Info("start ContainerList")
 	//获取容器列表
 	conlist, err := cli.ContainerList(ctx, types.ContainerListOptions{
@@ -85,38 +86,6 @@ func main() {
 		}
 	}
 
-	peers := []service.PeerPorts{
-		service.PeerPorts{
-			Main:      30031,
-			Chaincode: 30032,
-			Event:     30033,
-		},
-		service.PeerPorts{
-			Main:      30034,
-			Chaincode: 30035,
-			Event:     30036,
-		},
-	}
-	orderer0 := service.OrdererPorts{
-		Main:  30020,
-		Raft:  30021,
-		Debug: 30022,
-	}
-	setupReq := service.SetupRequest{
-		OrgName:      "baas1",
-		PeerPorts:    peers,
-		OrdererPorts: []service.OrdererPorts{orderer0},
-		Consensus:    "kafka",
-	}
-	bi := service.GetBuildInfo(&setupReq)
-	//logger.Info(bi.String())
-	initiator, err := createInitiator()
-	if err != nil {
-		logger.Error(err)
-		return
-	}
-	block, err := service.CreateGenesisBlockData(initiator.orgMSP, initiator.orgCA, bi, kafkas, bi.Consensus)
-	logger.Info(string(block))
 
 	resp, err := cli.ContainerCreate(ctx, &container.Config{
 		//Env:peerEnv,

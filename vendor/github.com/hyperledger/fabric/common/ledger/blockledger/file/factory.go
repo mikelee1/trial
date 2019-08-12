@@ -17,12 +17,12 @@ limitations under the License.
 package fileledger
 
 import (
+	"github.com/hyperledger/fabric/common/ledger/datadump"
 	"sync"
 
 	"github.com/hyperledger/fabric/common/ledger/blkstorage"
 	"github.com/hyperledger/fabric/common/ledger/blkstorage/fsblkstorage"
 	"github.com/hyperledger/fabric/common/ledger/blockledger"
-	"github.com/hyperledger/fabric/common/ledger/datadump"
 )
 
 type fileLedgerFactory struct {

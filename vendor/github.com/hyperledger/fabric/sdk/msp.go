@@ -90,15 +90,16 @@ func readFiles(dir string) (map[string][]byte, error) {
 
 func writeFiles(dir string, files map[string][]byte) error {
 	_, err := os.Stat(dir)
-	if err == nil {
-		return errors.Errorf("directory [%s] already exists", dir)
-	}
-	if !os.IsNotExist(err) {
-		return err
-	}
-	if err = os.MkdirAll(dir, os.ModePerm); err != nil {
-		return err
-
+	if err != nil {
+		//文件夹不存在，创建
+		if !os.IsNotExist(err) {
+			return err
+		}
+		if err = os.MkdirAll(dir, os.ModePerm); err != nil {
+			return err
+		}
+	} else {
+		logger.Warning("directory [%s] already exists", dir)
 	}
 	for name, content := range files {
 		if err = ioutil.WriteFile(path.Join(dir, name), content, os.ModePerm); err != nil {
@@ -152,6 +153,34 @@ func (ca *CA) MSPBytes(mspID string) ([]byte, error) {
 	return json.Marshal(bundle)
 }
 
+// GetMSPBytesForDir returns the bytes of specific folder
+func GetMSPBytesForDir(baseDir, orgname string) ([]byte, error) {
+	bundle := &cafiles{}
+	bundle.Org = orgname
+	bundle.MSPID = orgname
+	mspFold := path.Join(baseDir, orgname)
+	var err error
+	bundle.AdminCerts, err = readFiles(path.Join(mspFold, admincertsFold))
+	if err != nil {
+		logger.Error("Error reading admincerts", err)
+		return nil, err
+	}
+
+	bundle.CACerts, err = readFiles(path.Join(mspFold, cacertsFold))
+	if err != nil {
+		logger.Error("Error reading cacerts", err)
+		return nil, err
+	}
+
+	bundle.TLSCACerts, err = readFiles(path.Join(mspFold, tlscertsFold))
+	if err != nil {
+		logger.Error("Error reading tlscacerts", err)
+		return nil, err
+	}
+
+	return json.Marshal(bundle)
+}
+
 // WriteMSPDir read msp bytes and writes msp certs into directory,
 // and returns the mspPath and mspID
 func WriteMSPDir(baseDir string, data []byte) (string, string, error) {
@@ -165,16 +194,19 @@ func WriteMSPDir(baseDir string, data []byte) (string, string, error) {
 	dir := path.Join(baseDir, bundle.MSPID)
 
 	_, err = os.Stat(dir)
-	if err == nil {
-		return "", "", errors.Errorf("directory [%s] already exists", dir)
-	}
-
-	if !os.IsNotExist(err) {
-		return "", "", err
-	}
-
-	if err = os.MkdirAll(dir, os.ModePerm); err != nil {
-		return "", "", err
+	// if err == nil {
+	// 	return "", "", errors.Errorf("directory [%s] already exists", dir)
+	// }
+	if err != nil {
+		//文件夹不存在，创建
+		if !os.IsNotExist(err) {
+			return "", "", err
+		}
+		if err = os.MkdirAll(dir, os.ModePerm); err != nil {
+			return "", "", err
+		}
+	} else {
+		logger.Warning("directory [%s] already exists", dir)
 	}
 
 	if err = writeFiles(path.Join(dir, admincertsFold), bundle.AdminCerts); err != nil {

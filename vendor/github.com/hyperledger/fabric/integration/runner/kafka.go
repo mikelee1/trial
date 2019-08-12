@@ -23,7 +23,7 @@ import (
 
 const KafkaDefaultImage = "hyperledger/fabric-kafka:latest"
 
-// Kafka manages the execution of an instance of a dockerized CounchDB
+// Kafka manages the execution of an instance of a dockerized CouchDB
 // for tests.
 type Kafka struct {
 	Client        *docker.Client
@@ -44,7 +44,6 @@ type Kafka struct {
 	ZooKeeperConnect             string
 	ReplicaFetchResponseMaxBytes int
 	AdvertisedListeners          string
-	LogLevel                     string
 
 	ErrorStream  io.Writer
 	OutputStream io.Writer
@@ -112,10 +111,6 @@ func (k *Kafka) Run(sigCh <-chan os.Signal, ready chan<- struct{}) error {
 		k.ReplicaFetchResponseMaxBytes = 10485760
 	}
 
-	if k.LogLevel == "" {
-		k.LogLevel = "warn"
-	}
-
 	containerOptions := docker.CreateContainerOptions{
 		Name: k.Name,
 		Config: &docker.Config{
@@ -125,7 +120,7 @@ func (k *Kafka) Run(sigCh <-chan os.Signal, ready chan<- struct{}) error {
 		HostConfig: &docker.HostConfig{
 			AutoRemove: true,
 			PortBindings: map[docker.Port][]docker.PortBinding{
-				k.ContainerPort: []docker.PortBinding{{
+				k.ContainerPort: {{
 					HostIP:   k.HostIP,
 					HostPort: strconv.Itoa(k.HostPort),
 				}},
@@ -141,7 +136,7 @@ func (k *Kafka) Run(sigCh <-chan os.Signal, ready chan<- struct{}) error {
 
 		containerOptions.NetworkingConfig = &docker.NetworkingConfig{
 			EndpointsConfig: map[string]*docker.EndpointConfig{
-				k.NetworkName: &docker.EndpointConfig{
+				k.NetworkName: {
 					NetworkID: nw.ID,
 				},
 			},
@@ -211,6 +206,7 @@ func (k *Kafka) Run(sigCh <-chan os.Signal, ready chan<- struct{}) error {
 func (k *Kafka) buildEnv() []string {
 	env := []string{
 		"KAFKA_LOG_RETENTION_MS=-1",
+		//"KAFKA_AUTO_CREATE_TOPICS_ENABLE=false",
 		fmt.Sprintf("KAFKA_MESSAGE_MAX_BYTES=%d", k.MessageMaxBytes),
 		fmt.Sprintf("KAFKA_REPLICA_FETCH_MAX_BYTES=%d", k.ReplicaFetchMaxBytes),
 		fmt.Sprintf("KAFKA_UNCLEAN_LEADER_ELECTION_ENABLE=%s", strconv.FormatBool(k.UncleanLeaderElectionEnable)),

@@ -17,11 +17,12 @@ limitations under the License.
 package common
 
 import (
+	"context"
+
 	"github.com/golang/protobuf/proto"
 	"github.com/golang/protobuf/ptypes/empty"
 	cb "github.com/hyperledger/fabric/protos/common"
 	pb "github.com/hyperledger/fabric/protos/peer"
-	context "golang.org/x/net/context"
 	grpc "google.golang.org/grpc"
 )
 
@@ -101,4 +102,14 @@ func (m *mockAdminClient) SetModuleLogLevel(ctx context.Context, env *cb.Envelop
 
 func (m *mockAdminClient) RevertLogLevels(ctx context.Context, in *cb.Envelope, opts ...grpc.CallOption) (*empty.Empty, error) {
 	return &empty.Empty{}, m.err
+}
+
+func (m *mockAdminClient) GetLogSpec(ctx context.Context, in *cb.Envelope, opts ...grpc.CallOption) (*pb.LogSpecResponse, error) {
+	response := &pb.LogSpecResponse{LogSpec: "info"}
+	return response, m.err
+}
+
+func (m *mockAdminClient) SetLogSpec(ctx context.Context, in *cb.Envelope, opts ...grpc.CallOption) (*pb.LogSpecResponse, error) {
+	response := &pb.LogSpecResponse{LogSpec: "info"}
+	return response, m.err
 }

@@ -13,6 +13,79 @@ var (
 	defaultESCC = []byte("escc")
 	defaultVSCC = []byte("vscc")
 )
+// InstantiateChaincode ...
+func (client *Client) UpgradeChaincode(chainID string, name string, version string, input [][]byte, policy string, collection []byte, endorser *Endpoint, casters []*Endpoint) error {
+	return upgradeChaincode(chainID, name, version, input, policy, collection, endorser, casters, client.signer)
+}
+
+func upgradeChaincode(chainID string, name string, version string, input [][]byte, policy string, collection []byte, endorser *Endpoint, casters []*Endpoint, signer msp.SigningIdentity) error {
+	cds := createChaincodeDeploymentSpec(name, version, "", nil, input)
+	creator, err := signer.Serialize()
+	if err != nil {
+		logger.Error("Error serializing", err)
+		return err
+	}
+
+	// policy
+	var policyBytes []byte
+	if policy != "" {
+		p, err := cauthdsl.FromString(policy)
+		if err != nil {
+			return errors.Errorf("invalid policy %s", policy)
+		}
+		policyBytes = utils.MarshalOrPanic(p)
+	}
+
+	// collection
+	var collectionBytes []byte
+	if collection != nil {
+		collectionBytes, err = chaincode.GetCollectionConfigFromBytes(collection)
+		if err != nil {
+			return errors.Errorf("get collection config from bytes error: %s", err)
+		}
+	}
+
+	prop, _, err := utils.CreateUpgradeProposalFromCDS(chainID, cds, creator, policyBytes, defaultESCC, defaultVSCC, collectionBytes)
+	if err != nil {
+		logger.Error("Error creating deployProposal", err)
+		return err
+	}
+	propBytes, err := utils.GetBytesProposal(prop)
+	if err != nil {
+		logger.Error("Error marshaling proposal", err)
+		return err
+	}
+
+	sig, err := signer.Sign(propBytes)
+	if err != nil {
+		logger.Error("Error signning proposal", err)
+		return err
+	}
+
+	resps, err := Endorse(propBytes, sig, []*Endpoint{endorser})
+	if err != nil {
+		logger.Error("Error endorsing", err)
+		return err
+	}
+	payload, err := CreateChaincodeEnvelopeBytes(prop, resps)
+	if err != nil {
+		logger.Error("Error creating ChaincodeEnvelopeBytes", err)
+		return err
+
+	}
+	signature, err := signer.Sign(payload)
+	if err != nil {
+		logger.Error("Error signning payload", err)
+		return err
+	}
+	for _, caster := range casters {
+		if err = Broadcast(payload, signature, caster); err == nil {
+			return nil
+		}
+		logger.Error("Error broadcasting", err)
+	}
+	return errors.New("failed broadcasting after try all orderers")
+}
 
 // InstantiateChaincode ...
 func (client *Client) InstantiateChaincode(chainID string, name string, version string, input [][]byte, policy string, collection []byte, endorser *Endpoint, casters []*Endpoint) error {

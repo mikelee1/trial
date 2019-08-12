@@ -79,8 +79,8 @@ type NetworkMember struct {
 }
 
 // String returns a string representation of the NetworkMember
-func (n *NetworkMember) String() string {
-	return fmt.Sprintf("Endpoint: %s, InternalEndpoint: %s, PKI-ID: %v, Metadata: %v", n.Endpoint, n.InternalEndpoint, n.PKIid, n.Metadata)
+func (n NetworkMember) String() string {
+	return fmt.Sprintf("Endpoint: %s, InternalEndpoint: %s, PKI-ID: %s, Metadata: %x", n.Endpoint, n.InternalEndpoint, n.PKIid, n.Metadata)
 }
 
 // PreferredEndpoint computes the endpoint to connect to,
@@ -105,7 +105,6 @@ type identifier func() (*PeerIdentification, error)
 
 // Discovery is the interface that represents a discovery module
 type Discovery interface {
-
 	// Lookup returns a network member, or nil if not found
 	Lookup(PKIID common.PKIidType) *NetworkMember
 
@@ -167,6 +166,15 @@ func (members Members) Filter(filter func(member NetworkMember) bool) Members {
 		if filter(member) {
 			res = append(res, member)
 		}
+	}
+	return res
+}
+
+// Map invokes the given function to every NetworkMember among the Members
+func (members Members) Map(f func(member NetworkMember) NetworkMember) Members {
+	var res Members
+	for _, m := range members {
+		res = append(res, f(m))
 	}
 	return res
 }

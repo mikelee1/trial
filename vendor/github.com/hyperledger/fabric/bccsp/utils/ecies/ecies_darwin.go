@@ -23,13 +23,13 @@ import (
 	"crypto/elliptic"
 	"crypto/hmac"
 	"crypto/rand"
-	"errors"
-	"io"
-	"crypto/subtle"
-	"fmt"
-	"crypto/x509"
 	"crypto/sha256"
+	"crypto/subtle"
+	"crypto/x509"
+	"errors"
+	"fmt"
 	"golang.org/x/crypto/hkdf"
+	"io"
 )
 
 func aesEncrypt(key, plain []byte) ([]byte, error) {
@@ -67,12 +67,11 @@ func aesDecrypt(key, text []byte) ([]byte, error) {
 	return plain, nil
 }
 
-
-func eciesGenerateKey(curve elliptic.Curve,rand io.Reader) (*ecdsa.PrivateKey, error) {
+func eciesGenerateKey(curve elliptic.Curve, rand io.Reader) (*ecdsa.PrivateKey, error) {
 	return ecdsa.GenerateKey(curve, rand)
 }
 
-func eciesEncrypt(rand io.Reader, pub *ecdsa.PublicKey, s1, s2 []byte, plain []byte,usesm bool) ([]byte, error) {
+func eciesEncrypt(rand io.Reader, pub *ecdsa.PublicKey, s1, s2 []byte, plain []byte, usesm bool) ([]byte, error) {
 	params := pub.Curve
 
 	hash := sha256.New
@@ -133,7 +132,7 @@ func eciesEncrypt(rand io.Reader, pub *ecdsa.PublicKey, s1, s2 []byte, plain []b
 	return ciphertext, nil
 }
 
-func eciesDecrypt(priv *ecdsa.PrivateKey, s1, s2 []byte, ciphertext []byte,usesm bool) ([]byte, error) {
+func eciesDecrypt(priv *ecdsa.PrivateKey, s1, s2 []byte, ciphertext []byte, usesm bool) ([]byte, error) {
 	params := priv.Curve
 	hash := sha256.New
 
@@ -199,7 +198,7 @@ func eciesDecrypt(priv *ecdsa.PrivateKey, s1, s2 []byte, ciphertext []byte,usesm
 
 	// Use the tagging operation of the MAC scheme to compute
 	// the tag D on EM || s2 and then compare
-	mac := hmac.New(hash,kM)
+	mac := hmac.New(hash, kM)
 	mac.Write(ciphertext[mStart:mEnd])
 	if len(s2) > 0 {
 		mac.Write(s2)
@@ -220,22 +219,23 @@ func eciesDecrypt(priv *ecdsa.PrivateKey, s1, s2 []byte, ciphertext []byte,usesm
 	return plaintext, err
 }
 
-func EciesEncrypt(pub *ecdsa.PublicKey,msg []byte,usesm bool) ([]byte,error){
-	return eciesEncrypt(rand.Reader,pub,nil,nil,msg,usesm)
+func EciesEncrypt(pub *ecdsa.PublicKey, msg []byte, usesm bool) ([]byte, error) {
+	return eciesEncrypt(rand.Reader, pub, nil, nil, msg, usesm)
 }
 
-func EciesDecrypt(priv *ecdsa.PrivateKey,ciphertext []byte,usesm bool) ([]byte,error){
-	return eciesDecrypt(priv,nil,nil,ciphertext,usesm)
+func EciesDecrypt(priv *ecdsa.PrivateKey, ciphertext []byte, usesm bool) ([]byte, error) {
+	return eciesDecrypt(priv, nil, nil, ciphertext, usesm)
 }
 
-func ParseECPrivateKey(kb []byte) (*ecdsa.PrivateKey,error){
+func ParseECPrivateKey(kb []byte) (*ecdsa.PrivateKey, error) {
 	return x509.ParseECPrivateKey(kb)
 }
 
-func ParseECPublicKey(kb []byte) (*ecdsa.PublicKey,error){
-	pub,err := x509.ParsePKIXPublicKey(kb)
-	return pub.(*ecdsa.PublicKey),err
+func ParseECPublicKey(kb []byte) (*ecdsa.PublicKey, error) {
+	pub, err := x509.ParsePKIXPublicKey(kb)
+	return pub.(*ecdsa.PublicKey), err
 }
+
 /*
 func main(){
 	//rand.Reader

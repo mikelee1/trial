@@ -17,12 +17,12 @@ package gm
 
 import (
 	"crypto/sha256"
-	"github.com/hyperledger/fabric/sm/sm4"
 	"github.com/hyperledger/fabric/bccsp"
+	"github.com/hyperledger/fabric/sm/sm4"
 )
 
 type sm4PrivateKey struct {
-	key	[]byte
+	key []byte
 }
 
 // Bytes converts this key to its byte representation,
@@ -54,27 +54,25 @@ func (k *sm4PrivateKey) Private() bool {
 // PublicKey returns the corresponding public key part of an asymmetric public/private key pair.
 // This method returns an error in symmetric key schemes.
 func (k *sm4PrivateKey) PublicKey() (bccsp.Key, error) {
-	return &sm4PrivateKey{key:k.key}, nil
+	return &sm4PrivateKey{key: k.key}, nil
 }
-
-
 
 type sm4Encryptor struct{}
 
-func (* sm4Encryptor) Encrypt(k bccsp.Key, plaintext []byte, opts bccsp.EncrypterOpts) (ciphertext []byte, err error) {
-	keyBytes,err := k.Bytes()
-	if err != nil{
-		return nil,err
+func (*sm4Encryptor) Encrypt(k bccsp.Key, plaintext []byte, opts bccsp.EncrypterOpts) (ciphertext []byte, err error) {
+	keyBytes, err := k.Bytes()
+	if err != nil {
+		return nil, err
 	}
-	return sm4.Encrypt(keyBytes,plaintext)
+	return sm4.Encrypt(keyBytes, plaintext)
 }
 
 type sm4Decryptor struct{}
 
 func (*sm4Decryptor) Decrypt(k bccsp.Key, ciphertext []byte, opts bccsp.DecrypterOpts) (plaintext []byte, err error) {
-	keyBytes,err := k.Bytes()
-	if err != nil{
-		return nil,err
+	keyBytes, err := k.Bytes()
+	if err != nil {
+		return nil, err
 	}
-	return sm4.Decrypt(keyBytes,ciphertext)
+	return sm4.Decrypt(keyBytes, ciphertext)
 }

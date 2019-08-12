@@ -1,13 +1,13 @@
 package gm
 
 import (
+	"github.com/hyperledger/fabric/bccsp"
+	"github.com/hyperledger/fabric/bccsp/utils/ecies"
+	"github.com/hyperledger/fabric/common/flogging"
+	"github.com/hyperledger/fabric/sm/sm3"
+	"github.com/pkg/errors"
 	"hash"
 	"reflect"
-	"github.com/pkg/errors"
-	"github.com/hyperledger/fabric/bccsp"
-	"github.com/hyperledger/fabric/sm/sm3"
-	"github.com/hyperledger/fabric/common/flogging"
-	"github.com/hyperledger/fabric/bccsp/utils/ecies"
 )
 
 var (
@@ -15,10 +15,10 @@ var (
 )
 
 type impl struct {
-	ks bccsp.KeyStore
+	ks            bccsp.KeyStore
 	keyImporters  map[reflect.Type]KeyImporter
-	signer *sm2Signer
-	verifier *sm2Signer
+	signer        *sm2Signer
+	verifier      *sm2Signer
 	keyGenerators map[reflect.Type]KeyGenerator
 	encryptors    map[reflect.Type]Encryptor
 	decryptors    map[reflect.Type]Decryptor
@@ -27,10 +27,10 @@ type impl struct {
 func New(keyStore bccsp.KeyStore) (bccsp.BCCSP, error) {
 
 	impl := &impl{
-			ks:keyStore,
-		signer:&sm2Signer{},
-			verifier:&sm2Signer{},
-		}
+		ks:       keyStore,
+		signer:   &sm2Signer{},
+		verifier: &sm2Signer{},
+	}
 	keyImporters := make(map[reflect.Type]KeyImporter)
 	keyImporters[reflect.TypeOf(&bccsp.ECDSAPKIXPublicKeyImportOpts{})] = &ecdsaPKIXPublicKeyImportOptsKeyImporter{}
 	keyImporters[reflect.TypeOf(&bccsp.ECDSAPrivateKeyImportOpts{})] = &ecdsaPrivateKeyImportOptsKeyImporter{}
@@ -69,9 +69,9 @@ func (csp *impl) KeyGen(opts bccsp.KeyGenOpts) (k bccsp.Key, err error) {
 
 	k, err = keyGenerator.KeyGen(opts)
 	if err != nil {
-		return nil, errors.Wrapf(err,"BCCSP Internal Failed generating key with opts [%v]", opts)
+		return nil, errors.Wrapf(err, "BCCSP Internal Failed generating key with opts [%v]", opts)
 	}
-	return k,nil
+	return k, nil
 }
 
 // KeyDeriv derives a key from k using opts.
@@ -98,7 +98,7 @@ func (csp *impl) KeyImport(raw interface{}, opts bccsp.KeyImportOpts) (k bccsp.K
 
 	k, err = keyImporter.KeyImport(raw, opts)
 	if err != nil {
-		return nil, errors.Wrapf(err,"BCCSP Internal Failed importing key with opts [%v]", opts)
+		return nil, errors.Wrapf(err, "BCCSP Internal Failed importing key with opts [%v]", opts)
 	}
 
 	// If the key is not Ephemeral, store it.
@@ -106,7 +106,7 @@ func (csp *impl) KeyImport(raw interface{}, opts bccsp.KeyImportOpts) (k bccsp.K
 		// Store the key
 		err = csp.ks.StoreKey(k)
 		if err != nil {
-			return nil, errors.Wrapf(err,"BCCSP Internal Failed storing imported key with opts [%v]", opts)
+			return nil, errors.Wrapf(err, "BCCSP Internal Failed storing imported key with opts [%v]", opts)
 		}
 	}
 
@@ -118,7 +118,7 @@ func (csp *impl) KeyImport(raw interface{}, opts bccsp.KeyImportOpts) (k bccsp.K
 func (csp *impl) GetKey(ski []byte) (k bccsp.Key, err error) {
 	k, err = csp.ks.GetKey(ski)
 	if err != nil {
-		return nil, errors.Wrapf(err,"BCCSP Internal Failed getting key for SKI [%v]", ski)
+		return nil, errors.Wrapf(err, "BCCSP Internal Failed getting key for SKI [%v]", ski)
 	}
 
 	return
@@ -130,13 +130,12 @@ func (csp *impl) Hash(msg []byte, opts bccsp.HashOpts) (digest []byte, err error
 	if opts == nil {
 		return nil, errors.Errorf("BCCSP BadRequest Invalid opts. It must not be nil.")
 	}
-	//logger.Debugf("[hzyangwenlong] this is gm Hash")
 	//直接调用sm3来进行hash
 	h := sm3.New()
 	h.Write(msg)
 	digest = h.Sum(nil)
 	//return []byte("hahahah"), nil
-	return digest,nil
+	return digest, nil
 }
 
 // GetHash returns and instance of hash.Hash using options opts.
@@ -156,8 +155,6 @@ func (csp *impl) GetHash(opts bccsp.HashOpts) (hash.Hash, error) {
 func (csp *impl) Sign(k bccsp.Key, digest []byte, opts bccsp.SignerOpts) (signature []byte, err error) {
 	// Validate arguments
 	//调用sm2的签名
-	//logger.Debugf("[hzyangwenlong] this is gm Sign")
-
 	if k == nil {
 		return nil, errors.Errorf("BCCSP BadRequest Invalid Key. It must not be nil.")
 	}
@@ -169,17 +166,15 @@ func (csp *impl) Sign(k bccsp.Key, digest []byte, opts bccsp.SignerOpts) (signat
 
 	signature, err = signer.Sign(k, digest, opts)
 	if err != nil {
-		return nil, errors.Wrapf(err,"BCCSP Internal Failed signing with opts [%v]", opts)
+		return nil, errors.Wrapf(err, "BCCSP Internal Failed signing with opts [%v]", opts)
 	}
 
 	return
-	//return []byte("hahahah"), nil
 }
 
 // Verify verifies signature against key k and digest
 func (csp *impl) Verify(k bccsp.Key, signature, digest []byte, opts bccsp.SignerOpts) (valid bool, err error) {
 	//用sm2的公钥来验证
-	//logger.Debugf("[hzyangwenlong] this is gm Verify")
 	// Validate arguments
 	if k == nil {
 		return false, errors.Errorf("BCCSP BadRequest Invalid Key. It must not be nil.")
@@ -195,7 +190,7 @@ func (csp *impl) Verify(k bccsp.Key, signature, digest []byte, opts bccsp.Signer
 
 	valid, err = verifier.Verify(k, signature, digest, opts)
 	if err != nil {
-		return false, errors.Wrapf(err,"BCCSP Internal Failed verifing with opts [%v]", opts)
+		return false, errors.Wrapf(err, "BCCSP Internal Failed verifing with opts [%v]", opts)
 	}
 
 	return
@@ -212,12 +207,12 @@ func (csp *impl) Encrypt(k bccsp.Key, plaintext []byte, opts bccsp.EncrypterOpts
 	encryptor, found := csp.encryptors[reflect.TypeOf(k)]
 	if !found {
 		//用sm2来进行对称加密，里面采用sm4加密，具体看ecies
-		keyBytes,_ := k.Bytes()
+		keyBytes, _ := k.Bytes()
 		key, err := ecies.ParseECPublicKey(keyBytes)
-		if err != nil{
-			return nil,err
+		if err != nil {
+			return nil, err
 		}
-		return ecies.EciesEncrypt(key,plaintext,true)
+		return ecies.EciesEncrypt(key, plaintext, true)
 	}
 
 	return encryptor.Encrypt(k, plaintext, opts)
@@ -235,18 +230,18 @@ func (csp *impl) Decrypt(k bccsp.Key, ciphertext []byte, opts bccsp.DecrypterOpt
 	decryptor, found := csp.decryptors[reflect.TypeOf(k)]
 	if !found {
 		//用sm2来进行对称解密，里面采用sm4解密，具体看ecies
-		keyBytes,_ := k.Bytes()
+		keyBytes, _ := k.Bytes()
 
-		key,err := ecies.ParseECPrivateKey(keyBytes)
-		if err != nil{
-			return nil,err
+		key, err := ecies.ParseECPrivateKey(keyBytes)
+		if err != nil {
+			return nil, err
 		}
-		return ecies.EciesDecrypt(key,ciphertext,true)
+		return ecies.EciesDecrypt(key, ciphertext, true)
 	}
 
 	plaintext, err = decryptor.Decrypt(k, ciphertext, opts)
 	if err != nil {
-		return nil, errors.Wrapf(err,"BCCSP Internal Failed decrypting with opts [%v]", opts)
+		return nil, errors.Wrapf(err, "BCCSP Internal Failed decrypting with opts [%v]", opts)
 	}
-	return 
+	return
 }

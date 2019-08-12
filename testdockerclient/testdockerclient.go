@@ -10,6 +10,7 @@ import (
 	"myproj/try/common/fmtstruct"
 	logger2 "myproj/try/common/logger"
 	"time"
+	"fmt"
 )
 
 var logger = &logging.Logger{}
@@ -17,8 +18,11 @@ var logger = &logging.Logger{}
 var (
 	containerName  = "test11"
 	host           = "http://192.168.9.82:2375"
-	standardCli, _ = client.NewClientWithOpts(client.WithHost(host))
-	fsouzaCli, _   = dc.NewClient(host)
+	//standardCli, _ = client.NewClientWithOpts(client.WithHost(host))
+	standardCli, _ = client.NewClientWithOpts(client.WithHost(host),client.WithTLSClientConfig("./testdockerclient/ca.pem", "./testdockerclient/client/cert.pem","./testdockerclient/client/key.pem"))
+	fsouzaCli, _   = dc.NewTLSClient(host,"./testdockerclient/client/cert.pem","./testdockerclient/client/key.pem","./testdockerclient/ca.pem")
+	//fsouzaCli, _   = dc.NewClient(host)
+
 )
 
 func init() {
@@ -35,9 +39,23 @@ func main() {
 		return
 	}
 
+	info,err := standardCli.Info(context.TODO())
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+	fmt.Println("---")
+	//fmt.Println(info.NCPU)
+	fmt.Println(fmtstruct.String(info))
+	fmt.Println("---")
+	_,err = fsouzaCli.InspectImage("alpine")
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+
 	//删除容器
 	for _, value := range conlist {
-		logger.Info(value.Names[0])
 		//删除test容器
 		if value.Names[0] == "/"+containerName {
 			err = fsouzaCli.RemoveContainer(dc.RemoveContainerOptions{
@@ -56,8 +74,21 @@ func main() {
 		Config: &dc.Config{
 			Image:      "alpine",
 			Tty:        true,
-			Cmd:        []string{"sh", "-c", "ls & sh"},
+			Cmd:        []string{"sh", "-c", "ls & touch 1.txt & sh"},
 			WorkingDir: "/home",
+			Volumes: map[string]struct{}{
+				"/var/hyperledger": struct {}{},
+				"/home": struct {}{},
+			},
+			Mounts:[]dc.Mount{
+				dc.Mount{
+					Source:"lee",
+					Destination:"/home",
+					RW:true,
+					Mode:"rprivate",
+					Driver:"rw",
+				},
+			},
 		},
 		HostConfig: &dc.HostConfig{
 			Binds: []string{
@@ -96,6 +127,7 @@ func main() {
 		return
 	}
 	logger.Info("unpause well")
+
 
 	//容器状态
 	logger.Error(resp.ID)

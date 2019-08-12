@@ -17,15 +17,17 @@ package gm
 
 import (
 	"bytes"
-	"crypto/ecdsa"
-	"encoding/hex"
-	"errors"
-	"fmt"
 	"io/ioutil"
 	"os"
-	"path/filepath"
-	"strings"
 	"sync"
+
+	"errors"
+	"strings"
+
+	"crypto/ecdsa"
+	"encoding/hex"
+	"fmt"
+	"path/filepath"
 
 	"github.com/hyperledger/fabric/bccsp"
 	"github.com/hyperledger/fabric/bccsp/utils"
@@ -72,7 +74,6 @@ type fileBasedKeyStore struct {
 func (ks *fileBasedKeyStore) Init(pwd []byte, path string, readOnly bool) error {
 	// Validate inputs
 	// pwd can be nil
-
 	if len(path) == 0 {
 		return errors.New("An invalid KeyStore path provided. Path cannot be an empty string.")
 	}
@@ -114,35 +115,28 @@ func (ks *fileBasedKeyStore) GetKey(ski []byte) (k bccsp.Key, err error) {
 	if len(ski) == 0 {
 		return nil, errors.New("Invalid SKI. Cannot be of zero length.")
 	}
-
+	fmt.Println("ski string: ",hex.EncodeToString(ski))
 	suffix := ks.getSuffix(hex.EncodeToString(ski))
-	// fmt.Printf("[hzyangwenlong] the ski is %v\n",hex.EncodeToString(ski))
-
+	fmt.Println("suffix: ",suffix)
 	switch suffix {
 	case "key":
 		// Load the key
-		key, err := ks.loadKey(hex.EncodeToString(ski))
+		_, err := ks.loadKey(hex.EncodeToString(ski))
 		if err != nil {
 			return nil, fmt.Errorf("Failed loading key [%x] [%s]", ski, err)
 		}
-		fmt.Printf("[hzyangwenlong] the key is %v\n", key)
 		return nil, nil
-		//return &aesPrivateKey{key, false}, nil
 	case "sk":
 		// Load the private key
 		key, raw, err := ks.loadPrivateKey(hex.EncodeToString(ski))
 		if err != nil {
 			return nil, fmt.Errorf("Failed loading secret key [%x] [%s]", ski, err)
 		}
-
 		switch key.(type) {
 		case *ecdsa.PrivateKey:
-			//return &ecdsaPrivateKey{key.(*ecdsa.PrivateKey)}, nil
 			return &sm2PrivateKey{privKey: key.(*ecdsa.PrivateKey), raw: raw}, nil
-			return nil, nil
 		default:
 			return nil, nil
-			//return nil, errors.New("Secret key type not recognized")
 		}
 	case "pk":
 		// Load the public key
@@ -153,11 +147,9 @@ func (ks *fileBasedKeyStore) GetKey(ski []byte) (k bccsp.Key, err error) {
 
 		switch key.(type) {
 		case *ecdsa.PublicKey:
-			//return &ecdsaPublicKey{key.(*ecdsa.PublicKey)}, nil
 			return &sm2PublicKey{key.(*ecdsa.PublicKey)}, nil
 		default:
 			return nil, nil
-			//return nil, errors.New("Public key type not recognized")
 		}
 	default:
 		return ks.searchKeystoreForSKI(ski)
@@ -181,7 +173,7 @@ func (ks *fileBasedKeyStore) StoreKey(k bccsp.Key) (err error) {
 func (ks *fileBasedKeyStore) searchKeystoreForSKI(ski []byte) (k bccsp.Key, err error) {
 
 	files, _ := ioutil.ReadDir(ks.path)
-	fmt.Println("[hzyangwenlong] the ks.path is ", ks.path)
+	fmt.Println("ks.path:",ks.path)
 	for _, f := range files {
 		if f.IsDir() {
 			continue
@@ -199,13 +191,10 @@ func (ks *fileBasedKeyStore) searchKeystoreForSKI(ski []byte) (k bccsp.Key, err 
 		switch key.(type) {
 		case *ecdsa.PrivateKey:
 			k = &sm2PrivateKey{privKey: key.(*ecdsa.PrivateKey), raw: raw}
-			//k = &ecdsaPrivateKey{key.(*ecdsa.PrivateKey)}
 			continue
 		default:
 			continue
 		}
-
-		fmt.Println("[hzyangwenlong] the k.SKI is ", k.SKI())
 
 		if !bytes.Equal(k.SKI(), ski) {
 			continue
@@ -286,7 +275,7 @@ func (ks *fileBasedKeyStore) storeKey(alias string, key []byte) error {
 func (ks *fileBasedKeyStore) loadPrivateKey(alias string) (interface{}, []byte, error) {
 	path := ks.getPathForAlias(alias, "sk")
 	logger.Debugf("Loading private key [%s] at [%s]...", alias, path)
-
+	fmt.Println("path: ",path)
 	raw, err := ioutil.ReadFile(path)
 	if err != nil {
 		logger.Errorf("Failed loading private key [%s]: [%s].", alias, err.Error())

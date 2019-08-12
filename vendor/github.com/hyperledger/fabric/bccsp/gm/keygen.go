@@ -23,7 +23,6 @@ import (
 	"github.com/hyperledger/fabric/sm/sm4"
 )
 
-
 type sm4KeyGenerator struct {
 }
 

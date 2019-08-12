@@ -17,7 +17,6 @@ limitations under the License.
 package gm
 
 import (
-
 	"github.com/hyperledger/fabric/bccsp"
 )
 
@@ -51,4 +50,3 @@ type Decryptor interface {
 	// The opts argument should be appropriate for the algorithm used.
 	Decrypt(k bccsp.Key, ciphertext []byte, opts bccsp.DecrypterOpts) (plaintext []byte, err error)
 }
-

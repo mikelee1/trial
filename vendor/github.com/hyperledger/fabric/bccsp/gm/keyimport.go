@@ -28,7 +28,6 @@ import (
 	"github.com/hyperledger/fabric/bccsp/utils"
 )
 
-
 type ecdsaPKIXPublicKeyImportOptsKeyImporter struct{}
 
 func (*ecdsaPKIXPublicKeyImportOptsKeyImporter) KeyImport(raw interface{}, opts bccsp.KeyImportOpts) (k bccsp.Key, err error) {
@@ -76,11 +75,11 @@ func (*ecdsaPrivateKeyImportOptsKeyImporter) KeyImport(raw interface{}, opts bcc
 		return nil, errors.New("Failed casting to ECDSA private key. Invalid raw material.")
 	}
 
-	dd,err := utils.PrivateKeyToPEM(ecdsaSK,[]byte(""))
-	if err != nil{
-		return nil,err
+	dd, err := utils.PrivateKeyToPEM(ecdsaSK, []byte(""))
+	if err != nil {
+		return nil, err
 	}
-	return &sm2PrivateKey{privKey:ecdsaSK,raw:dd}, nil
+	return &sm2PrivateKey{privKey: ecdsaSK, raw: dd}, nil
 }
 
 type ecdsaGoPublicKeyImportOptsKeyImporter struct{}
@@ -135,4 +134,3 @@ func (ki *sm4ImportKeyOptsKeyImporter) KeyImport(raw interface{}, opts bccsp.Key
 
 	return &sm4PrivateKey{utils.Clone(keyRaw)}, nil
 }
-

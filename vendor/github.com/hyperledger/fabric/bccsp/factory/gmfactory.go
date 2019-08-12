@@ -58,13 +58,6 @@ func (f *GMFactory) Get(config *FactoryOpts) (bccsp.BCCSP, error) {
 			ks = gm.NewDummyKeyStore()
 		}
 
-		//fks, err := gm.NewFileBasedKeyStore(nil, swOpts.FileKeystore.KeyStorePath, false)
-		//fks, err := gm.NewFileBasedKeyStore(nil, "", false)
-		/*
-			if err!=nil{
-				logger.Error("[hzyangwenlong] error !!!!! when Get GMFactory keystore",err)
-			}
-		*/
 		return gm.New(ks)
 	}
 

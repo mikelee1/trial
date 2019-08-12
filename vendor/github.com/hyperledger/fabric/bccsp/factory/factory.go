@@ -34,6 +34,9 @@ var (
 	// BCCSP Factories
 	bccspMap map[string]bccsp.BCCSP
 
+	// current used BCCSP Provider
+	currentProvider string
+
 	// factories' Sync on Initialization
 	factoriesInitOnce sync.Once
 	bootBCCSPInitOnce sync.Once
@@ -55,10 +58,14 @@ type BCCSPFactory interface {
 	Get(opts *FactoryOpts) (bccsp.BCCSP, error)
 }
 
+func GetCurrentBCCSPProvider() string {
+	return currentProvider
+}
+
 // GetDefault returns a non-ephemeral (long-term) BCCSP
 func GetDefault() bccsp.BCCSP {
 	if defaultBCCSP == nil {
-		logger.Warning("Before using BCCSP, please call InitFactories(). Falling back to bootBCCSP.")
+		logger.Debug("Before using BCCSP, please call InitFactories(). Falling back to bootBCCSP.")
 		bootBCCSPInitOnce.Do(func() {
 			var err error
 			f := &SWFactory{}
@@ -88,6 +95,7 @@ func initBCCSP(f BCCSPFactory, config *FactoryOpts) error {
 	}
 
 	logger.Debugf("Initialize BCCSP [%s]", f.Name())
+	currentProvider = f.Name()
 	bccspMap[f.Name()] = csp
 	return nil
 }

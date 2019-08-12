@@ -138,7 +138,7 @@ func SetupBCCSPKeystoreConfig(bccspConfig *factory.FactoryOpts, keystoreDir stri
 		if bccspConfig.SwOpts == nil {
 			bccspConfig.SwOpts = factory.GetDefaultOpts().SwOpts
 		}
-
+		fmt.Println(bccspConfig.SwOpts.FileKeystore)
 		// Only override the KeyStorePath if it was left empty
 		if bccspConfig.SwOpts.FileKeystore == nil ||
 			bccspConfig.SwOpts.FileKeystore.KeyStorePath == "" {
@@ -168,12 +168,10 @@ func GetLocalMspConfig(dir string, bccspConfig *factory.FactoryOpts, ID string) 
 	signcertDir := filepath.Join(dir, signcerts)
 	keystoreDir := filepath.Join(dir, keystore)
 	bccspConfig = SetupBCCSPKeystoreConfig(bccspConfig, keystoreDir)
-
 	err := factory.InitFactories(bccspConfig)
 	if err != nil {
 		return nil, errors.WithMessage(err, "could not initialize BCCSP Factories")
 	}
-
 	signcert, err := getPemMaterialFromDir(signcertDir)
 	if err != nil || len(signcert) == 0 {
 		return nil, errors.Wrapf(err, "could not load a valid signer certificate from directory %s", signcertDir)
@@ -291,7 +289,7 @@ func getMspConfig(dir string, ID string, sigid *msp.SigningIdentityInfo) (*msp.M
 
 		// Prepare NodeOUs
 		if configuration.NodeOUs != nil && configuration.NodeOUs.Enable {
-			mspLogger.Info("Loading NodeOUs")
+			mspLogger.Debug("Loading NodeOUs")
 			if configuration.NodeOUs.ClientOUIdentifier == nil || len(configuration.NodeOUs.ClientOUIdentifier.OrganizationalUnitIdentifier) == 0 {
 				return nil, errors.New("Failed loading NodeOUs. ClientOU must be different from nil.")
 			}
@@ -337,11 +335,11 @@ func getMspConfig(dir string, ID string, sigid *msp.SigningIdentityInfo) (*msp.M
 
 	// Compose FabricMSPConfig
 	fmspconf := &msp.FabricMSPConfig{
-		Admins:            admincert,
-		RootCerts:         cacerts,
-		IntermediateCerts: intermediatecerts,
-		SigningIdentity:   sigid,
-		Name:              ID,
+		Admins:                        admincert,
+		RootCerts:                     cacerts,
+		IntermediateCerts:             intermediatecerts,
+		SigningIdentity:               sigid,
+		Name:                          ID,
 		OrganizationalUnitIdentifiers: ouis,
 		RevocationList:                crls,
 		CryptoConfig:                  cryptoConfig,

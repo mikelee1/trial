@@ -1,34 +1,25 @@
 /*
-Copyright IBM Corp. 2016 All Rights Reserved.
+Copyright IBM Corp. All Rights Reserved.
 
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-		 http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
+SPDX-License-Identifier: Apache-2.0
 */
 
 package fsblkstorage
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"math"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
 
 	"github.com/davecgh/go-spew/spew"
-
 	"github.com/golang/protobuf/proto"
 	"github.com/hyperledger/fabric/common/flogging"
 	"github.com/hyperledger/fabric/common/ledger/blkstorage"
@@ -38,6 +29,7 @@ import (
 	"github.com/hyperledger/fabric/protos/common"
 	"github.com/hyperledger/fabric/protos/peer"
 	putil "github.com/hyperledger/fabric/protos/utils"
+	"github.com/pkg/errors"
 )
 
 var logger = flogging.MustGetLogger("fsblkstorage")
@@ -115,7 +107,7 @@ func newBlockfileMgr(id string, conf *Conf, indexConfig *blkstorage.IndexConfig,
 	rootDir := conf.getLedgerBlockDir(id)
 	_, err := util.CreateDirIfMissing(rootDir)
 	if err != nil {
-		panic(fmt.Sprintf("Error: %s", err))
+		panic(fmt.Sprintf("Error creating block storage root dir [%s]: %s", rootDir, err))
 	}
 	// Instantiate the manager, i.e. blockFileMgr structure
 	mgr := &blockfileMgr{rootDir: rootDir, conf: conf, db: indexStore, rwMutexs: rwMutexs}
@@ -129,13 +121,13 @@ func newBlockfileMgr(id string, conf *Conf, indexConfig *blkstorage.IndexConfig,
 	}
 	if cpInfo == nil {
 		logger.Info(`Getting block information from block storage`)
-		if cpInfo, err = constructCheckpointInfoFromBlockFiles(rootDir); err != nil {
+		if cpInfo, err = constructCheckpointInfoFromBlockFiles(rootDir, conf); err != nil {
 			panic(fmt.Sprintf("Could not build checkpoint info from block files: %s", err))
 		}
 		logger.Debugf("Info constructed by scanning the blocks dir = %s", spew.Sdump(cpInfo))
 	} else {
 		logger.Debug(`Synching block information from block storage (if needed)`)
-		syncCPInfoFromFS(rootDir, cpInfo)
+		syncCPInfoFromFS(rootDir, cpInfo, conf)
 	}
 	err = mgr.saveCurrentInfo(cpInfo, true)
 	if err != nil {
@@ -151,7 +143,6 @@ func newBlockfileMgr(id string, conf *Conf, indexConfig *blkstorage.IndexConfig,
 		}
 	}
 	mgr.dumpMutex = new(sync.Mutex)
-
 	//Open a writer to the file identified by the number and truncate it to only contain the latest block
 	// that was completely saved (file system, index, cpinfo, etc)
 	currentFileWriter, err := newBlockfileWriter(deriveBlockfilePath(rootDir, cpInfo.latestFileChunkSuffixNum))
@@ -208,11 +199,20 @@ func syncOldestFileNum(rootDir string) int {
 	}
 	for _, info := range infos {
 		var number int
+		if strings.HasSuffix(info.Name(), ".tar") {
+			continue
+		}
 		if _, err := fmt.Sscanf(info.Name(), blockFileFormatString, &number); err != nil {
-			return 0
+			continue
 		} else {
-			oldestFileNum = number
-			break
+			if number == 0 {
+				oldestFileNum = number
+				break
+			} else if oldestFileNum == 0 && number > 0 {
+				oldestFileNum = number
+			} else if number > 0 && number < oldestFileNum {
+				oldestFileNum = number
+			}
 		}
 	}
 	return oldestFileNum
@@ -222,7 +222,7 @@ func syncOldestFileNum(rootDir string) int {
 // the file of where the last block was written.  Also retrieves contains the
 // last block number that was written.  At init
 //checkpointInfo:latestFileChunkSuffixNum=[0], latestFileChunksize=[0], lastBlockNumber=[0]
-func syncCPInfoFromFS(rootDir string, cpInfo *checkpointInfo) {
+func syncCPInfoFromFS(rootDir string, cpInfo *checkpointInfo, conf *Conf) {
 	logger.Debugf("Starting checkpoint=%s", cpInfo)
 	//Checks if the file suffix of where the last block was written exists
 	filePath := deriveBlockfilePath(rootDir, cpInfo.latestFileChunkSuffixNum)
@@ -240,7 +240,7 @@ func syncCPInfoFromFS(rootDir string, cpInfo *checkpointInfo) {
 	}
 	//Scan the file system to verify that the checkpoint info stored in db is correct
 	_, endOffsetLastBlock, numBlocks, err := scanForLastCompleteBlock(
-		rootDir, cpInfo.latestFileChunkSuffixNum, int64(cpInfo.latestFileChunksize))
+		rootDir, conf, cpInfo.latestFileChunkSuffixNum, int64(cpInfo.latestFileChunksize))
 	if err != nil {
 		panic(fmt.Sprintf("Could not open current file for detecting last block in the file: %s", err))
 	}
@@ -295,20 +295,33 @@ func (mgr *blockfileMgr) moveToNextFile() {
 }
 
 func (mgr *blockfileMgr) addBlock(block *common.Block) error {
-	if block.Header.Number != mgr.getBlockchainInfo().Height {
-		return fmt.Errorf("Block number should have been %d but was %d", mgr.getBlockchainInfo().Height, block.Header.Number)
+	bcInfo := mgr.getBlockchainInfo()
+	if block.Header.Number != bcInfo.Height {
+		return errors.Errorf(
+			"block number should have been %d but was %d",
+			mgr.getBlockchainInfo().Height, block.Header.Number,
+		)
+	}
+
+	// Add the previous hash check - Though, not essential but may not be a bad idea to
+	// verify the field `block.Header.PreviousHash` present in the block.
+	// This check is a simple bytes comparison and hence does not cause any observable performance penalty
+	// and may help in detecting a rare scenario if there is any bug in the ordering service.
+	if !bytes.Equal(block.Header.PreviousHash, bcInfo.CurrentBlockHash) {
+		return errors.Errorf(
+			"unexpected Previous block hash. Expected PreviousHash = [%x], PreviousHash referred in the latest block= [%x]",
+			bcInfo.CurrentBlockHash, block.Header.PreviousHash,
+		)
 	}
 	blockBytes, info, err := serializeBlock(block)
 	if err != nil {
-		return fmt.Errorf("Error while serializing block: %s", err)
+		return errors.WithMessage(err, "error serializing block")
 	}
 	blockHash := block.Header.Hash()
 	//Get the location / offset where each transaction starts in the block and where the block ends
 	txOffsets := info.txOffsets
 	currentOffset := mgr.cpInfo.latestFileChunksize
-	if err != nil {
-		return fmt.Errorf("Error while serializing block: %s", err)
-	}
+
 	blockBytesLen := len(blockBytes)
 	blockBytesEncodedLen := proto.EncodeVarint(uint64(blockBytesLen))
 	totalBytesToAppend := blockBytesLen + len(blockBytesEncodedLen)
@@ -337,7 +350,7 @@ func (mgr *blockfileMgr) addBlock(block *common.Block) error {
 		if truncateErr != nil {
 			panic(fmt.Sprintf("Could not truncate current file to known size after an error during block append: %s", err))
 		}
-		return fmt.Errorf("Error while appending block to file: %s", err)
+		return errors.WithMessage(err, "error appending block to file")
 	}
 
 	//Update the checkpoint info with the results of adding the new block
@@ -355,7 +368,7 @@ func (mgr *blockfileMgr) addBlock(block *common.Block) error {
 		if truncateErr != nil {
 			panic(fmt.Sprintf("Error in truncating current file to known size after an error in saving checkpoint info: %s", err))
 		}
-		return fmt.Errorf("Error while saving current file info to db: %s", err)
+		return errors.WithMessage(err, "error saving current file info to db")
 	}
 
 	//Index block file location pointer updated with file suffex and offset for the new block
@@ -421,7 +434,7 @@ func (mgr *blockfileMgr) syncIndex() error {
 
 	//open a blockstream to the file location that was stored in the index
 	var stream *blockStream
-	if stream, err = newBlockStream(mgr.rootDir, startFileNum, int64(startOffset), endFileNum); err != nil {
+	if stream, err = newBlockStream(mgr.rootDir, mgr.conf, startFileNum, int64(startOffset), endFileNum); err != nil {
 		return err
 	}
 	var blockBytes []byte
@@ -432,7 +445,7 @@ func (mgr *blockfileMgr) syncIndex() error {
 			return err
 		}
 		if blockBytes == nil {
-			return fmt.Errorf("block bytes for block num = [%d] should not be nil here. The indexes for the block are already present",
+			return errors.Errorf("block bytes for block num = [%d] should not be nil here. The indexes for the block are already present",
 				lastBlockIndexed)
 		}
 	}
@@ -621,7 +634,7 @@ func (mgr *blockfileMgr) fetchBlockBytesWithRetry(lp *fileLocPointer) ([]byte, e
 
 func (mgr *blockfileMgr) fetchBlockBytes(lp *fileLocPointer) ([]byte, error) {
 	if mgr.conf.dumpConf.Enabled && lp.fileSuffixNum < mgr.oldestFileChunkSuffixNum {
-		logger.Debugf("the file has been dumped fileSuffixNum :[%d], oldestFileChunkSuffixNum: [%d]", lp.fileSuffixNum, mgr.oldestFileChunkSuffixNum)
+		logger.Infof("the file has been dumped fileSuffixNum :[%d], oldestFileChunkSuffixNum: [%d]", lp.fileSuffixNum, mgr.oldestFileChunkSuffixNum)
 		err := mgr.dataLoad(lp)
 		if err == nil {
 			defer mgr.rmBlockFile(lp.fileSuffixNum)
@@ -633,7 +646,7 @@ func (mgr *blockfileMgr) fetchBlockBytes(lp *fileLocPointer) ([]byte, error) {
 		defer mgr.rwMutexs[lp.fileSuffixNum].RUnlock()
 	}
 
-	stream, err := newBlockfileStream(mgr.rootDir, lp.fileSuffixNum, int64(lp.offset))
+	stream, err := newBlockfileStream(mgr.rootDir, mgr.conf, lp.fileSuffixNum, int64(lp.offset))
 	if err != nil {
 		return nil, err
 	}
@@ -806,37 +819,13 @@ func (mgr *blockfileMgr) dataLoad(lp *fileLocPointer) error {
 	return nil
 }
 
-func (mgr *blockfileMgr) rmBlockFile(fileNum int) error {
-	mgr.rwMutexs[fileNum].Lock()
-	defer mgr.rwMutexs[fileNum].Unlock()
-	filename := deriveBlockfilePath(mgr.rootDir, fileNum)
-	return os.Remove(filename)
-}
-
-func (mgr *blockfileMgr) writeConfigBlock(block *common.Block) error {
-	blockBytes, _, err := serializeBlock(block)
-	if err != nil {
-		return fmt.Errorf("Error while serializing block: %s", err)
-	}
-	return ioutil.WriteFile(filepath.Join(mgr.rootDir, configBlockFileName), blockBytes, 0666)
-}
-
-func (mgr *blockfileMgr) readConfigBlock() (*common.Block, error) {
-	cfgBlockFile := filepath.Join(mgr.rootDir, configBlockFileName)
-	if blockBytes, err := ioutil.ReadFile(cfgBlockFile); err != nil {
-		return nil, err
-	} else {
-		return deserializeBlock(blockBytes)
-	}
-}
-
 // scanForLastCompleteBlock scan a given block file and detects the last offset in the file
 // after which there may lie a block partially written (towards the end of the file in a crash scenario).
-func scanForLastCompleteBlock(rootDir string, fileNum int, startingOffset int64) ([]byte, int64, int, error) {
+func scanForLastCompleteBlock(rootDir string, blkStoreConf *Conf, fileNum int, startingOffset int64) ([]byte, int64, int, error) {
 	//scan the passed file number suffix starting from the passed offset to find the last completed block
 	numBlocks := 0
 	var lastBlockBytes []byte
-	blockStream, errOpen := newBlockfileStream(rootDir, fileNum, startingOffset)
+	blockStream, errOpen := newBlockfileStream(rootDir, blkStoreConf, fileNum, startingOffset)
 	if errOpen != nil {
 		return nil, 0, 0, errOpen
 	}
@@ -944,6 +933,30 @@ func (i *checkpointInfo) String() string {
 	return fmt.Sprintf("latestFileChunkSuffixNum=[%d], latestFileChunksize=[%d], isChainEmpty=[%t], lastBlockNumber=[%d],fileEndBlockNums=[%s]",
 		i.latestFileChunkSuffixNum, i.latestFileChunksize, i.isChainEmpty, i.lastBlockNumber, endBlockNumStr)
 
+}
+
+func (mgr *blockfileMgr) rmBlockFile(fileNum int) error {
+	mgr.rwMutexs[fileNum].Lock()
+	defer mgr.rwMutexs[fileNum].Unlock()
+	filename := deriveBlockfilePath(mgr.rootDir, fileNum)
+	return os.Remove(filename)
+}
+
+func (mgr *blockfileMgr) writeConfigBlock(block *common.Block) error {
+	blockBytes, _, err := serializeBlock(block)
+	if err != nil {
+		return fmt.Errorf("Error while serializing block: %s", err)
+	}
+	return ioutil.WriteFile(filepath.Join(mgr.rootDir, configBlockFileName), blockBytes, 0666)
+}
+
+func (mgr *blockfileMgr) readConfigBlock() (*common.Block, error) {
+	cfgBlockFile := filepath.Join(mgr.rootDir, configBlockFileName)
+	if blockBytes, err := ioutil.ReadFile(cfgBlockFile); err != nil {
+		return nil, err
+	} else {
+		return deserializeBlock(blockBytes)
+	}
 }
 
 type blockDumpInfo struct {

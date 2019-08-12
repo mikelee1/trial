@@ -183,11 +183,15 @@ func GenerateVerifyingMSP(baseDir string, signCA *ca.CA, tlsCA *ca.CA, nodeOUs b
 	// cleared up anyway by copyAdminCert, but
 	// we leave a valid admin for now for the sake
 	// of unit tests
-
 	sw := &factory.SWFactory{}
 	bcsp, err := sw.Get(factory.GetDefaultOpts())
-
+	if err != nil {
+		return err
+	}
 	priv, err := bcsp.KeyGen(&bccsp.ECDSAP256KeyGenOpts{Temporary: true})
+	if err != nil {
+		return err
+	}
 	ecPubKey, err := csp.GetECPublicKey(priv)
 	if err != nil {
 		return err

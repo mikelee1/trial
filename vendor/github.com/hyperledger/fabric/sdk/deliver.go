@@ -115,6 +115,14 @@ type DeliverClient struct {
 	endpoint *Endpoint
 }
 
+type PeerClient struct {
+	endpoint *Endpoint
+}
+
+type OrdererClient struct {
+	endpoint *Endpoint
+}
+
 // NewDeliverClient ...
 func NewDeliverClient(deliver *Endpoint) *DeliverClient {
 	return &DeliverClient{
@@ -122,7 +130,13 @@ func NewDeliverClient(deliver *Endpoint) *DeliverClient {
 	}
 }
 
-// RequestBlock requests a single block once a time
+func NewPeerClient(deliver *Endpoint) *PeerClient {
+	return &PeerClient{
+		endpoint: deliver,
+	}
+}
+
+// RequestBlock requests a single block from orderer once a time
 func (dc *DeliverClient) RequestBlock(req *cb.Envelope) (*cb.Block, error) {
 	de, conn, cancel, err := newAtomicBroadcastDeliverClient(dc.endpoint)
 	if err != nil {
@@ -149,6 +163,41 @@ func (dc *DeliverClient) RequestBlock(req *cb.Envelope) (*cb.Block, error) {
 		logger.Infof("Got status: %v", t)
 		return nil, errors.Errorf("can't read the block: %v", t)
 	case *ab.DeliverResponse_Block:
+		logger.Infof("Received block: %v", t.Block.Header.Number)
+		de.Recv() // Flush the success message
+		return t.Block, nil
+	default:
+		return nil, errors.Errorf("response error: unknown type %T", t)
+	}
+}
+
+// RequestBlock requests a single block from peer once a time
+func (dc *PeerClient) RequestBlock(req *cb.Envelope) (*cb.Block, error) {
+	de, conn, cancel, err := newPeerDeliverClient(dc.endpoint)
+	if err != nil {
+		logger.Error("Error creating deliver client", err)
+		return nil, err
+	}
+
+	defer conn.Close()
+	defer de.CloseSend()
+	defer cancel()
+
+	err = de.Send(req)
+	if err != nil {
+		logger.Error("Error sending block request", err)
+		return nil, err
+	}
+
+	msg, err := de.Recv()
+	if err != nil {
+		return nil, errors.Wrap(err, "error receiving")
+	}
+	switch t := msg.Type.(type) {
+	case *pb.DeliverResponse_Status:
+		logger.Infof("Got status: %v", t)
+		return nil, errors.Errorf("can't read the block: %v", t)
+	case *pb.DeliverResponse_Block:
 		logger.Infof("Received block: %v", t.Block.Header.Number)
 		de.Recv() // Flush the success message
 		return t.Block, nil
@@ -222,6 +271,7 @@ func (dc *DeliverClient) RequestBlocks(req *cb.Envelope) (*BlockIterator, error)
 
 }
 
+// for orderer deliver
 func newAtomicBroadcastDeliverClient(endpoint *Endpoint) (ab.AtomicBroadcast_DeliverClient, *grpc.ClientConn, context.CancelFunc, error) {
 	conn, err := createConnection(endpoint)
 	if err != nil {
@@ -232,6 +282,26 @@ func newAtomicBroadcastDeliverClient(endpoint *Endpoint) (ab.AtomicBroadcast_Del
 	ctx, cancel := context.WithCancel(context.Background())
 
 	de, err := ab.NewAtomicBroadcastClient(conn).Deliver(ctx)
+	if err != nil {
+		logger.Error("Error creating DeliverClient", err)
+		conn.Close()
+		cancel()
+		return nil, nil, nil, err
+	}
+	return de, conn, cancel, nil
+}
+
+// for peer deliver
+func newPeerDeliverClient(endpoint *Endpoint) (pb.Deliver_DeliverClient, *grpc.ClientConn, context.CancelFunc, error) {
+	conn, err := createConnection(endpoint)
+	if err != nil {
+		logger.Error("Error creating connection", err)
+		return nil, nil, nil, err
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+
+	de, err := pb.NewDeliverClient(conn).Deliver(ctx)
 	if err != nil {
 		logger.Error("Error creating DeliverClient", err)
 		conn.Close()

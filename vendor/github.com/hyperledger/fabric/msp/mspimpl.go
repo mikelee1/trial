@@ -96,33 +96,6 @@ type bccspmsp struct {
 	clientOU, peerOU *OUIdentifier
 }
 
-// NewBccspMsp returns MSP with supported bccsp instance
-func NewBccspMsp(version MSPVersion, csp bccsp.BCCSP) (MSP, error) {
-	mspLogger.Debugf("Creating BCCSP-based MSP instance")
-
-	theMsp := &bccspmsp{}
-	theMsp.version = version
-	theMsp.bccsp = csp
-	switch version {
-	case MSPv1_0:
-		theMsp.internalSetupFunc = theMsp.setupV1
-		theMsp.internalValidateIdentityOusFunc = theMsp.validateIdentityOUsV1
-		theMsp.internalSatisfiesPrincipalInternalFunc = theMsp.satisfiesPrincipalInternalPreV13
-	case MSPv1_1:
-		theMsp.internalSetupFunc = theMsp.setupV11
-		theMsp.internalValidateIdentityOusFunc = theMsp.validateIdentityOUsV11
-		theMsp.internalSatisfiesPrincipalInternalFunc = theMsp.satisfiesPrincipalInternalPreV13
-	case MSPv1_3:
-		theMsp.internalSetupFunc = theMsp.setupV11
-		theMsp.internalValidateIdentityOusFunc = theMsp.validateIdentityOUsV11
-		theMsp.internalSatisfiesPrincipalInternalFunc = theMsp.satisfiesPrincipalInternalV13
-	default:
-		return nil, errors.Errorf("Invalid MSP version [%v]", version)
-	}
-
-	return theMsp, nil
-}
-
 // newBccspMsp returns an MSP instance backed up by a BCCSP
 // crypto provider. It handles x.509 certificates and can
 // generate identities and signing identities backed by
@@ -197,7 +170,6 @@ func (msp *bccspmsp) getSigningIdentityFromConf(sidInfo *m.SigningIdentityInfo) 
 	if sidInfo == nil {
 		return nil, errors.New("getIdentityFromBytes error: nil sidInfo")
 	}
-
 	// Extract the public part of the identity
 	idPub, pubKey, err := msp.getIdentityFromConf(sidInfo.PublicSigner)
 	if err != nil {
@@ -208,6 +180,7 @@ func (msp *bccspmsp) getSigningIdentityFromConf(sidInfo *m.SigningIdentityInfo) 
 	privKey, err := msp.bccsp.GetKey(pubKey.SKI())
 	// Less Secure: Attempt to import Private Key from KeyInfo, if BCCSP was not able to find the key
 	if err != nil {
+		fmt.Println("err: ", err)
 		mspLogger.Debugf("Could not find SKI [%s], trying KeyMaterial field: %+v\n", hex.EncodeToString(pubKey.SKI()), err)
 		if sidInfo.PrivateSigner == nil || sidInfo.PrivateSigner.KeyMaterial == nil {
 			return nil, errors.New("KeyMaterial not found in SigningIdentityInfo")
@@ -361,7 +334,7 @@ func (msp *bccspmsp) hasOURoleInternal(id *identity, mspRole m.MSPRole_MSPRoleTy
 // DeserializeIdentity returns an Identity given the byte-level
 // representation of a SerializedIdentity struct
 func (msp *bccspmsp) DeserializeIdentity(serializedID []byte) (Identity, error) {
-	mspLogger.Infof("Obtaining identity")
+	mspLogger.Debug("Obtaining identity")
 
 	// We first deserialize to a SerializedIdentity to get the MSP ID
 	sId := &m.SerializedIdentity{}

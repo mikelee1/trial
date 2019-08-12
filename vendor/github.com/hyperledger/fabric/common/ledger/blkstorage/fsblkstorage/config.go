@@ -17,9 +17,8 @@ limitations under the License.
 package fsblkstorage
 
 import (
-	"path/filepath"
-
 	"github.com/hyperledger/fabric/common/ledger/datadump"
+	"path/filepath"
 )
 
 const (
@@ -39,13 +38,19 @@ type Conf struct {
 
 // NewConf constructs new `Conf`.
 // blockStorageDir is the top level folder under which `FsBlockStore` manages its data
+//func NewConf(blockStorageDir string, maxBlockfileSize int) *Conf {
+//	if maxBlockfileSize <= 0 {
+//		maxBlockfileSize = defaultMaxBlockfileSize
+//	}
+//	return &Conf{blockStorageDir, maxBlockfileSize}
+//}
+
 func NewConf(blockStorageDir string, maxBlockfileSize int, dumpConf *datadump.DumpConf) *Conf {
 	if maxBlockfileSize <= 0 {
 		maxBlockfileSize = defaultMaxBlockfileSize
 	}
 	return &Conf{blockStorageDir, maxBlockfileSize, dumpConf}
 }
-
 func (conf *Conf) getIndexDir() string {
 	return filepath.Join(conf.blockStorageDir, IndexDir)
 }

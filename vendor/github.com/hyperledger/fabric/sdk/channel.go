@@ -3,11 +3,7 @@ package sdk
 import (
 	"context"
 	"errors"
-	"io/ioutil"
-	"net/url"
-	"strconv"
-	"time"
-
+	"fmt"
 	"github.com/golang/protobuf/proto"
 	"github.com/hyperledger/fabric/common/channelconfig"
 	"github.com/hyperledger/fabric/common/tools/configtxgen/encoder"
@@ -17,9 +13,15 @@ import (
 	"github.com/hyperledger/fabric/core/scc/cscc"
 	"github.com/hyperledger/fabric/msp"
 	cb "github.com/hyperledger/fabric/protos/common"
+	"github.com/hyperledger/fabric/protos/orderer"
 	ab "github.com/hyperledger/fabric/protos/orderer"
+	"github.com/hyperledger/fabric/protos/orderer/etcdraft"
 	pb "github.com/hyperledger/fabric/protos/peer"
 	"github.com/hyperledger/fabric/protos/utils"
+	"io/ioutil"
+	"net/url"
+	"strconv"
+	"time"
 )
 
 const (
@@ -28,7 +30,7 @@ const (
 	defaultMaxMessageCount       = 10
 	defaultAbsoluteMaxBytes      = 100 * 1024 * 1024
 	defaultPreferredMaxBytes     = 512 * 1024
-	defaultChannelCapability     = "V1_1"
+	defaultChannelCapability     = "V1_3"
 	defaultOrdererCapability     = "V1_1"
 	defaultApplicationCapability = "V1_2"
 	defaultPolicyType            = encoder.ImplicitMetaPolicyType
@@ -36,12 +38,12 @@ const (
 
 const (
 	// DefaultSystemChainID is the default name of system chain
-	DefaultSystemChainID = "systemchain"
+	DefaultSystemChainID = "byfn-sys-channel"
 )
 
 const (
 	// DefaultConsortium is the name of the default consortim
-	DefaultConsortium = "defaultConsortium"
+	DefaultConsortium = "SampleConsortium"
 )
 
 var acceptAllPolicy = &localconfig.Policy{
@@ -74,6 +76,7 @@ type GenesisConfig struct {
 	Addresses               []string
 	BatchTimeout            time.Duration
 	KafkaBrokers            []string
+	EtcdRaft                *etcdraft.ConfigMetadata
 	MaxMessageCount         uint32
 	AbsoluteMaxBytes        uint32
 	PreferredMaxBytes       uint32
@@ -131,8 +134,9 @@ func (client *Client) SignChannelConfigUpdate(update []byte) ([]byte, []byte, er
 }
 
 // GetChannelConfigUpdate ...
-func (client *Client) GetChannelConfigUpdate(chainID string, block *cb.Block, newOrdererOrgs []*Organization, newApplicationOrgs []*Organization, newConsortiumOrgs map[string][]*Organization, orderers []string) ([]byte, error) {
-	tx, err := configUpdate(chainID, block, newOrdererOrgs, newApplicationOrgs, newConsortiumOrgs, orderers)
+func (client *Client) GetChannelConfigUpdate(add bool, chainID string, block *cb.Block, updateOrdererOrgs []*Organization,
+	updateApplicationOrgs []*Organization, updateConsortiumOrgs map[string][]*Organization, updateOrdererAddrs []string, updateRaftNodes []etcdraft.Consenter) ([]byte, error) {
+	tx, err := configUpdate(add, chainID, block, updateOrdererOrgs, updateApplicationOrgs, updateConsortiumOrgs, updateOrdererAddrs, updateRaftNodes)
 	if err != nil {
 		logger.Error("Error computing update", err)
 		return nil, err
@@ -140,9 +144,16 @@ func (client *Client) GetChannelConfigUpdate(chainID string, block *cb.Block, ne
 	return utils.Marshal(tx)
 }
 
-// UpdateChannel ...
-func (client *Client) UpdateChannel(chainID string, block *cb.Block, newOrdererOrgs []*Organization, newApplicationOrgs []*Organization, newConsortiumOrgs map[string][]*Organization, orderers []string, caster *Endpoint) error {
-	return updateChannel(chainID, block, newOrdererOrgs, newApplicationOrgs, newConsortiumOrgs, orderers, caster, client.signer)
+// UpdateChannelAdd ...
+func (client *Client) UpdateChannelAdd(chainID string, block *cb.Block, updateOrdererOrgs []*Organization,
+	updateApplicationOrgs []*Organization, updateConsortiumOrgs map[string][]*Organization, updateOrdererAddrs []string, caster *Endpoint, updateRaftNodes []etcdraft.Consenter) error {
+	return updateChannel(true, chainID, block, updateOrdererOrgs, updateApplicationOrgs, updateConsortiumOrgs, updateOrdererAddrs, caster, client.signer, updateRaftNodes)
+}
+
+// UpdateChannelDel ...
+func (client *Client) UpdateChannelDel(chainID string, block *cb.Block, updateOrdererOrgs []*Organization, updateApplicationOrgs []*Organization,
+	updateConsortiumOrgs map[string][]*Organization, updateOrdererAddrs []string, caster *Endpoint, updateRaftNodes []etcdraft.Consenter) error {
+	return updateChannel(false, chainID, block, updateOrdererOrgs, updateApplicationOrgs, updateConsortiumOrgs, updateOrdererAddrs, caster, client.signer, updateRaftNodes)
 }
 
 // UpdateChannelByConfigUpdate ...
@@ -167,7 +178,8 @@ func (client *Client) UpdateChannelByConfigUpdate(chainID string, configUpdate [
 	return Broadcast(envelopeBytes, signature, caster)
 }
 
-func configUpdate(chainID string, block *cb.Block, newOrdererOrgs []*Organization, newApplicationOrgs []*Organization, newConsortiumOrgs map[string][]*Organization, orderers []string) (*cb.ConfigUpdate, error) {
+func configUpdate(add bool, chainID string, block *cb.Block, updateOrdererOrgs []*Organization, updateApplicationOrgs []*Organization,
+	updateConsortiumOrgs map[string][]*Organization, updateOrdererAddrs []string, updateRaftNodes []etcdraft.Consenter) (*cb.ConfigUpdate, error) {
 	env := utils.ExtractEnvelopeOrPanic(block, 0)
 	payload, err := utils.GetPayload(env)
 	if err != nil {
@@ -183,95 +195,203 @@ func configUpdate(chainID string, block *cb.Block, newOrdererOrgs []*Organizatio
 
 	oldConf := configEnv.Config
 	newConf := proto.Clone(oldConf).(*cb.Config)
-	// orderers
-	if orderers != nil {
+
+	if newConf.ChannelGroup.Groups[channelconfig.OrdererGroupKey] == nil {
+		logger.Errorf("channel has closed, group: %+v is empty", channelconfig.OrdererGroupKey)
+		return nil, fmt.Errorf("channel has closed")
+	}
+
+	// 应用链升级肯定会影响application,系统链升级不会
+	if updateApplicationOrgs != nil && newConf.ChannelGroup.Groups[channelconfig.ApplicationGroupKey] == nil {
+		logger.Errorf("channel has closed, group: %+s is empty", channelconfig.ApplicationGroupKey)
+		return nil, fmt.Errorf("channel has closed")
+	}
+
+	if newConf.ChannelGroup.Values[channelconfig.OrdererAddressesKey] == nil {
+		logger.Errorf("channel has closed, value %+v is empty", channelconfig.OrdererAddressesKey)
+		return nil, fmt.Errorf("channel has closed")
+	}
+
+	// ordererAddrs
+	if updateOrdererAddrs != nil {
 		val := newConf.ChannelGroup.Values[channelconfig.OrdererAddressesKey].Value
 		oa := &cb.OrdererAddresses{}
 		if err = proto.Unmarshal(val, oa); err != nil {
 			logger.Error("Error unmarshaling OrdererAddresses", err)
 			return nil, err
 		}
-		oldAddrMap := make(map[string]bool)
+		// oldAddrMap := make(map[string]bool)
+		newAddrMap := make(map[string]bool)
 		for _, addr := range oa.Addresses {
-			oldAddrMap[addr] = true
+			// oldAddrMap[addr] = true
+			newAddrMap[addr] = true
 		}
-		for _, addr := range orderers {
-			if !oldAddrMap[addr] {
-				oa.Addresses = append(oa.Addresses, addr)
+		for _, addr := range updateOrdererAddrs {
+			if add {
+				newAddrMap[addr] = true
+			} else {
+				delete(newAddrMap, addr)
 			}
 		}
+		var newAddrs []string
+		for addr, _ := range newAddrMap {
+			newAddrs = append(newAddrs, addr)
+		}
+
+		oa.Addresses = newAddrs
+
 		newConf.ChannelGroup.Values[channelconfig.OrdererAddressesKey].Value, err = proto.Marshal(oa)
 		if err != nil {
 			logger.Error("Error marshaling OrdererAddresses", err)
 			return nil, err
 		}
 	}
+	// etcdraft node update
+	if updateRaftNodes != nil {
+		oc := new(orderer.ConsensusType)
+		consensus := newConf.ChannelGroup.Groups[channelconfig.OrdererGroupKey].Values[channelconfig.ConsensusTypeKey].Value
+		if err = proto.Unmarshal(consensus, oc); err != nil {
+			logger.Error("Error unmarshaling orderer's ConsensusType", err)
+			return nil, err
+		}
+		om := new(etcdraft.ConfigMetadata)
+		if err = proto.Unmarshal(oc.Metadata, om); err != nil {
+			logger.Error("Error unmarshaling etcdraft's ConfigMetadata", err)
+			return nil, err
+		}
 
-	// add orgs
-	if newOrdererOrgs != nil {
-		// system chain
-		for _, org := range newOrdererOrgs {
-			newConf.ChannelGroup.Groups[channelconfig.OrdererGroupKey].Groups[org.Name], err = encoder.NewOrdererOrgGroup(&localconfig.Organization{
-				Name:    org.Name,
-				ID:      org.ID,
-				MSPDir:  org.MSPDir,
-				MSPType: defaultMSPType,
-			})
-			if err != nil {
-				logger.Error("Error creating ordererOrgGroup", err)
-				return nil, err
+		updateNodeMap := make(map[string]*etcdraft.Consenter)
+		for _, node := range om.Consenters {
+			key := fmt.Sprintf("%s-%d", node.Host, node.Port)
+			updateNodeMap[key] = &etcdraft.Consenter{
+				Host:          node.Host,
+				Port:          node.Port,
+				ServerTlsCert: node.ServerTlsCert,
+				ClientTlsCert: node.ClientTlsCert,
 			}
 		}
+
+		if add { //新增或更新已存在的etcdraft节点的配置信息
+			for _, node := range updateRaftNodes {
+				key := fmt.Sprintf("%s-%d", node.Host, node.Port)
+				updateNodeMap[key] = &etcdraft.Consenter{
+					Host:          node.Host,
+					Port:          node.Port,
+					ServerTlsCert: node.ServerTlsCert,
+					ClientTlsCert: node.ClientTlsCert,
+				}
+			}
+		} else { //删除已存在的etcdraft节点的配置信息
+			for _, node := range updateRaftNodes {
+				key := fmt.Sprintf("%s-%d", node.Host, node.Port)
+				delete(updateNodeMap, key)
+			}
+		}
+		updateNodes := make([]*etcdraft.Consenter, 0)
+		for _, node := range updateNodeMap {
+			updateNodes = append(updateNodes, node)
+		}
+
+		om.Consenters = updateNodes
+
+		if oc.Metadata, err = proto.Marshal(om); err != nil {
+			logger.Error("Error marshaling etcdraft's ConfigMetadata", err)
+			return nil, err
+		}
+
+		if consensus, err = proto.Marshal(oc); err != nil {
+			logger.Error("Error marshaling orderer's ConsensusType", err)
+			return nil, err
+		}
+		newConf.ChannelGroup.Groups[channelconfig.OrdererGroupKey].Values[channelconfig.ConsensusTypeKey].Value = consensus
 	}
 
-	if newConsortiumOrgs != nil {
-		// update consortium orgs
-		for name, orgs := range newConsortiumOrgs {
-			var localOrgs []*localconfig.Organization
-			for _, org := range orgs {
-				localOrgs = append(localOrgs, &localconfig.Organization{
+	if add {
+		// add orgs
+		if updateOrdererOrgs != nil {
+			// system chain
+			for _, org := range updateOrdererOrgs {
+				newConf.ChannelGroup.Groups[channelconfig.OrdererGroupKey].Groups[org.Name], err = encoder.NewOrdererOrgGroup(&localconfig.Organization{
 					Name:    org.Name,
 					ID:      org.ID,
 					MSPDir:  org.MSPDir,
 					MSPType: defaultMSPType,
 				})
+				if err != nil {
+					logger.Error("Error creating ordererOrgGroup", err)
+					return nil, err
+				}
 			}
+		}
 
-			if _, ok := newConf.ChannelGroup.Groups[channelconfig.ConsortiumsGroupKey].Groups[name]; !ok {
-				newConf.ChannelGroup.Groups[channelconfig.ConsortiumsGroupKey].Groups[name], err = encoder.NewConsortiumGroup(&localconfig.Consortium{
-					Organizations: localOrgs,
-				})
-			} else {
-				for _, org := range localOrgs {
-					newConf.ChannelGroup.Groups[channelconfig.ConsortiumsGroupKey].Groups[name].Groups[org.Name], err = encoder.NewOrdererOrgGroup(org)
-					if err != nil {
-						logger.Error("Error creating ordererOrgGroup", err)
-						return nil, err
+		if updateConsortiumOrgs != nil {
+			// update consortium orgs
+			for name, orgs := range updateConsortiumOrgs {
+				var localOrgs []*localconfig.Organization
+				for _, org := range orgs {
+					localOrgs = append(localOrgs, &localconfig.Organization{
+						Name:    org.Name,
+						ID:      org.ID,
+						MSPDir:  org.MSPDir,
+						MSPType: defaultMSPType,
+					})
+				}
+
+				if _, ok := newConf.ChannelGroup.Groups[channelconfig.ConsortiumsGroupKey].Groups[name]; !ok {
+					newConf.ChannelGroup.Groups[channelconfig.ConsortiumsGroupKey].Groups[name], err = encoder.NewConsortiumGroup(&localconfig.Consortium{
+						Organizations: localOrgs,
+					})
+				} else {
+					// 只有系统链更新会添加, Note, NewOrdererOrgGroup is correct here, as the structure is identical
+					for _, org := range localOrgs {
+						newConf.ChannelGroup.Groups[channelconfig.ConsortiumsGroupKey].Groups[name].Groups[org.Name], err = encoder.NewOrdererOrgGroup(org)
+						if err != nil {
+							logger.Error("Error creating ordererOrgGroup", err)
+							return nil, err
+						}
 					}
 				}
 			}
 		}
-	}
+		if updateApplicationOrgs != nil {
+			// application chain
+			for _, org := range updateApplicationOrgs {
 
-	if newApplicationOrgs != nil {
-		// application chain
-		for _, org := range newApplicationOrgs {
+				peers := []*localconfig.AnchorPeer{}
+				for _, ap := range org.AnchorPeers {
+					peers = append(peers, parseURL(ap))
+				}
 
-			peers := []*localconfig.AnchorPeer{}
-			for _, ap := range org.AnchorPeers {
-				peers = append(peers, parseURL(ap))
+				newConf.ChannelGroup.Groups[channelconfig.ApplicationGroupKey].Groups[org.Name], err = encoder.NewApplicationOrgGroup(&localconfig.Organization{
+					Name:        org.Name,
+					ID:          org.ID,
+					MSPDir:      org.MSPDir,
+					MSPType:     defaultMSPType,
+					AnchorPeers: peers,
+				})
+				if err != nil {
+					logger.Error("Error creating applicationOrgGroup", err)
+					return nil, err
+				}
 			}
+		}
 
-			newConf.ChannelGroup.Groups[channelconfig.ApplicationGroupKey].Groups[org.Name], err = encoder.NewApplicationOrgGroup(&localconfig.Organization{
-				Name:        org.Name,
-				ID:          org.ID,
-				MSPDir:      org.MSPDir,
-				MSPType:     defaultMSPType,
-				AnchorPeers: peers,
-			})
-			if err != nil {
-				logger.Error("Error creating applicationOrgGroup", err)
-				return nil, err
+	} else {
+		for _, organization := range updateOrdererOrgs {
+			delOrgName := organization.Name
+			if _, ok := newConf.ChannelGroup.Groups[channelconfig.OrdererGroupKey].Groups[delOrgName]; ok {
+				delete(newConf.ChannelGroup.Groups[channelconfig.OrdererGroupKey].Groups, delOrgName)
+			}
+		}
+		for _, organization := range updateApplicationOrgs {
+			delOrgName := organization.Name
+			if _, ok := newConf.ChannelGroup.Groups[channelconfig.ApplicationGroupKey].Groups[delOrgName]; ok {
+				delete(newConf.ChannelGroup.Groups[channelconfig.ApplicationGroupKey].Groups, delOrgName)
+			}
+		}
+		for delOrgName, _ := range updateConsortiumOrgs {
+			if _, ok := newConf.ChannelGroup.Groups[channelconfig.ConsortiumsGroupKey].Groups[delOrgName]; ok {
+				delete(newConf.ChannelGroup.Groups[channelconfig.ConsortiumsGroupKey].Groups, delOrgName)
 			}
 		}
 	}
@@ -285,8 +405,9 @@ func configUpdate(chainID string, block *cb.Block, newOrdererOrgs []*Organizatio
 
 }
 
-func updateChannel(chainID string, block *cb.Block, newOrdererOrgs []*Organization, newApplicationOrgs []*Organization, newConsortiumOrgs map[string][]*Organization, orderers []string, caster *Endpoint, signer msp.SigningIdentity) error {
-	updateTx, err := configUpdate(chainID, block, newOrdererOrgs, newApplicationOrgs, newConsortiumOrgs, orderers)
+func updateChannel(add bool, chainID string, block *cb.Block, updateOrdererOrgs []*Organization, updateApplicationOrgs []*Organization,
+	updateConsortiumOrgs map[string][]*Organization, updateOrdererAddrs []string, caster *Endpoint, signer msp.SigningIdentity, updateRaftNodes []etcdraft.Consenter) error {
+	updateTx, err := configUpdate(add, chainID, block, updateOrdererOrgs, updateApplicationOrgs, updateConsortiumOrgs, updateOrdererAddrs, updateRaftNodes)
 	if err != nil {
 		if isNoDiffError(err) {
 			logger.Warning("No differences detected between original and updated config")
@@ -332,6 +453,35 @@ func updateChannel(chainID string, block *cb.Block, newOrdererOrgs []*Organizati
 // GetConfigBlockByChannel ...
 func (client *Client) GetConfigBlockByChannel(chainID string, deliver *Endpoint) (*cb.Block, error) {
 	return getConfigBlockByChannel(chainID, deliver, client.signer)
+}
+
+func (client *Client) GetNewestBlockByChannel(fromOrderer bool, chainID string, deliver *Endpoint) (*cb.Block, error) {
+	seekI := seekInfo(seekNewest, seekNewest)
+	var block *cb.Block
+	var err error
+	if fromOrderer {
+		block, err = seekBlockByChannel(chainID, seekI, deliver, client.signer)
+		if err != nil {
+			logger.Error("Error getting block by channel", err)
+			return nil, err
+		}
+	} else {
+		block, err = seekBlockByChannelFromPeer(chainID, seekI, deliver, client.signer)
+		if err != nil {
+			logger.Error("Error getting block by channel", err)
+			return nil, err
+		}
+	}
+
+	return block, err
+}
+
+func (client *Client) GetChannelHeight(fromOrderer bool, chainID string, deliver *Endpoint) (int, error) {
+	block, err := client.GetNewestBlockByChannel(fromOrderer, chainID, deliver)
+	if err != nil {
+		return 0, err
+	}
+	return int(block.GetHeader().Number) + 1, nil
 }
 
 func getConfigBlockByChannel(chainID string, deliver *Endpoint, signer msp.SigningIdentity) (*cb.Block, error) {
@@ -381,6 +531,16 @@ func seekBlockByChannel(chainID string, seekI *ab.SeekInfo, deliver *Endpoint, s
 		return nil, err
 	}
 	return NewDeliverClient(deliver).RequestBlock(env)
+}
+
+func seekBlockByChannelFromPeer(chainID string, seekI *ab.SeekInfo, deliver *Endpoint, signer msp.SigningIdentity) (*cb.Block, error) {
+	env, err := createBlockRequest(chainID, seekI, signer)
+	if err != nil {
+		logger.Error("Error creating block request envelope", err)
+		return nil, err
+	}
+	// if
+	return NewPeerClient(deliver).RequestBlock(env)
 }
 
 func getBlocksByChannel(chainID string, seekI *ab.SeekInfo, deliver *Endpoint, signer msp.SigningIdentity) (*BlockIterator, error) {
@@ -483,8 +643,8 @@ func joinChannel(chainID string, block *cb.Block, endorsers []*Endpoint, signer 
 			return errors.New("bad proposal response")
 		}
 		logger.Infof("Successfully submitted proposal to join channel for %s", endorser.Address)
+		break
 	}
-
 	return nil
 }
 
@@ -496,7 +656,12 @@ func (client *Client) CreateChannel(conf *ChannelConfig, caster *Endpoint) error
 		return err
 	}
 	config := newChannelProfile(conf)
-	newChannelConfigUpdate, err := encoder.NewChannelCreateConfigUpdate(conf.ChainID, nil, config)
+	template, err := encoder.DefaultConfigTemplate(config)
+	if err != nil {
+		logger.Error("Error creating configTemplate", err)
+		return err
+	}
+	newChannelConfigUpdate, err := encoder.NewChannelCreateConfigUpdate(conf.ChainID, config, template)
 	if err != nil {
 		logger.Error("Error creating configUpdate", err)
 		return err
@@ -532,7 +697,7 @@ func (client *Client) CreateChannel(conf *ChannelConfig, caster *Endpoint) error
 // CreateChannelTx ...
 func CreateChannelTx(config *ChannelConfig) (*cb.Envelope, error) {
 	conf := newChannelProfile(config)
-	return encoder.MakeChannelCreationTransaction(config.ChainID, nil, nil, conf)
+	return encoder.MakeChannelCreationTransaction(config.ChainID, nil, conf)
 }
 
 // WriteChannelTx ...
@@ -626,6 +791,8 @@ func newChannelProfile(conf *ChannelConfig) *localconfig.Profile {
 	}
 	profile.Application.Organizations = orgs
 	profile.Application.Capabilities = make(map[string]bool)
+	profile.Application.Capabilities[defaultChannelCapability] = true
+	profile.Application.Capabilities[defaultOrdererCapability] = true
 	profile.Application.Capabilities[defaultApplicationCapability] = true
 
 	return profile
@@ -634,6 +801,7 @@ func newChannelProfile(conf *ChannelConfig) *localconfig.Profile {
 func newGenesisProfile(conf *GenesisConfig) *localconfig.Profile {
 	profile := &localconfig.Profile{}
 	orderer := &localconfig.Orderer{}
+	profile.Application = &localconfig.Application{}
 	orderer.Addresses = conf.Addresses
 	orderer.OrdererType = conf.OrdererType
 
@@ -659,23 +827,38 @@ func newGenesisProfile(conf *GenesisConfig) *localconfig.Profile {
 
 	orderer.Kafka.Brokers = conf.KafkaBrokers
 
+	orderer.EtcdRaft = conf.EtcdRaft
+
 	orderer.MaxChannels = conf.MaxChannels
 
+	orgs := []*localconfig.Organization{}
 	for _, org := range conf.OrdererOrganizations {
-		orderer.Organizations = append(orderer.Organizations, &localconfig.Organization{
+		orgs = append(orgs, &localconfig.Organization{
 			Name:    org.Name,
 			ID:      org.ID,
 			MSPDir:  org.MSPDir,
 			MSPType: defaultMSPType,
 		})
 	}
+	orderer.Organizations = orgs
+	profile.Application.Organizations = orgs
+	profile.Application.Capabilities = make(map[string]bool)
+	profile.Application.Capabilities[defaultChannelCapability] = true
+	profile.Application.Capabilities[defaultOrdererCapability] = true
+	profile.Application.Capabilities[defaultApplicationCapability] = true
+
+	policy := make(map[string]*localconfig.Policy)
+	policy["Readers"] = &localconfig.Policy{Type: "ImplicitMeta", Rule: "ANY Readers"}
+	policy["Writers"] = &localconfig.Policy{Type: "ImplicitMeta", Rule: "ANY Writers"}
+	policy["Admins"] = &localconfig.Policy{Type: "ImplicitMeta", Rule: "MAJORITY Admins"}
+	policy["BlockValidation"] = &localconfig.Policy{Type: "ImplicitMeta", Rule: "ANY Writers"}
 
 	orderer.Capabilities = make(map[string]bool)
 	orderer.Capabilities[defaultOrdererCapability] = true
-	orderer.Policies = make(map[string]*localconfig.Policy)
+	orderer.Policies = policy
 
 	profile.Orderer = orderer
-	profile.Policies = make(map[string]*localconfig.Policy)
+	profile.Policies = policy
 
 	profile.Consortiums = make(map[string]*localconfig.Consortium)
 
@@ -701,37 +884,6 @@ func newGenesisProfile(conf *GenesisConfig) *localconfig.Profile {
 
 	profile.Capabilities = make(map[string]bool)
 	profile.Capabilities[defaultChannelCapability] = true
-
-	defaultAdmins := PolicyAnyAdmins
-	if conf.AdminsPolicy != "" {
-		defaultAdmins = conf.AdminsPolicy
-	}
-
-	profile.Orderer.Policies["Admins"] = &localconfig.Policy{
-		Type: defaultPolicyType,
-		Rule: string(defaultAdmins),
-	}
-	profile.Policies["Admins"] = profile.Orderer.Policies["Admins"]
-
-	defaultWriters := PolicyAnyWriters
-	if conf.WritersPolicy != "" {
-		defaultWriters = conf.WritersPolicy
-	}
-	profile.Orderer.Policies["Writers"] = &localconfig.Policy{
-		Type: defaultPolicyType,
-		Rule: string(defaultWriters),
-	}
-	profile.Policies["Writers"] = profile.Orderer.Policies["Writers"]
-
-	defaultReaders := PolicyAnyReaders
-	if conf.ReadersPolicy != "" {
-		defaultReaders = conf.ReadersPolicy
-	}
-	profile.Orderer.Policies["Readers"] = &localconfig.Policy{
-		Type: defaultPolicyType,
-		Rule: string(defaultReaders),
-	}
-	profile.Policies["Readers"] = profile.Orderer.Policies["Readers"]
 
 	return profile
 

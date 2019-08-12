@@ -62,7 +62,19 @@ func setFactories(config *FactoryOpts) error {
 
 	// Software-Based BCCSP
 	if config.SwOpts != nil {
-		f := &SWFactory{}
+		var f BCCSPFactory
+		switch config.ProviderName {
+		case "SW":
+			f = &SWFactory{}
+		case "PKCS11":
+			f = &PKCS11Factory{}
+		case "PLUGIN":
+			f = &PluginFactory{}
+		case "GM":
+			f = &GMFactory{}
+		default:
+			factoriesInitError = errors.Wrapf(errors.Errorf("Could not find BCCSP, no '%s' provider", config.ProviderName), "Failed initializing BCCSP.")
+		}
 		err := initBCCSP(f, config)
 		if err != nil {
 			factoriesInitError = errors.Wrap(err, "Failed initializing SW.BCCSP")
@@ -86,12 +98,6 @@ func setFactories(config *FactoryOpts) error {
 			factoriesInitError = errors.Wrapf(err, "Failed initializing PKCS11.BCCSP %s", factoriesInitError)
 		}
 	}
-	logger.Debug("try to initFactory in pkc11")
-	fgm := &GMFactory{}
-	err := initBCCSP(fgm, config)
-	if err != nil {
-		logger.Debugf("try to init bccsp to gm factory", err)
-	}
 
 	var ok bool
 	defaultBCCSP, ok = bccspMap[config.ProviderName]
@@ -114,7 +120,6 @@ func GetBCCSPFromOpts(config *FactoryOpts) (bccsp.BCCSP, error) {
 		f = &PluginFactory{}
 	case "GM":
 		f = &GMFactory{}
-
 	default:
 		return nil, errors.Errorf("Could not find BCCSP, no '%s' provider", config.ProviderName)
 	}

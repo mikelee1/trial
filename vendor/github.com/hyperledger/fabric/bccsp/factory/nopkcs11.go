@@ -20,6 +20,7 @@ package factory
 import (
 	"github.com/hyperledger/fabric/bccsp"
 	"github.com/pkg/errors"
+	"fmt"
 )
 
 // FactoryOpts holds configuration information used to initialize factory implementations
@@ -34,12 +35,13 @@ type FactoryOpts struct {
 // some defaults will get used
 // Error is returned only if defaultBCCSP cannot be found
 func InitFactories(config *FactoryOpts) error {
-	factoriesInitOnce.Do(func() {
+	func() {
 		// Take some precautions on default opts
 		if config == nil {
 			config = GetDefaultOpts()
 		}
 
+		// default use SW
 		if config.ProviderName == "" {
 			config.ProviderName = "SW"
 		}
@@ -53,18 +55,21 @@ func InitFactories(config *FactoryOpts) error {
 
 		// Software-Based BCCSP
 		if config.SwOpts != nil {
-			f := &SWFactory{}
+			var f BCCSPFactory
+			switch config.ProviderName {
+			case "SW":
+				f = &SWFactory{}
+			case "PLUGIN":
+				f = &PluginFactory{}
+			case "GM":
+				f = &GMFactory{}
+			default:
+				factoriesInitError = errors.Wrapf(errors.Errorf("Could not find BCCSP, no '%s' provider", config.ProviderName), "Failed initializing BCCSP.")
+			}
 			err := initBCCSP(f, config)
 			if err != nil {
 				factoriesInitError = errors.Wrapf(err, "Failed initializing BCCSP.")
 			}
-		}
-
-		logger.Debug("try to init the gm factory")
-		fgm := &GMFactory{}
-		err := initBCCSP(fgm, config)
-		if err != nil {
-			logger.Debugf("try to init bccsp to gm factory err:%v", err)
 		}
 
 		// BCCSP Plugin
@@ -81,7 +86,7 @@ func InitFactories(config *FactoryOpts) error {
 		if !ok {
 			factoriesInitError = errors.Errorf("%s\nCould not find default `%s` BCCSP", factoriesInitError, config.ProviderName)
 		}
-	})
+	}()
 
 	return factoriesInitError
 }

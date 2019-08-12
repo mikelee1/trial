@@ -7,6 +7,7 @@ SPDX-License-Identifier: Apache-2.0
 package deliverclient
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"math"
@@ -19,17 +20,11 @@ import (
 	"github.com/hyperledger/fabric/gossip/api"
 	"github.com/hyperledger/fabric/gossip/util"
 	"github.com/hyperledger/fabric/protos/orderer"
-	"github.com/op/go-logging"
 	"github.com/spf13/viper"
-	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 )
 
-var logger *logging.Logger // package-level logger
-
-func init() {
-	logger = flogging.MustGetLogger("deliveryClient")
-}
+var logger = flogging.MustGetLogger("deliveryClient")
 
 const (
 	defaultReConnectTotalTimeThreshold = time.Second * 60 * 60
@@ -47,6 +42,10 @@ func getConnectionTimeout() time.Duration {
 
 func getReConnectBackoffThreshold() float64 {
 	return util.GetFloat64OrDefault("peer.deliveryclient.reConnectBackoffThreshold", defaultReConnectBackoffThreshold)
+}
+
+func staticRootsEnabled() bool {
+	return viper.GetBool("peer.deliveryclient.staticRootsEnabled")
 }
 
 // DeliverService used to communicate with orderers to obtain
@@ -214,6 +213,8 @@ func (d *deliverServiceImpl) Stop() {
 }
 
 func (d *deliverServiceImpl) newClient(chainID string, ledgerInfoProvider blocksprovider.LedgerInfo) *broadcastClient {
+	reconnectBackoffThreshold := getReConnectBackoffThreshold()
+	reconnectTotalTimeThreshold := getReConnectTotalTimeThreshold()
 	requester := &blocksRequester{
 		tls:     viper.GetBool("peer.tls.enabled"),
 		chainID: chainID,
@@ -222,12 +223,12 @@ func (d *deliverServiceImpl) newClient(chainID string, ledgerInfoProvider blocks
 		return requester.RequestBlocks(ledgerInfoProvider)
 	}
 	backoffPolicy := func(attemptNum int, elapsedTime time.Duration) (time.Duration, bool) {
-		if elapsedTime.Nanoseconds() > getReConnectTotalTimeThreshold().Nanoseconds() {
+		if elapsedTime >= reconnectTotalTimeThreshold {
 			return 0, false
 		}
 		sleepIncrement := float64(time.Millisecond * 500)
 		attempt := float64(attemptNum)
-		return time.Duration(math.Min(math.Pow(2, attempt)*sleepIncrement, getReConnectBackoffThreshold())), true
+		return time.Duration(math.Min(math.Pow(2, attempt)*sleepIncrement, reconnectBackoffThreshold)), true
 	}
 	connProd := comm.NewConnectionProducer(d.conf.ConnFactory(chainID), d.conf.Endpoints)
 	bClient := NewBroadcastClient(connProd, d.conf.ABCFactory, broadcastSetup, backoffPolicy)
@@ -254,7 +255,7 @@ func DefaultConnectionFactory(channelID string) func(endpoint string) (*grpc.Cli
 		dialOpts = append(dialOpts, comm.ClientKeepaliveOptions(kaOpts)...)
 
 		if viper.GetBool("peer.tls.enabled") {
-			creds, err := comm.GetCredentialSupport().GetDeliverServiceCredentials(channelID)
+			creds, err := comm.GetCredentialSupport().GetDeliverServiceCredentials(channelID, staticRootsEnabled())
 			if err != nil {
 				return nil, fmt.Errorf("failed obtaining credentials for channel %s: %v", channelID, err)
 			}
@@ -262,9 +263,8 @@ func DefaultConnectionFactory(channelID string) func(endpoint string) (*grpc.Cli
 		} else {
 			dialOpts = append(dialOpts, grpc.WithInsecure())
 		}
-		grpc.EnableTracing = true
-		ctx := context.Background()
-		ctx, _ = context.WithTimeout(ctx, getConnectionTimeout())
+		ctx, cancel := context.WithTimeout(context.Background(), getConnectionTimeout())
+		defer cancel()
 		return grpc.DialContext(ctx, endpoint, dialOpts...)
 	}
 }

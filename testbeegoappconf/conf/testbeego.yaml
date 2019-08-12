@@ -1,0 +1,6 @@
+appname=aaa
+runmode=dev
+
+[dev]
+appname=aaa
+

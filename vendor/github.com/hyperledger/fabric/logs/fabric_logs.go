@@ -65,6 +65,7 @@ var once sync.Once
 var fl *FabricLogger
 var loglevel int = LevelDebug
 var levelNames = [...]string{"emergency", "alert", "critical", "error", "warning", "notice", "info", "debug"}
+var logsBeforeInit = make([][]string, 8)
 
 func SetFabricLogger(containerType string) *FabricLogger {
 	once.Do(func() {
@@ -113,10 +114,10 @@ func SetFabricLogger(containerType string) *FabricLogger {
 			if err != nil {
 				panic(fmt.Sprintf("Error convert general.daily to bool, err: %s", err))
 			}
-			loginfo.rotate, err = strconv.ParseBool(config.GetString("general.rotate"))
-			if err != nil {
-				panic(fmt.Sprintf("Error convert general.rotate to bool, err: %s", err))
-			}
+			// loginfo.rotate, err = strconv.ParseBool(config.GetString("general.rotate"))
+			// if err != nil {
+			// 	panic(fmt.Sprintf("Error convert general.rotate to bool, err: %s", err))
+			// }
 			loginfo.isAutoDelete, err = strconv.ParseBool(config.GetString("general.isautodelete"))
 			if err != nil {
 				panic(fmt.Sprintf("Error convert general.isautodelete to bool, err: %s", err))
@@ -167,10 +168,10 @@ func SetFabricLogger(containerType string) *FabricLogger {
 			if err != nil {
 				panic(fmt.Sprintf("Error convert logging.daily to bool, err: %s", err))
 			}
-			loginfo.rotate, err = strconv.ParseBool(config.GetString("logging.rotate"))
-			if err != nil {
-				panic(fmt.Sprintf("Error convert logging.rotate to bool, err: %s", err))
-			}
+			// loginfo.rotate, err = strconv.ParseBool(config.GetString("logging.rotate"))
+			// if err != nil {
+			// 	panic(fmt.Sprintf("Error convert logging.rotate to bool, err: %s", err))
+			// }
 			loginfo.isAutoDelete, err = strconv.ParseBool(config.GetString("logging.isautodelete"))
 			if err != nil {
 				panic(fmt.Sprintf("Error convert logging.isautodelete to bool, err: %s", err))
@@ -214,10 +215,10 @@ func SetFabricLogger(containerType string) *FabricLogger {
 			if err != nil {
 				panic(fmt.Sprintf("Error convert CHAINCODE_LOG_DAILY to bool, err: %s", err))
 			}
-			loginfo.rotate, err = strconv.ParseBool(os.Getenv("CHAINCODE_LOG_ROTATE"))
-			if err != nil {
-				panic(fmt.Sprintf("Error convert CHAINCODE_LOG_DAILY to bool, err: %s", err))
-			}
+			// loginfo.rotate, err = strconv.ParseBool(os.Getenv("CHAINCODE_LOG_ROTATE"))
+			// if err != nil {
+			// 	panic(fmt.Sprintf("Error convert CHAINCODE_LOG_DAILY to bool, err: %s", err))
+			// }
 			loginfo.maxdays, err = strconv.Atoi(os.Getenv("CHAINCODE_LOG_MAXDAYS"))
 			if err != nil {
 				panic(fmt.Sprintf("Error convert CHAINCODE_LOG_DAILY to int, err: %s", err))
@@ -226,42 +227,53 @@ func SetFabricLogger(containerType string) *FabricLogger {
 			panic(fmt.Sprintln("containerType should not be orderer or peer or chaincode"))
 		}
 
+		loginfo.rotate = loginfo.isOpenYxlog
+
 		if loginfo.filepath == "" || len(loginfo.filepath) > FilenameLenMax {
 
-			fmt.Printf("log config args err, filepath:%s, filepath_len:%d, use default arg: %s.\n", loginfo.filepath, len(loginfo.filepath), DefaultFilePath)
+			fl.logBeforeInit(LevelError, fmt.Sprintf("log config args err, filepath:%s, filepath_len:%d, use default arg: %s.\n", loginfo.filepath, len(loginfo.filepath), DefaultFilePath))
 			loginfo.filepath = DefaultFilePath
 		}
 
 		if loginfo.filename == "" || len(loginfo.filename) > FilepathLenMax {
-			fmt.Printf("log config args err,filename:%s,filename_len:%d,use default arg: %s.\n", loginfo.filename, len(loginfo.filename), DefaultFileName)
+			fl.logBeforeInit(LevelError, fmt.Sprintf("log config args err,filename:%s,filename_len:%d,use default arg: %s.\n", loginfo.filename, len(loginfo.filename), DefaultFileName))
 			loginfo.filename = DefaultFileName
 		}
 
 		if loginfo.maxlinesPerFile <= 0 || loginfo.maxlinesPerFile > math.MaxInt32 {
-			fmt.Printf("log config args err,maxlinesPerFile:%d,use default arg: %d.\n", loginfo.maxlinesPerFile, DefaultMaxlinesPerFile)
+			fl.logBeforeInit(LevelError, fmt.Sprintf("log config args err,maxlinesPerFile:%d,use default arg: %d.\n", loginfo.maxlinesPerFile, DefaultMaxlinesPerFile))
 			loginfo.maxlinesPerFile = DefaultMaxlinesPerFile
 		}
 
 		if loginfo.maxsizePerFile <= 0 || loginfo.maxsizePerFile > math.MaxInt32 {
-			fmt.Printf("log config args err,maxsizePerFile:%d,use default arg: %d.\n", loginfo.maxsizePerFile, DefaultMaxsizePerFile)
+			fl.logBeforeInit(LevelError, fmt.Sprintf("log config args err,maxsizePerFile:%d,use default arg: %d.\n", loginfo.maxsizePerFile, DefaultMaxsizePerFile))
 			loginfo.maxsizePerFile = DefaultMaxsizePerFile
 		}
 
 		if loginfo.maxTotalSize <= 0 || loginfo.maxTotalSize > math.MaxInt64 {
-			fmt.Printf("log config args err,maxTotalSize:%d,use default arg: %d.\n", loginfo.maxTotalSize, DefaultMaxTotalSize)
+			fl.logBeforeInit(LevelError, fmt.Sprintf("log config args err,maxTotalSize:%d,use default arg: %d.\n", loginfo.maxTotalSize, DefaultMaxTotalSize))
 			loginfo.maxTotalSize = DefaultMaxTotalSize
 		}
 
 		if loginfo.maxdays <= 0 || loginfo.maxdays > math.MaxInt32 {
-			fmt.Printf("log config args err,maxdays:%d,use default arg: %d.\n", loginfo.maxdays, DefaultMaxDays)
+			fl.logBeforeInit(LevelError, fmt.Sprintf("log config args err,maxdays:%d,use default arg: %d.\n", loginfo.maxdays, DefaultMaxDays))
 			loginfo.maxdays = DefaultMaxDays
 		}
 
 		if loglevel < 0 || loglevel > 7 {
-			fmt.Printf("log config args err,loglevel:%d,use default arg: %d.\n", loglevel, DefaultLogLevel)
+			fl.logBeforeInit(LevelError, fmt.Sprintf("log config args err,loglevel:%d,use default arg: %d.\n", loglevel, DefaultLogLevel))
 			loglevel = DefaultLogLevel
 		}
 		fl = GetLogger(loginfo)
+
+		for level, logs := range logsBeforeInit {
+			logFunc := []func(...interface{}){fl.Emergency, fl.Alert, fl.Critical, fl.Error, fl.Warning, fl.Notice, fl.Info, fl.Debug}
+
+			for _, log := range logs {
+				logFunc[level](log)
+			}
+		}
+		logsBeforeInit = nil
 	})
 	return fl
 }
@@ -306,6 +318,10 @@ func concat(args ...interface{}) string {
 	// Sprintln will add space between args, and always add an extra '\n' character at the end
 	resultString = resultString[0 : len(resultString)-1]
 	return resultString
+}
+
+func (l *FabricLogger) logBeforeInit(level int, log string) {
+	logsBeforeInit[level] = append(logsBeforeInit[level], log)
 }
 
 func (l *FabricLogger) Debug(v ...interface{}) {

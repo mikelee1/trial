@@ -7,19 +7,19 @@ SPDX-License-Identifier: Apache-2.0
 package chaincode
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
 
-	"github.com/golang/protobuf/proto"
-	"golang.org/x/net/context"
+	"github.com/pkg/errors"
 
+	"github.com/golang/protobuf/proto"
 	"github.com/hyperledger/fabric/core/common/ccpackage"
 	"github.com/hyperledger/fabric/core/common/ccprovider"
 	"github.com/hyperledger/fabric/peer/common"
 	pcommon "github.com/hyperledger/fabric/protos/common"
 	pb "github.com/hyperledger/fabric/protos/peer"
 	"github.com/hyperledger/fabric/protos/utils"
-
 	"github.com/spf13/cobra"
 )
 
@@ -84,7 +84,12 @@ func install(msg proto.Message, cf *ChaincodeCmdFactory) error {
 	}
 
 	if proposalResponse != nil {
+		if proposalResponse.Response.Status != int32(pcommon.Status_SUCCESS) {
+			return errors.Errorf("Bad response: %d - %s", proposalResponse.Response.Status, proposalResponse.Response.Message)
+		}
 		logger.Infof("Installed remotely %v", proposalResponse)
+	} else {
+		return errors.New("Error during install: received nil proposal response")
 	}
 
 	return nil
@@ -141,7 +146,7 @@ func getPackageFromFile(ccpackfile string) (proto.Message, *pb.ChaincodeDeployme
 		}
 
 		//...and get the CDS at last
-		cds, err = utils.GetChaincodeDeploymentSpec(sCDS.ChaincodeDeploymentSpec)
+		cds, err = utils.GetChaincodeDeploymentSpec(sCDS.ChaincodeDeploymentSpec, platformRegistry)
 		if err != nil {
 			return nil, nil, fmt.Errorf("error extracting chaincode deployment spec(%s)", err)
 		}

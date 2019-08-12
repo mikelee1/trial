@@ -2,11 +2,11 @@ package sdk
 
 import (
 	"context"
-	"time"
-
+	"fmt"
 	pp "github.com/hyperledger/fabric/protos/peer"
 	putils "github.com/hyperledger/fabric/protos/utils"
 	"google.golang.org/grpc"
+	"time"
 )
 
 const (
@@ -81,6 +81,10 @@ func (client *Client) Endorse(chainID string, chaincode string, args [][]byte, t
 	}()
 
 	responses, err := endorse(propBytes, signature, ecList)
+	if err == nil && len(responses) == 0 {
+		err = fmt.Errorf("Endorse resps should not be empty")
+	}
+
 	return txID, prop, responses, err
 }
 

@@ -1,23 +1,15 @@
 package main
 
-import (
-	"fmt"
-	"sync"
-)
+import "fmt"
 
 func main() {
-	var wg sync.WaitGroup
-	wg.Add(20)
-	for i := 0; i < 10; i++ {
+	a := 11
+	switch {
+	case a<11:
+		fmt.Println("<11")
+	case a>11:
+		fmt.Println(">11")
 
-		go func() {
-
-			fmt.Println(i)
-
-			wg.Done()
-
-		}()
 	}
-	wg.Wait()
-
+	fmt.Println("end")
 }

@@ -9,7 +9,7 @@ import (
 	"github.com/hyperledger/fabric/common/flogging"
 	"github.com/hyperledger/fabric/msp"
 	"github.com/hyperledger/fabric/msp/cache"
-	logging "github.com/op/go-logging"
+	"fmt"
 )
 
 /*
@@ -39,7 +39,7 @@ const mspCacheSize = 100
 
 const keystore = "keystore"
 
-var logger *logging.Logger
+var logger *flogging.FabricLogger
 var mspCache *lru.Cache
 var mspLock sync.Mutex
 
@@ -87,7 +87,6 @@ func NewClient(identity string, mspID string, dir string, gm bool) (*Client, err
 func initializeMsp(identity string, dir string, mspID string, bccspConfig *factory.FactoryOpts) (msp.MSP, error) {
 	mspLock.Lock()
 	defer mspLock.Unlock()
-
 	if value, ok := mspCache.Get(identity); ok {
 		logger.Debugf("Cached msp for identity: %s", identity)
 		return value.(msp.MSP), nil
@@ -97,8 +96,9 @@ func initializeMsp(identity string, dir string, mspID string, bccspConfig *facto
 		bccspConfig = factory.GetDefaultOpts()
 	}
 	bccspConfig = msp.SetupBCCSPKeystoreConfig(bccspConfig, path.Join(dir, keystore))
-
-	bccsp, err := factory.GetBCCSPFromOpts(bccspConfig)
+	fmt.Println("keystorepath:",path.Join(dir, keystore))
+	fmt.Println(bccspConfig.SwOpts.FileKeystore)
+	err := factory.InitFactories(bccspConfig)
 	if err != nil {
 		logger.Error("Error creating bccsp instance", err)
 		return nil, err
@@ -108,8 +108,8 @@ func initializeMsp(identity string, dir string, mspID string, bccspConfig *facto
 	if err != nil {
 		return nil, err
 	}
-
-	mspInst, err := msp.NewBccspMsp(msp.MSPv1_0, bccsp)
+	//mspInst, err := msp.New(msp.MSPv1_0, bccsp)
+	mspInst, err := msp.New(&msp.BCCSPNewOpts{msp.NewBaseOpts{Version: msp.MSPv1_0}})
 	if err != nil {
 		return nil, err
 	}

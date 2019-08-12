@@ -23,15 +23,15 @@ import (
 	"crypto/elliptic"
 	"crypto/hmac"
 	"crypto/rand"
-	"errors"
-	"io"
-	"crypto/subtle"
-	"fmt"
-	"crypto/x509"
 	"crypto/sha256"
-	"golang.org/x/crypto/hkdf"
-	"github.com/hyperledger/fabric/sm/sm4"
+	"crypto/subtle"
+	"crypto/x509"
+	"errors"
+	"fmt"
 	"github.com/hyperledger/fabric/sm/sm3"
+	"github.com/hyperledger/fabric/sm/sm4"
+	"golang.org/x/crypto/hkdf"
+	"io"
 )
 
 func aesEncrypt(key, plain []byte) ([]byte, error) {
@@ -69,19 +69,19 @@ func aesDecrypt(key, text []byte) ([]byte, error) {
 	return plain, nil
 }
 
-func smEncrypt(key,text []byte) ([]byte,error){
-	return sm4.Encrypt(key,text)
+func smEncrypt(key, text []byte) ([]byte, error) {
+	return sm4.Encrypt(key, text)
 }
 
-func smDecrypt(key,text []byte) ([]byte,error){
-	return sm4.Decrypt(key,text)
+func smDecrypt(key, text []byte) ([]byte, error) {
+	return sm4.Decrypt(key, text)
 }
 
-func eciesGenerateKey(curve elliptic.Curve,rand io.Reader) (*ecdsa.PrivateKey, error) {
+func eciesGenerateKey(curve elliptic.Curve, rand io.Reader) (*ecdsa.PrivateKey, error) {
 	return ecdsa.GenerateKey(curve, rand)
 }
 
-func eciesEncrypt(rand io.Reader, pub *ecdsa.PublicKey, s1, s2 []byte, plain []byte,usesm bool) ([]byte, error) {
+func eciesEncrypt(rand io.Reader, pub *ecdsa.PublicKey, s1, s2 []byte, plain []byte, usesm bool) ([]byte, error) {
 	params := pub.Curve
 
 	hash := sha256.New
@@ -126,9 +126,9 @@ func eciesEncrypt(rand io.Reader, pub *ecdsa.PublicKey, s1, s2 []byte, plain []b
 	// Use the encryption operation of the symmetric encryption scheme
 	// to encrypt m under EK as ciphertext EM
 	var EM []byte
-	if !usesm{
+	if !usesm {
 		EM, err = aesEncrypt(kE, plain)
-	}else{
+	} else {
 		EM, err = smEncrypt(kE, plain)
 	}
 	// Use the tagging operation of the MAC scheme to compute
@@ -152,10 +152,10 @@ func eciesEncrypt(rand io.Reader, pub *ecdsa.PublicKey, s1, s2 []byte, plain []b
 	return ciphertext, nil
 }
 
-func eciesDecrypt(priv *ecdsa.PrivateKey, s1, s2 []byte, ciphertext []byte,usesm bool) ([]byte, error) {
+func eciesDecrypt(priv *ecdsa.PrivateKey, s1, s2 []byte, ciphertext []byte, usesm bool) ([]byte, error) {
 	params := priv.Curve
 	hash := sha256.New
-	if usesm{
+	if usesm {
 		hash = sm3.New
 	}
 
@@ -207,7 +207,7 @@ func eciesDecrypt(priv *ecdsa.PrivateKey, s1, s2 []byte, ciphertext []byte,usesm
 	// generate keying data K of length ecnKeyLen + macKeyLen octects from Z
 	// ans s1
 	kELength := 32
-	if usesm{
+	if usesm {
 		kELength = 16
 	}
 	kE := make([]byte, kELength)
@@ -224,7 +224,7 @@ func eciesDecrypt(priv *ecdsa.PrivateKey, s1, s2 []byte, ciphertext []byte,usesm
 
 	// Use the tagging operation of the MAC scheme to compute
 	// the tag D on EM || s2 and then compare
-	mac := hmac.New(hash,kM)
+	mac := hmac.New(hash, kM)
 	mac.Write(ciphertext[mStart:mEnd])
 	if len(s2) > 0 {
 		mac.Write(s2)
@@ -241,30 +241,31 @@ func eciesDecrypt(priv *ecdsa.PrivateKey, s1, s2 []byte, ciphertext []byte,usesm
 	// Use the decryption operation of the symmetric encryption scheme
 	// to decryptr EM under EK as plaintext
 	var plaintext []byte
-	if !usesm{
+	if !usesm {
 		plaintext, err = aesDecrypt(kE, ciphertext[mStart:mEnd])
-	}else{
-		plaintext,err = smDecrypt(kE,ciphertext[mStart:mEnd])
+	} else {
+		plaintext, err = smDecrypt(kE, ciphertext[mStart:mEnd])
 	}
 	return plaintext, err
 }
 
-func EciesEncrypt(pub *ecdsa.PublicKey,msg []byte,usesm bool) ([]byte,error){
-	return eciesEncrypt(rand.Reader,pub,nil,nil,msg,usesm)
+func EciesEncrypt(pub *ecdsa.PublicKey, msg []byte, usesm bool) ([]byte, error) {
+	return eciesEncrypt(rand.Reader, pub, nil, nil, msg, usesm)
 }
 
-func EciesDecrypt(priv *ecdsa.PrivateKey,ciphertext []byte,usesm bool) ([]byte,error){
-	return eciesDecrypt(priv,nil,nil,ciphertext,usesm)
+func EciesDecrypt(priv *ecdsa.PrivateKey, ciphertext []byte, usesm bool) ([]byte, error) {
+	return eciesDecrypt(priv, nil, nil, ciphertext, usesm)
 }
 
-func ParseECPrivateKey(kb []byte) (*ecdsa.PrivateKey,error){
+func ParseECPrivateKey(kb []byte) (*ecdsa.PrivateKey, error) {
 	return x509.ParseECPrivateKey(kb)
 }
 
-func ParseECPublicKey(kb []byte) (*ecdsa.PublicKey,error){
-	pub,err := x509.ParsePKIXPublicKey(kb)
-	return pub.(*ecdsa.PublicKey),err
+func ParseECPublicKey(kb []byte) (*ecdsa.PublicKey, error) {
+	pub, err := x509.ParsePKIXPublicKey(kb)
+	return pub.(*ecdsa.PublicKey), err
 }
+
 /*
 func main(){
 	//rand.Reader

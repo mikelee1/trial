@@ -40,7 +40,7 @@ func (client *Client) DiscoveryChannel(chainID string, peer *Endpoint) (map[stri
 	dialer := func() (*grpc.ClientConn, error) {
 		return createConnection(peer)
 	}
-	dc := dis.NewClient(dialer, client.signer.Sign)
+	dc := dis.NewClient(dialer, client.signer.Sign, 1)
 	ctx := context.TODO()
 	req := dis.NewRequest().OfChannel(chainID).AddConfigQuery().AddPeersQuery()
 	auth := &pd.AuthInfo{

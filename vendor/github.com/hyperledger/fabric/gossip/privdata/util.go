@@ -8,16 +8,18 @@ package privdata
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/golang/protobuf/proto"
 	"github.com/hyperledger/fabric/core/ledger"
 	"github.com/hyperledger/fabric/core/ledger/kvledger/txmgmt/rwsetutil"
+	privdatacommon "github.com/hyperledger/fabric/gossip/privdata/common"
 	"github.com/hyperledger/fabric/protos/common"
-	gossip2 "github.com/hyperledger/fabric/protos/gossip"
 	"github.com/hyperledger/fabric/protos/ledger/rwset"
 	"github.com/hyperledger/fabric/protos/ledger/rwset/kvrwset"
 	"github.com/hyperledger/fabric/protos/msp"
 	"github.com/hyperledger/fabric/protos/peer"
+	"github.com/spf13/viper"
 )
 
 type txValidationFlags []uint8
@@ -226,6 +228,20 @@ func sampleCollHashedRwSet(collectionName string, hash []byte, hasWrites bool) *
 	return collHashedRwSet
 }
 
+func extractCollectionConfig(configPackage *common.CollectionConfigPackage, collectionName string) *common.CollectionConfig {
+	for _, config := range configPackage.Config {
+		switch cconf := config.Payload.(type) {
+		case *common.CollectionConfig_StaticCollectionConfig:
+			if cconf.StaticCollectionConfig.Name == collectionName {
+				return config
+			}
+		default:
+			return nil
+		}
+	}
+	return nil
+}
+
 type pvtDataFactory struct {
 	data []*ledger.TxPvtData
 }
@@ -262,10 +278,10 @@ func (df *pvtDataFactory) create() []*ledger.TxPvtData {
 
 type digestsAndSourceFactory struct {
 	d2s     dig2sources
-	lastDig *gossip2.PvtDataDigest
+	lastDig *privdatacommon.DigKey
 }
 
-func (f *digestsAndSourceFactory) mapDigest(dig *gossip2.PvtDataDigest) *digestsAndSourceFactory {
+func (f *digestsAndSourceFactory) mapDigest(dig *privdatacommon.DigKey) *digestsAndSourceFactory {
 	f.lastDig = dig
 	return f
 }
@@ -280,10 +296,65 @@ func (f *digestsAndSourceFactory) toSources(peers ...string) *digestsAndSourceFa
 			Endorser: []byte(p),
 		})
 	}
-	f.d2s[f.lastDig] = endorsements
+	f.d2s[*f.lastDig] = endorsements
 	return f
 }
 
 func (f *digestsAndSourceFactory) create() dig2sources {
 	return f.d2s
+}
+
+const btlPullMarginDefault = 10
+
+func GetBtlPullMargin() uint64 {
+	var result uint64
+	if viper.IsSet("peer.gossip.pvtData.btlPullMargin") {
+		btlMarginVal := viper.GetInt("peer.gossip.pvtData.btlPullMargin")
+		if btlMarginVal < 0 {
+			result = btlPullMarginDefault
+		} else {
+			result = uint64(btlMarginVal)
+		}
+	} else {
+		result = btlPullMarginDefault
+	}
+	return result
+}
+
+const (
+	rreconcileSleepIntervalConfigKey = "peer.gossip.pvtData.reconcileSleepInterval"
+	reconcileSleepIntervalDefault    = time.Minute * 1
+	reconcileBatchSizeConfigKey      = "peer.gossip.pvtData.reconcileBatchSize"
+	reconcileBatchSizeDefault        = 10
+	reconciliationEnabledConfigKey   = "peer.gossip.pvtData.reconciliationEnabled"
+)
+
+// this func reads reconciler configuration values from core.yaml and returns ReconcilerConfig
+func GetReconcilerConfig() *ReconcilerConfig {
+	reconcileSleepInterval := viper.GetDuration(rreconcileSleepIntervalConfigKey)
+	if reconcileSleepInterval == 0 {
+		logger.Warning("Configuration key", rreconcileSleepIntervalConfigKey, "isn't set, defaulting to", reconcileSleepIntervalDefault)
+		reconcileSleepInterval = reconcileSleepIntervalDefault
+	}
+	reconcileBatchSize := viper.GetInt(reconcileBatchSizeConfigKey)
+	if reconcileBatchSize == 0 {
+		logger.Warning("Configuration key", reconcileBatchSizeConfigKey, "isn't set, defaulting to", reconcileBatchSizeDefault)
+		reconcileBatchSize = reconcileBatchSizeDefault
+	}
+	isEnabled := viper.GetBool(reconciliationEnabledConfigKey)
+	return &ReconcilerConfig{SleepInterval: reconcileSleepInterval, BatchSize: reconcileBatchSize, IsEnabled: isEnabled}
+}
+
+const (
+	transientBlockRetentionConfigKey = "peer.gossip.pvtData.transientstoreMaxBlockRetention"
+	TransientBlockRetentionDefault   = 1000
+)
+
+func GetTransientBlockRetention() uint64 {
+	transientBlockRetention := uint64(viper.GetInt(transientBlockRetentionConfigKey))
+	if transientBlockRetention == 0 {
+		logger.Warning("Configuration key", transientBlockRetentionConfigKey, "isn't set, defaulting to", TransientBlockRetentionDefault)
+		transientBlockRetention = TransientBlockRetentionDefault
+	}
+	return transientBlockRetention
 }
