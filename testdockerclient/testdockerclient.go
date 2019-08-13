@@ -2,26 +2,24 @@ package main
 
 import (
 	"context"
-	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 	dc "github.com/fsouza/go-dockerclient"
 	"github.com/op/go-logging"
-	"myproj/try/common/fmtstruct"
 	logger2 "myproj/try/common/logger"
-	"time"
-	"fmt"
 )
 
 var logger = &logging.Logger{}
 
 var (
-	containerName  = "test11"
-	host           = "http://192.168.9.82:2375"
+	containerName  = "test12"
+	//host           = "http://192.168.9.83:2375"
 	//standardCli, _ = client.NewClientWithOpts(client.WithHost(host))
+	//fsouzaCli, _   = dc.NewClient(host)
+
+	host           = "http://192.168.9.82:2375"
 	standardCli, _ = client.NewClientWithOpts(client.WithHost(host),client.WithTLSClientConfig("./testdockerclient/ca.pem", "./testdockerclient/client/cert.pem","./testdockerclient/client/key.pem"))
 	fsouzaCli, _   = dc.NewTLSClient(host,"./testdockerclient/client/cert.pem","./testdockerclient/client/key.pem","./testdockerclient/ca.pem")
-	//fsouzaCli, _   = dc.NewClient(host)
+
 
 )
 
@@ -39,15 +37,12 @@ func main() {
 		return
 	}
 
-	info,err := standardCli.Info(context.TODO())
+	_, err = standardCli.Info(context.TODO())
 	if err != nil {
 		logger.Error(err)
 		return
 	}
-	fmt.Println("---")
-	//fmt.Println(info.NCPU)
-	fmt.Println(fmtstruct.String(info))
-	fmt.Println("---")
+
 	_,err = fsouzaCli.InspectImage("alpine")
 	if err != nil {
 		logger.Error(err)
@@ -56,6 +51,7 @@ func main() {
 
 	//删除容器
 	for _, value := range conlist {
+		logger.Info(value.Names[0])
 		//删除test容器
 		if value.Names[0] == "/"+containerName {
 			err = fsouzaCli.RemoveContainer(dc.RemoveContainerOptions{
@@ -74,7 +70,7 @@ func main() {
 		Config: &dc.Config{
 			Image:      "alpine",
 			Tty:        true,
-			Cmd:        []string{"sh", "-c", "ls & touch 1.txt & sh"},
+			Cmd:        []string{"sh", "-c", "wget http://test11:18000 & sh"},
 			WorkingDir: "/home",
 			Volumes: map[string]struct{}{
 				"/var/hyperledger": struct {}{},
@@ -97,7 +93,8 @@ func main() {
 			},
 			AutoRemove: true,
 			UsernsMode: "host",
-			ExtraHosts: []string{"host1:192.168.9.82"},
+			ExtraHosts:[]string{"test11:192.168.9.83"},
+			//Links:[]string{"test11:test11"},
 		},
 	})
 	if err != nil {
@@ -110,48 +107,48 @@ func main() {
 		panic(err)
 	}
 
-	//暂停
-	time.Sleep(5 * time.Second)
-	err = fsouzaCli.PauseContainer(containerName)
-	if err != nil {
-		logger.Error(err)
-		return
-	}
-	logger.Info("pause well")
+	////暂停
+	//time.Sleep(5 * time.Second)
+	//err = fsouzaCli.PauseContainer(containerName)
+	//if err != nil {
+	//	logger.Error(err)
+	//	return
+	//}
+	//logger.Info("pause well")
+	//
+	////启动
+	//time.Sleep(5 * time.Second)
+	//err = fsouzaCli.UnpauseContainer(containerName)
+	//if err != nil {
+	//	logger.Error(err)
+	//	return
+	//}
+	//logger.Info("unpause well")
 
-	//启动
-	time.Sleep(5 * time.Second)
-	err = fsouzaCli.UnpauseContainer(containerName)
-	if err != nil {
-		logger.Error(err)
-		return
-	}
-	logger.Info("unpause well")
 
-
-	//容器状态
-	logger.Error(resp.ID)
-	cs, err := fsouzaCli.InspectContainer(resp.ID)
-	if err != nil {
-		logger.Error(err)
-		return
-	}
-	logger.Info(cs.State.Status)
+	////容器状态
+	//logger.Error(resp.ID)
+	//cs, err := fsouzaCli.InspectContainer(resp.ID)
+	//if err != nil {
+	//	logger.Error(err)
+	//	return
+	//}
+	//logger.Info(cs.State.Status)
 
 	//dcInfo,err := fsouzaCli.Info()
 	//logger.Info(fmtstruct.String(dcInfo))
 
-	//根据容器名获取容器状态
-	a, err := fsouzaCli.ListContainers(dc.ListContainersOptions{
-		Filters: map[string][]string{"name": []string{containerName}},
-	})
-	logger.Info(fmtstruct.String(a))
-
-	//根据容器名获取容器状态
-	fsArgs := filters.NewArgs()
-	fsArgs.Add("name", containerName)
-	fcl, err := standardCli.ContainerList(context.TODO(), types.ContainerListOptions{
-		Filters: fsArgs,
-	})
-	logger.Info(fmtstruct.String(fcl))
+	////根据容器名获取容器状态
+	//a, err := fsouzaCli.ListContainers(dc.ListContainersOptions{
+	//	Filters: map[string][]string{"name": []string{containerName}},
+	//})
+	//logger.Info(fmtstruct.String(a))
+	//
+	////根据容器名获取容器状态
+	//fsArgs := filters.NewArgs()
+	//fsArgs.Add("name", containerName)
+	//fcl, err := standardCli.ContainerList(context.TODO(), types.ContainerListOptions{
+	//	Filters: fsArgs,
+	//})
+	//logger.Info(fmtstruct.String(fcl))
 }
