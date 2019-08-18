@@ -37,12 +37,26 @@ type OrgChannel struct {
 	Currentorg string
 }
 
+type Org struct {
+	Id           int
+	UserId       int
+	MspId        string
+	GenesisBlock string `orm:"type(text)"`
+	PublicBlock  string `orm:"type(text)"`
+	TlsCert      string `orm:"type(text)"`
+	RootCert     string `orm:"type(text)"`
+	AdminCert    string `orm:"type(text)"`
+	AnchorPeers  string
+	Consensus    string
+	Namespace    string
+}
+
 var Oconnect orm.Ormer
 var dbtype = "mysql"
 var dbname1 = "wasabi"
 var dbuser = "yunphant"
 var dbpasswd = "123456"
-var dbip = "192.168.9.87"
+var dbip = "192.168.9.83"
 var dbport = "38255"
 var dbcharset = "utf8"
 
@@ -54,6 +68,7 @@ func init() {
 	orm.RegisterModel(new(ChaincodeInfo))
 	orm.RegisterModel(new(OrgChannel))
 	orm.RegisterModel(new(Inform))
+	orm.RegisterModel(new(Org))
 	connectstr := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=%s", dbuser, dbpasswd, dbip, dbport, dbname1, dbcharset)
 	// 数据库密码明文去除
 	err := orm.RegisterDriver(dbtype, orm.DRMySQL)
@@ -97,8 +112,32 @@ type InformDetail struct {
 	SignerId    string
 }
 
+
+//修改orgchannel表
+func queryOrg() {
+	tmp := &Org{
+		UserId: 1,
+	}
+	tmp1 := &Org{
+		Id:22,
+		UserId: 1,
+	}
+	if _,err := Oconnect.Insert(tmp1); err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	if err := Oconnect.QueryTable("org").One(tmp); err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(tmp.Id)
+}
+
 func main() {
-	addOrgChannel()
+
+	queryOrg()
+	//addOrgChannel()
 	//tmpdata := []interface{}{}
 	//Oconnect.Begin()
 	//ccAmount, err := Oconnect.Raw("select a.name from chaincode_info a left join auth b on b.channel = a.channel" +

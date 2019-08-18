@@ -6,6 +6,7 @@ import (
 	dc "github.com/fsouza/go-dockerclient"
 	"github.com/op/go-logging"
 	logger2 "myproj/try/common/logger"
+	"github.com/docker/docker/api/types/volume"
 )
 
 var logger = &logging.Logger{}
@@ -19,15 +20,28 @@ var (
 	host           = "http://192.168.9.82:2375"
 	standardCli, _ = client.NewClientWithOpts(client.WithHost(host),client.WithTLSClientConfig("./testdockerclient/ca.pem", "./testdockerclient/client/cert.pem","./testdockerclient/client/key.pem"))
 	fsouzaCli, _   = dc.NewTLSClient(host,"./testdockerclient/client/cert.pem","./testdockerclient/client/key.pem","./testdockerclient/ca.pem")
-
-
 )
 
 func init() {
 	logger = logger2.GetLogger()
 }
 
+
+
 func main() {
+	standardCli.VolumeCreate(context.TODO(),volume.VolumeCreateBody{})
+	var err error
+	err = fsouzaCli.PullImage(dc.PullImageOptions{
+		Repository:"192.168.9.83:5000/busybox",
+		Tag:"latest",
+		Registry:"http://192.168.9.83:5000",
+	},dc.AuthConfiguration{})
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+	logger.Info("good")
+
 	//获取容器列表
 	conlist, err := fsouzaCli.ListContainers(dc.ListContainersOptions{
 		All: true,
