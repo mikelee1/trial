@@ -75,61 +75,67 @@ func Test_volume1(t *testing.T) {
 			Tty:   true,
 			Cmd:   []string{"sh", "-c", " sh"},
 			Image: "alpine",
+			Volumes:map[string]struct{}{
+				"/nfs": struct {}{},
+			},
 		},
 		HostConfig: &docker2.HostConfig{
+
 			Mounts:[]docker2.HostMount{
 				//mount1
 				docker2.HostMount{
 					Type:   "volume",
-					Target: "/var/hyperledger/orderer",
+					Target: "/var/hyperledger",
 					VolumeOptions: &docker2.VolumeOptions{
 						DriverConfig: docker2.VolumeDriverConfig{
 							Name: "local",
 							Options: map[string]string{
 								"type":   "nfs",
-								"device": fmt.Sprintf("%s:%s/orderer", nfshost, nfsdir),
+								"device": fmt.Sprintf("%s:%s", nfshost, nfsdir),
 								"o":      fmt.Sprintf("addr=%s,rw,tcp,nolock", nfshost),
 							},
 						},
 					},
 				},
-				//mount2
+
 				docker2.HostMount{
 					Type:   "volume",
-					Target: "/var/hyperledger/orderer/common",
+					Target: "/nfs",
 					VolumeOptions: &docker2.VolumeOptions{
 						DriverConfig: docker2.VolumeDriverConfig{
 							Name: "local",
 							Options: map[string]string{
 								"type":   "nfs",
-								"device": fmt.Sprintf("%s:%s/orderer/common", nfshost, nfsdir),
+								"device": fmt.Sprintf("%s:%s", nfshost, nfsdir),
 								"o":      fmt.Sprintf("addr=%s,rw,tcp,nolock", nfshost),
 							},
 						},
 					},
 				},
-				//mount3,和mount1的挂载device一样
-				docker2.HostMount{
-					Type:   "volume",
-					Target: "/var/hyperledger/orderer1",
-					VolumeOptions: &docker2.VolumeOptions{
-						DriverConfig: docker2.VolumeDriverConfig{
-							Name: "local",
-							Options: map[string]string{
-								"type":   "nfs",
-								"device": fmt.Sprintf("%s:%s/orderer", nfshost, nfsdir),
-								"o":      fmt.Sprintf("addr=%s,rw,tcp,nolock", nfshost),
-							},
-						},
-					},
-				},
+
+				////mount3,和mount1的挂载device一样
+				//docker2.HostMount{
+				//	Type:   "volume",
+				//	Target: "/var/hyperledger/orderer2",
+				//	VolumeOptions: &docker2.VolumeOptions{
+				//		DriverConfig: docker2.VolumeDriverConfig{
+				//			Name: "local",
+				//			Options: map[string]string{
+				//				"type":   "nfs",
+				//				"device": fmt.Sprintf("%s:%s/orderer", nfshost, nfsdir),
+				//				"o":      fmt.Sprintf("addr=%s,rw,tcp,nolock", nfshost),
+				//			},
+				//		},
+				//	},
+				//},
 
 			},
+			Binds:[]string{
+				//mike 宿主机上的地址进行映射
+				//"/nfs:/var/hyperledger/orderer:rw",
+				"/nfs/orderer:/var/hyperledger/orderer:rw",
+			},
 		},
-
-
-
-
 	})
 	if err != nil {
 		logger.Error(err)

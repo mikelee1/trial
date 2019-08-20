@@ -1,8 +1,9 @@
 package main
 
 import (
-	"io/ioutil"
 	"os"
+	"fmt"
+	"io"
 )
 
 func check(e error) {
@@ -27,27 +28,30 @@ func checkFileIsExist(filename string) bool {
  */
 
 func main() {
-	var wireteString = "测试n"
+	var wireteString = "测试dfn"
+	filename := "./saoutput2.txt"
 	//var filename = "./output1.txt";
-	//var f *os.File
-	//var err1 error;
+	var f *os.File
+	var err1 error;
 	///******************* 第一种方式: 使用 io.WriteString 写入文件 *************************************/
-	//if checkFileIsExist(filename) { //如果文件存在
-	//	f, err1 = os.OpenFile(filename, os.O_APPEND, 0666) //打开文件
-	//	fmt.Println("文件存在");
-	//}else {
-	//	f, err1 = os.Create(filename) //创建文件
-	//	fmt.Println("文件不存在");
-	//}
-	//check(err1)
-	//n, err1 := io.WriteString(f, wireteString) //写入文件(字符串)
-	//check(err1)
-	//fmt.Printf("写入 %d 个字节n", n);
+	if checkFileIsExist(filename) { //如果文件存在
+		f, err1 = os.OpenFile(filename, os.O_TRUNC|os.O_WRONLY, 0666) //打开文件
+		fmt.Println("文件存在");
+	}else {
+		f, err1 = os.Create(filename) //创建文件
+		fmt.Println("文件不存在");
+	}
+	check(err1)
+	n, err1 := io.WriteString(f, wireteString) //写入文件(字符串)
+	check(err1)
+	fmt.Printf("写入 %d 个字节n", n);
 
 	/******************* 第二种方式: 使用 ioutil.WriteFile 写入文件 *************************************/
-	var d1 = []byte(wireteString)
-	err2 := ioutil.WriteFile("./output2.txt", d1, 0666) //写入文件(字节数组)
-	check(err2)
+	//var d1 = []byte(wireteString)
+	//err2 := ioutil.WriteFile(filename, d1, 0666) //写入文件(字节数组)
+	//check(err2)
+
+
 	//
 	///******************* 第三种方式: 使用 File(Write,WriteString) 写入文件 *************************************/
 	//f, err3 := os.Create("./output3.txt") //创建文件
