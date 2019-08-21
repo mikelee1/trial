@@ -1,17 +1,18 @@
 package main
 
 import (
-	"aria/core"
 	"fmt"
 	"github.com/op/go-logging"
 	"github.com/spf13/viper"
 	"os"
+	logger2 "myproj/try/common/logger"
+	"myproj/try/common/flatteninterface"
 )
 
 var logger *logging.Logger
 
 func init() {
-	logger = logging.MustGetLogger("test config")
+	logger = logger2.GetLogger()
 }
 
 type Config struct {
@@ -44,7 +45,7 @@ func main() {
 		logger.Error(err)
 		return
 	}
-	for _, v1 := range core.Flatten(c) {
+	for _, v1 := range flatteninterface.Flatten(c) {
 		fmt.Println(v1)
 	}
 }
