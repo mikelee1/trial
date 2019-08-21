@@ -209,3 +209,20 @@ func Test_Join(t *testing.T) {
 	}
 	t.Log(string(ret))
 }
+
+func Test_CreateAndJoinChannel(t *testing.T) {
+	data := models.InitChannelRequest{
+		ChannelName: "channel3",
+		Orgs: []string{baas1, baas2},
+		Peers: []string{"peer-0-"+baas1, "peer-1-"+baas1},
+	}
+	bytedata, _ := json.Marshal(data)
+
+	wrt := bytes.NewBuffer(bytedata)
+
+	_, err := http.Post("http://"+baas2Host+":8081/channel/createandjoin", "application/json", wrt)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+}

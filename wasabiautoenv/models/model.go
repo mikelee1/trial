@@ -40,3 +40,9 @@ type IndirectInvokeRequest struct {
 	//PeerNodes    []*ServiceNode
 	//OrdererNodes []*ServiceNode
 }
+
+type InitChannelRequest struct {
+	Orgs        []string
+	ChannelName string
+	Peers       []string
+}
