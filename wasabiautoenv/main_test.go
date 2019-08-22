@@ -25,10 +25,11 @@ var (
 
 	channel    = "channel1"
 	chaincode  = "example1"
-	orgname    = "org1"
-	username   = "user1"
+	orgname    = "org2"
+	username   = "user2"
 	password   = "12345678"
-	indirectid = "0d72c85a-d83d-42d5-a9f8-92b29821a973"
+
+	indirectid = ""
 	cchash     = "bdb2b28b8f83c06f594cd2ac20e2e126" //默认情况下examplecc的hash都一样
 )
 
@@ -261,6 +262,25 @@ func Test_InstallAndInstantiate(t *testing.T) {
 	}
 }
 
+func Test_InstallAndUpgrade(t *testing.T) {
+	data := models.InstallAndInstantiateChainCodeRequest{
+		Args:        []string{"init", "a", "100", "b", "100"},
+		CcHash:      cchash,
+		CcName:      chaincode,
+		CcPath:      "example_cc",
+		CcVersion:   "1.0.1",
+		ChannelName: channel,
+		PeerNodes:   []string{"peer-0-baas2"},
+	}
+	bytedata, _ := json.Marshal(data)
+	wrt := bytes.NewBuffer(bytedata)
+	_, err := http.Post("http://"+baas2Host+":8081/chaincode/installandupgrade", "application/json", wrt)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
 func Test_CreateIndirect(t *testing.T) {
 	data := models.CreateIndirectRequest{
 		Orgname:  orgname,
@@ -302,9 +322,34 @@ func Test_LoginIndirect(t *testing.T) {
 	}
 	indirectid = b.UserId
 	logger.Info(indirectid)
+	return
+}
+
+func LoginIndirect() string {
+	data := models.LoginRequest{
+		Username: username,
+		Password: password,
+	}
+	bytedata, _ := json.Marshal(data)
+	wrt := bytes.NewBuffer(bytedata)
+	resp, err := http.Post("http://"+baas2Host+":8081/login", "application/json", wrt)
+	if err != nil {
+		return err.Error()
+	}
+	a, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	b := &models.LoginResp{}
+	err = json.Unmarshal(a, b)
+	if err != nil {
+		logger.Error(err)
+		return err.Error()
+	}
+	indirectid = b.UserId
+	return indirectid
 }
 
 func Test_Invoke(t *testing.T) {
+	indirectid = LoginIndirect()
 	data := models.IndirectInvokeRequest{
 		ChannelName: channel,
 		CcName:      chaincode,
@@ -323,6 +368,7 @@ func Test_Invoke(t *testing.T) {
 }
 
 func Test_Query(t *testing.T) {
+	indirectid = LoginIndirect()
 	data := models.IndirectInvokeRequest{
 		ChannelName: channel,
 		CcName:      chaincode,
