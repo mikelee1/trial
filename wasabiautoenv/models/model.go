@@ -46,3 +46,38 @@ type InitChannelRequest struct {
 	ChannelName string
 	Peers       []string
 }
+
+type CreateIndirectRequest struct {
+	Orgname  string `json:"orgname"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type LoginRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type LoginResp struct {
+	IsAdmin bool   `json:"isAdmin"`
+	UserId  string `json:"userId"`
+
+	HasCluster            bool   `json:"hasCluster"`
+	HasCreatedNetwork     bool   `json:"hasCreatedNetwork"`
+	HasJoinedNetwork      bool   `json:"hasJoinedNetwork"`
+	HasArtifactsGenerated bool   `json:"hasArtifactsGenerated"`
+	UserName              string `json:"userName"`
+	OrgName               string `json:"orgName"`
+}
+
+
+type InstallAndInstantiateChainCodeRequest struct {
+	CcName      string   `json:"cc_name"`
+	CcVersion   string   `json:"cc_version"`
+	Args        []string `json:"args"`
+	ChannelName string   `json:"channel_name"`
+	PeerNodes   []string `json:"peer_nodes"`
+	CcPath      string   `json:"cc_path"`
+	CcHash      string   `json:"cc_hash"`
+	Org         string
+}

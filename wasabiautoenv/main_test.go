@@ -13,7 +13,6 @@ import (
 	"net/http"
 	"os"
 	"testing"
-	"time"
 )
 
 var (
@@ -23,6 +22,14 @@ var (
 	baas2          = "baas2"
 	baas1Host      = "192.168.9.83"
 	baas2Host      = "192.168.9.82"
+
+	channel    = "channel1"
+	chaincode  = "example1"
+	orgname    = "org1"
+	username   = "user1"
+	password   = "12345678"
+	indirectid = "0d72c85a-d83d-42d5-a9f8-92b29821a973"
+	cchash     = "bdb2b28b8f83c06f594cd2ac20e2e126" //默认情况下examplecc的hash都一样
 )
 
 func init() {
@@ -79,12 +86,12 @@ func Test_Setup(t *testing.T) {
 
 func Test_Main(t *testing.T) {
 	Test_CreateIdentity(t)
-	time.Sleep(time.Minute)
 	Test_ScpIdentity(t)
 	Test_Invite(t)
 	Test_AgreeInvitation(t)
 	Test_InviteCode(t)
 	Test_Join(t)
+	Test_CreateAndJoinChannel(t)
 }
 
 func Test_CreateIdentity(t *testing.T) {
@@ -95,6 +102,12 @@ func Test_CreateIdentity(t *testing.T) {
 			models.PeerPorts{
 				Main:      30031,
 				Chaincode: 30032,
+			},
+		},
+		OrdererPorts: []models.OrdererPorts{
+			models.OrdererPorts{
+				Main:  30021,
+				Debug: 30022,
 			},
 		},
 		Company:            baas2,
@@ -212,9 +225,9 @@ func Test_Join(t *testing.T) {
 
 func Test_CreateAndJoinChannel(t *testing.T) {
 	data := models.InitChannelRequest{
-		ChannelName: "channel3",
-		Orgs: []string{baas1, baas2},
-		Peers: []string{"peer-0-"+baas1, "peer-1-"+baas1},
+		ChannelName: "channel1",
+		Orgs:        []string{baas1, baas2},
+		Peers:       []string{"peer-0-" + baas1, "peer-1-" + baas1},
 	}
 	bytedata, _ := json.Marshal(data)
 
@@ -225,4 +238,107 @@ func Test_CreateAndJoinChannel(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+}
+
+func Test_InstallAndInstantiate(t *testing.T) {
+	data := models.InstallAndInstantiateChainCodeRequest{
+		Args:        []string{"init", "a", "100", "b", "100"},
+		CcHash:      cchash,
+		CcName:      chaincode,
+		CcPath:      "example_cc",
+		CcVersion:   "1.0.0",
+		ChannelName: channel,
+		PeerNodes:   []string{"peer-0-baas2"},
+	}
+	bytedata, _ := json.Marshal(data)
+
+	wrt := bytes.NewBuffer(bytedata)
+
+	_, err := http.Post("http://"+baas2Host+":8081/chaincode/installandinstantiate", "application/json", wrt)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func Test_CreateIndirect(t *testing.T) {
+	data := models.CreateIndirectRequest{
+		Orgname:  orgname,
+		Username: username,
+		Password: password,
+	}
+	bytedata, _ := json.Marshal(data)
+
+	wrt := bytes.NewBuffer(bytedata)
+
+	_, err := http.Post("http://"+baas2Host+":8081/indirect/create", "application/json", wrt)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func Test_LoginIndirect(t *testing.T) {
+	data := models.LoginRequest{
+		Username: username,
+		Password: password,
+	}
+	bytedata, _ := json.Marshal(data)
+
+	wrt := bytes.NewBuffer(bytedata)
+
+	resp, err := http.Post("http://"+baas2Host+":8081/login", "application/json", wrt)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	a, err := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	b := &models.LoginResp{}
+	err = json.Unmarshal(a, b)
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+	indirectid = b.UserId
+	logger.Info(indirectid)
+}
+
+func Test_Invoke(t *testing.T) {
+	data := models.IndirectInvokeRequest{
+		ChannelName: channel,
+		CcName:      chaincode,
+		Args:        []string{"move", "a", "b", "3"},
+		Userid:      indirectid,
+	}
+	bytedata, _ := json.Marshal(data)
+
+	wrt := bytes.NewBuffer(bytedata)
+
+	_, err := http.Post("http://"+baas2Host+":8081/indirect/invoke", "application/json", wrt)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func Test_Query(t *testing.T) {
+	data := models.IndirectInvokeRequest{
+		ChannelName: channel,
+		CcName:      chaincode,
+		Args:        []string{"query", "a"},
+		Userid:      indirectid,
+	}
+	bytedata, _ := json.Marshal(data)
+
+	wrt := bytes.NewBuffer(bytedata)
+
+	resp, err := http.Post("http://"+baas2Host+":8081/indirect/query", "application/json", wrt)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	body, _ := ioutil.ReadAll(resp.Body)
+	defer resp.Body.Close()
+	t.Log(string(body))
 }
