@@ -55,7 +55,7 @@ func main() {
 		zipkinhttp.SpanName("request")), // name for request span
 	)
 
-	err = http.ListenAndServe("0.0.0.0:8080", r)
+	err = http.ListenAndServe("0.0.0.0:18080", r)
 	if err != nil {
 		logger.Error(err)
 		return

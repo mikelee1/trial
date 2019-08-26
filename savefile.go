@@ -4,6 +4,7 @@ import (
 	"os"
 	"fmt"
 	"io"
+	"myproj/try/common/file"
 )
 
 func check(e error) {
@@ -12,21 +13,6 @@ func check(e error) {
 	}
 }
 
-/**
-* 判断文件是否存在 存在返回 true 不存在返回false
- */
-func checkFileIsExist(filename string) bool {
-	var exist = true
-	if _, err := os.Stat(filename); os.IsNotExist(err) {
-		exist = false
-	}
-	return exist
-}
-
-/**
-
- */
-
 func main() {
 	var wireteString = "测试dfn"
 	filename := "./saoutput2.txt"
@@ -34,7 +20,7 @@ func main() {
 	var f *os.File
 	var err1 error;
 	///******************* 第一种方式: 使用 io.WriteString 写入文件 *************************************/
-	if checkFileIsExist(filename) { //如果文件存在
+	if file.CheckFileIsExist(filename) { //如果文件存在
 		f, err1 = os.OpenFile(filename, os.O_TRUNC|os.O_WRONLY, 0666) //打开文件
 		fmt.Println("文件存在");
 	}else {

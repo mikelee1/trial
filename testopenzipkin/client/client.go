@@ -31,7 +31,7 @@ func init() {
 
 func CheckDB(ctx context.Context) {
 	rand.Seed(time.Now().Unix())
-	rs := (rand.Intn(20) + 50) * 100
+	rs := rand.Intn(20) + 50
 	logger.Infof("wait %d ms\n", rs)
 
 	span, ctx := tracer.StartSpanFromContext(ctx, "CheckDB")

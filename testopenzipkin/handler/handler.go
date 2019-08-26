@@ -25,16 +25,16 @@ type HelloService struct{}
 
 func (h HelloService) Hello(ctx context.Context, req *protos.String) (*protos.String, error) {
 	//从grpc的client ctx中获取信息
-	_, ok := metadata.FromIncomingContext(ctx)
+	md, ok := metadata.FromIncomingContext(ctx)
 	if !ok {
 		logger.Info("not found md in context")
 		return &protos.String{Value: "oops"}, errors.New("not found md in context")
 	}
-	//logger.Info(md)
+	logger.Info("md: ", md)
 	//logger.Info(fmtstruct.String(md))
 	//logger.Warning(fmtstruct.String(zipkin.SpanFromContext(ctx)))
 	//上报
-	span, ctx := tracer.StartSpanFromContext(ctx, "grpc server")
+	span, ctx := tracer.StartSpanFromContext(ctx, "grpc server1")
 	defer span.Finish()
 
 	return &protos.String{Value: "hello," + req.Value}, nil

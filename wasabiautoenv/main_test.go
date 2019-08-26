@@ -9,10 +9,11 @@ import (
 	"myproj/try/common/file"
 	logger2 "myproj/try/common/logger"
 	"myproj/try/wasabiautoenv/models"
-	"myproj/try/wasabiautoenv/ssh"
 	"net/http"
 	"os"
 	"testing"
+	"github.com/appleboy/easyssh-proxy"
+	"time"
 )
 
 var (
@@ -36,7 +37,7 @@ var (
 func init() {
 	logger = logger2.GetLogger()
 }
-
+//baas1进行setup
 func Test_Setup(t *testing.T) {
 	org := baas1
 	peers := []models.PeerPorts{
@@ -84,7 +85,7 @@ func Test_Setup(t *testing.T) {
 	fmt.Println(string(ret))
 	//time.Sleep(50*time.Second)
 }
-
+//baas2创建identity -> baas1邀请、同意 -> baas2加入网络 -> 创建和加入通道
 func Test_Main(t *testing.T) {
 	Test_CreateIdentity(t)
 	Test_ScpIdentity(t)
@@ -134,7 +135,7 @@ func Test_CreateIdentity(t *testing.T) {
 }
 
 func Test_ScpIdentity(t *testing.T) {
-	sc := ssh.NewSshClient(baas2Host)
+	sc := NewSshClient(baas2Host)
 	stdout, _, _, err := sc.Run("cd /home/centos/go/src/wasabi && ./getidentity.sh")
 	if err != nil {
 		logger.Error(err)
@@ -143,7 +144,7 @@ func Test_ScpIdentity(t *testing.T) {
 	//创建获取命令输出管
 	logger.Info(string(stdout))
 
-	sc = ssh.NewSshClient(baas1Host)
+	sc = NewSshClient(baas1Host)
 	stdout, _, _, err = sc.Run(fmt.Sprintf("cd /home/centos/go/src/wasabi && "+
 		"docker exec wasabi mkdir -p /wasabi/%s && "+
 		"docker cp identity wasabi:/wasabi/%s", baas2, baas2),
@@ -249,7 +250,7 @@ func Test_InstallAndInstantiate(t *testing.T) {
 		CcPath:      "example_cc",
 		CcVersion:   "1.0.0",
 		ChannelName: channel,
-		PeerNodes:   []string{"peer-0-baas2"},
+		PeerNodes:   []string{"peer-0-"+baas2},
 	}
 	bytedata, _ := json.Marshal(data)
 
@@ -268,7 +269,7 @@ func Test_InstallAndUpgrade(t *testing.T) {
 		CcHash:      cchash,
 		CcName:      chaincode,
 		CcPath:      "example_cc",
-		CcVersion:   "1.0.1",
+		CcVersion:   "1.0.2",
 		ChannelName: channel,
 		PeerNodes:   []string{"peer-0-baas2"},
 	}
@@ -299,30 +300,8 @@ func Test_CreateIndirect(t *testing.T) {
 }
 
 func Test_LoginIndirect(t *testing.T) {
-	data := models.LoginRequest{
-		Username: username,
-		Password: password,
-	}
-	bytedata, _ := json.Marshal(data)
-
-	wrt := bytes.NewBuffer(bytedata)
-
-	resp, err := http.Post("http://"+baas2Host+":8081/login", "application/json", wrt)
-
-	if err != nil {
-		t.Fatal(err)
-	}
-	a, err := ioutil.ReadAll(resp.Body)
-	defer resp.Body.Close()
-	b := &models.LoginResp{}
-	err = json.Unmarshal(a, b)
-	if err != nil {
-		logger.Error(err)
-		return
-	}
-	indirectid = b.UserId
-	logger.Info(indirectid)
-	return
+	id := LoginIndirect()
+	logger.Info(id)
 }
 
 func LoginIndirect() string {
@@ -388,3 +367,25 @@ func Test_Query(t *testing.T) {
 	defer resp.Body.Close()
 	t.Log(string(body))
 }
+
+
+func NewSshClient(server string) *easyssh.MakeConfig {
+	ssh := &easyssh.MakeConfig{
+		User:   "centos",
+		Server: server,
+		KeyPath: "/Users/leemike/.ssh/id_rsa",//私钥
+		Port:    "22",
+		Timeout: 60 * time.Second,
+	}
+
+	_, _, _, err := ssh.Run("cd /home/centos/go/src/wasabi && pwd && ls", 60*time.Second)
+	// Handle errors
+	if err != nil {
+		panic("Can't run remote command: " + err.Error())
+		return nil
+	} else {
+		fmt.Println("connect ssh "+server+" ok")
+	}
+	return ssh
+}
+

@@ -33,6 +33,27 @@ func Test_main(t *testing.T) {
 		logger.Info("already exist")
 	}
 }
+
+func Test_main2(t *testing.T) {
+	_, err = fsouzaCli.InspectImage("192.168.9.87/busybox:latest")
+	if err != nil {
+		logger.Info("pull new")
+		err = fsouzaCli.PullImage(docker2.PullImageOptions{
+			Repository: "192.168.9.87:5000/busybox",
+			Tag:        "latest",
+			Registry:   "192.168.9.87",
+		}, docker2.AuthConfiguration{})
+		if err != nil {
+			logger.Error(err)
+			return
+		}
+		logger.Info("good")
+	} else {
+		logger.Info("already exist")
+	}
+}
+
+
 //挂载方式1：创建mount的时候就把volume创建好
 func Test_volume1(t *testing.T) {
 	host = "http://192.168.9.83:2375"
