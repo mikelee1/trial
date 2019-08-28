@@ -81,3 +81,8 @@ type InstallAndInstantiateChainCodeRequest struct {
 	CcHash      string   `json:"cc_hash"`
 	Org         string
 }
+
+type AuthUpdate struct {
+	Indirectid string
+	Items      map[string][]string
+}
