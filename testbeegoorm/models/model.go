@@ -70,3 +70,22 @@ type InformDetail struct {
 	TypeUniqId  int       //每个消息类型下都维护一个自增Id，用于比新，分为加入邀请和签名两种
 	SignerId    string
 }
+
+type Node struct {
+	Id                int
+	OrgId             int
+	Name              string
+	IsPeer            bool
+	Endpoint          string
+	ExternalEndpoint  string
+	ChaincodeEndpoint string
+	Public            bool
+	Status            string
+	OrgName           string
+	Separate          bool
+}
+
+const (
+	NodeRunningStatus = "running"
+	NodeDownStatus    = "down"
+)

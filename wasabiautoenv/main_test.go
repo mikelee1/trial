@@ -19,9 +19,9 @@ import (
 var (
 	logger         *logging.Logger
 	inviteCodeFile = "./invitecode"
-	baas1          = "baas3"
+	baas1          = "baas1"
 	baas2          = "baas4"
-	baas1Host      = "192.168.9.67"
+	baas1Host      = "192.168.9.83"
 	baas2Host      = "192.168.9.87"
 
 	channel    = "channel1"
@@ -97,6 +97,7 @@ func Test_Main(t *testing.T) {
 	Test_AgreeInvitation(t)
 	Test_InviteCode(t)
 	Test_Join(t)
+	Test_ChannelJoin(t)
 	Test_CreateAndJoinChannel(t)
 }
 
@@ -218,6 +219,29 @@ func Test_Join(t *testing.T) {
 	wrt := bytes.NewBuffer(data)
 
 	resp, err := http.Post("http://"+baas2Host+":8081/member/join", "application/json", wrt)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+	ret, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(string(ret))
+}
+
+func Test_ChannelJoin(t *testing.T)  {
+	cjRequest := models.JoinChannelRequest{
+		Peers: []string{"peer-0-"+baas2},
+		ChannelName:channel,
+	}
+	data, err := json.Marshal(cjRequest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	wrt := bytes.NewBuffer(data)
+
+	resp, err := http.Post("http://"+baas2Host+":8081/channel/join", "application/json", wrt)
 
 	if err != nil {
 		t.Fatal(err)

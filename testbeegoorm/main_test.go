@@ -4,17 +4,9 @@ import (
 	"testing"
 	"myproj/try/testbeegoorm/models"
 	"fmt"
-	"github.com/astaxie/beego/orm"
 	"time"
-)
 
-var (
-	Oconnect orm.Ormer
 )
-
-func init()  {
-	Oconnect = models.GetDBClient()
-}
 
 //修改orgchannel表
 func Test_UpdateOrgChannel(t *testing.T) {
@@ -24,7 +16,7 @@ func Test_UpdateOrgChannel(t *testing.T) {
 	fmt.Println("update")
 	fmt.Println(tmp.Id)
 	tmp.Channel = "channel3"
-	a, err := Oconnect.Update(tmp,"Channel")
+	a, err := models.GetDBClient().Update(tmp,"Channel")
 	fmt.Println(a, err)
 }
 
@@ -58,4 +50,12 @@ func Test_addInform(t *testing.T) {
 		return
 	}
 	fmt.Println(tmp.Id)
+}
+
+func Test_querynodestatus(t *testing.T)  {
+	if models.GetDBClient().QueryTable("node").Filter("name","peer-0-baas3").Filter("is_peer", 1).Filter("status", models.NodeRunningStatus).Exist(){
+		fmt.Println("found")
+	}else{
+		fmt.Println("not found")
+	}
 }

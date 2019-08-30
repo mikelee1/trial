@@ -86,3 +86,9 @@ type AuthUpdate struct {
 	Indirectid string
 	Items      map[string][]string
 }
+
+
+type JoinChannelRequest struct {
+	Peers       []string
+	ChannelName string
+}
