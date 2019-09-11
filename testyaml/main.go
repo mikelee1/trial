@@ -1,12 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
-	"github.com/docker/docker/client"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"fmt"
 )
 
 var data = `
@@ -25,7 +24,16 @@ type T struct {
 	//	D        []int `yaml:",flow"`
 	//}
 	B map[string]Info
+	C []string
+	CrossDomain bool `yaml:"CrossDomain"`
+	Routers []FromTo
 }
+
+type FromTo struct {
+	From string
+	To string
+}
+
 
 type Info struct {
 	Name string
@@ -38,10 +46,12 @@ func main() {
 	if err != nil {
 		log.Fatalf("error: %v", err)
 	}
+	fmt.Println(t.CrossDomain)
+	fmt.Println(t.Routers)
 
 
-	a, err := client.ParseHostURL(t.A)
-	fmt.Println(a, err)
+	//a, err := client.ParseHostURL(t.A)
+	//fmt.Println(a, err)
 
 	//
 	//m := make(map[interface{}]interface{})

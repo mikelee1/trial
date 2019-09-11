@@ -4,6 +4,16 @@ b:
     name: 1
   lee:
     name: 2
+c:
+  - 111
+  - 222
+
+CrossDomain: true
+routers:
+   - from: orderer1:7050
+     to: 127.0.0.1:30001
+   - from: orderer2:7050
+     to: 127.0.0.1:30002
 #b:
 #  c: 2
 #  d: [3, 4]

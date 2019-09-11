@@ -27,7 +27,7 @@ func init() {
 func Test_getonejiaoan(t *testing.T) {
 	tmp := &models.Jiaoan{}
 	//如果jiaoan表里面已经有要create的条目，则会报"pq: duplicate key value violates unique constraint"
-	if err := dbClient.Debug().Model(&models.Jiaoan{}).Where("id = ?", 16).Find(tmp).Error; err != nil {
+	if err := dbClient.Debug().Model(&models.Jiaoan{}).Where(&models.Jiaoan{Title: ""}).Where("id = ?", 1).Find(tmp).Error; err != nil {
 		logger.Info(err)
 		return
 	}
