@@ -1,0 +1,16 @@
+#!/bin/bash
+
+#testalpine2 172.22.0.2
+#testalpine3 172.22.0.3
+# in testalpine3 apk add python & python -m SimpleHTTPServer 8882
+
+iptables -t nat -A PREROUTING -d `/sbin/ip route|grep eth0|awk '{print $7}'` -p tcp --dport 8882 -j DNAT --to-destination 192.168.9.87:9993 & iptables -t nat -A POSTROUTING -d 192.168.9.87 -p tcp --dport 9993 -j SNAT --to 172.17.0.9 & exec syslogd -n -O -
+iptables -t nat -A PREROUTING -d 127.0.0.1 -p tcp --dport 8882 -j DNAT --to-destination 192.168.9.87:9993 & iptables -t nat -A POSTROUTING -d 192.168.9.87 -p tcp --dport 9993 -j SNAT --to 127.0.0.1 & exec syslogd -n -O -
+
+iptables -t nat -A PREROUTING -d 172.17.0.1 -p tcp --dport 8882 -j DNAT --to-destination 192.168.9.87:9993 & iptables -t nat -A POSTROUTING -d 192.168.9.87 -p tcp --dport 9993 -j SNAT --to 172.17.0.1 & exec syslogd -n -O -
+
+iptables -t nat -A PREROUTING -d 172.22.0.2 -p tcp -j DNAT --to-destination 192.168.9.87:9992
+
+iptables -t nat -A POSTROUTING -d 192.168.9.87 -p tcp --dport 9992 -j SNAT --to 172.22.0.2
+
+exec syslogd -n -O -
