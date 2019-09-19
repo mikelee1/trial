@@ -41,7 +41,7 @@ type Info struct {
 
 func main() {
 	t := T{}
-	yamlFile, err := ioutil.ReadFile("testyaml/test.yaml")
+	yamlFile, err := ioutil.ReadFile("testyaml/app.conf")
 	err = yaml.Unmarshal(yamlFile, &t)
 	if err != nil {
 		log.Fatalf("error: %v", err)

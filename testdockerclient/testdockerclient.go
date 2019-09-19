@@ -31,33 +31,21 @@ func init() {
 func main() {
 	standardCli.VolumeCreate(context.TODO(),volume.VolumeCreateBody{})
 	var err error
-	err = fsouzaCli.PullImage(dc.PullImageOptions{
-		Repository:"192.168.9.83:5000/busybox",
-		Tag:"latest",
-		Registry:"http://192.168.9.83:5000",
-	},dc.AuthConfiguration{})
-	if err != nil {
-		logger.Error(err)
-		return
-	}
-	logger.Info("good")
+	//err = fsouzaCli.PullImage(dc.PullImageOptions{
+	//	Repository:"192.168.9.87:5000/busybox",
+	//	Tag:"latest",
+	//	Registry:"http://192.168.9.87:5000",
+	//},dc.AuthConfiguration{})
+	//if err != nil {
+	//	logger.Error(err)
+	//	return
+	//}
+	//logger.Info("good")
 
 	//获取容器列表
 	conlist, err := fsouzaCli.ListContainers(dc.ListContainersOptions{
 		All: true,
 	})
-	if err != nil {
-		logger.Error(err)
-		return
-	}
-
-	_, err = standardCli.Info(context.TODO())
-	if err != nil {
-		logger.Error(err)
-		return
-	}
-
-	_,err = fsouzaCli.InspectImage("alpine")
 	if err != nil {
 		logger.Error(err)
 		return

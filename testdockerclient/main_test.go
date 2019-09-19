@@ -5,6 +5,7 @@ import (
 	logger2 "myproj/try/common/logger"
 	"testing"
 	"fmt"
+	dc "github.com/fsouza/go-dockerclient"
 )
 
 var (
@@ -14,6 +15,128 @@ var (
 	//fsouzaCli, err = docker2.NewTLSClient(host,"./testdockerclient/client/cert.pem","./testdockerclient/client/key.pem","./testdockerclient/ca.pem")
 	fsouzaCli, _ = docker2.NewClient(host)
 )
+
+func RemoveContainer(containerName string)  {
+	//获取容器列表
+	conlist, err := fsouzaCli.ListContainers(dc.ListContainersOptions{
+		All: true,
+	})
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+
+	//删除容器
+	for _, value := range conlist {
+		logger.Info(value.Names[0])
+		//删除test容器
+		if value.Names[0] == "/"+containerName {
+			err = fsouzaCli.RemoveContainer(dc.RemoveContainerOptions{
+				Force: true,
+				ID:    value.ID,
+			})
+			if err != nil {
+				logger.Error(err)
+				return
+			}
+		}
+	}
+}
+
+func Test_updateconfig(t *testing.T) {
+	imgName := "192.168.9.87:5000/busybox"
+	containerName := "test"
+
+	RemoveContainer(containerName)
+
+	_, err = fsouzaCli.InspectImage(imgName+":latest")
+	if err != nil {
+		logger.Info("pull new")
+		err = fsouzaCli.PullImage(docker2.PullImageOptions{
+			Repository: "192.168.9.87:5000/busybox",
+			Tag:        "latest",
+			Registry:   "192.168.9.87",
+		}, docker2.AuthConfiguration{})
+		if err != nil {
+			logger.Error(err)
+			return
+		}
+		logger.Info("good")
+	}
+
+	//创建容器
+	resp, err := fsouzaCli.CreateContainer(dc.CreateContainerOptions{
+		Name: containerName,
+		Config: &dc.Config{
+			Image: imgName,
+			Tty:   true,
+			Cmd:   []string{"sh", "-c", " sh"},
+		},
+		HostConfig: &dc.HostConfig{
+			AutoRemove: true,
+			//UsernsMode: "host",
+			//ExtraHosts: []string{
+			//	"test11:192.168.9.83",
+			//},
+		},
+	})
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+
+	if err = fsouzaCli.StartContainer(resp.ID, nil); err != nil {
+		panic(err)
+	}
+
+	container, err := fsouzaCli.InspectContainer(resp.ID)
+	logger.Info("container.HostConfig.ExtraHosts: ",container.HostConfig.ExtraHosts)
+
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+	logger.Info("container: ",container)
+
+	fsouzaCli.StopContainer(resp.ID,1)
+
+	//创建容器
+	resp, err = fsouzaCli.CreateContainer(dc.CreateContainerOptions{
+		Name: containerName,
+		Config: &dc.Config{
+			Image: imgName,
+			Tty:   true,
+			Cmd:   []string{"sh", "-c", " sh"},
+		},
+		HostConfig: &dc.HostConfig{
+			AutoRemove: true,
+			//UsernsMode: "host",
+			ExtraHosts: []string{
+				"test11:192.168.9.83",
+			},
+		},
+	})
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+
+
+	err = fsouzaCli.RestartContainer(resp.ID,1)
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+
+	container, err = fsouzaCli.InspectContainer(resp.ID)
+	logger.Info("container.HostConfig.ExtraHosts: ",container.HostConfig.ExtraHosts)
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+	logger.Info("container: ",container)
+	//
+}
 
 func Test_main(t *testing.T) {
 	_, err = fsouzaCli.InspectImage("192.168.9.87:5000/busybox:latest")
@@ -53,7 +176,6 @@ func Test_main2(t *testing.T) {
 	}
 }
 
-
 //挂载方式1：创建mount的时候就把volume创建好
 func Test_volume1(t *testing.T) {
 	host = "http://192.168.9.83:2375"
@@ -79,14 +201,14 @@ func Test_volume1(t *testing.T) {
 	}
 	//删除volume
 	vs, err := fsouzaCli.ListVolumes(docker2.ListVolumesOptions{})
-	for _,v := range vs{
+	for _, v := range vs {
 		err = fsouzaCli.RemoveVolumeWithOptions(docker2.RemoveVolumeOptions{
-			Name:v.Name,
+			Name: v.Name,
 		})
 		if err != nil {
 			continue
 		}
-		logger.Info("removed ",v.Name)
+		logger.Info("removed ", v.Name)
 	}
 
 	//验证挂载
@@ -96,13 +218,13 @@ func Test_volume1(t *testing.T) {
 			Tty:   true,
 			Cmd:   []string{"sh", "-c", " sh"},
 			Image: "alpine",
-			Volumes:map[string]struct{}{
-				"/nfs": struct {}{},
+			Volumes: map[string]struct{}{
+				"/nfs": struct{}{},
 			},
 		},
 		HostConfig: &docker2.HostConfig{
 
-			Mounts:[]docker2.HostMount{
+			Mounts: []docker2.HostMount{
 				//mount1
 				docker2.HostMount{
 					Type:   "volume",
@@ -149,9 +271,8 @@ func Test_volume1(t *testing.T) {
 				//		},
 				//	},
 				//},
-
 			},
-			Binds:[]string{
+			Binds: []string{
 				//mike 宿主机上的地址进行映射
 				//"/nfs:/var/hyperledger/orderer:rw",
 				"/nfs/orderer:/var/hyperledger/orderer:rw",
@@ -169,9 +290,10 @@ func Test_volume1(t *testing.T) {
 	}
 	logger.Info("good")
 }
+
 //挂载方式2：先创建volume，再mount到容器内
 func Test_volume2(t *testing.T) {
-	host   = "http://192.168.9.83:2375"
+	host = "http://192.168.9.83:2375"
 	nfshost := "192.168.9.82"
 	fsouzaCli, _ = docker2.NewClient(host)
 	cname := "test1"
@@ -193,16 +315,15 @@ func Test_volume2(t *testing.T) {
 	}
 	//删除volume
 	vs, err := fsouzaCli.ListVolumes(docker2.ListVolumesOptions{})
-	for _,v := range vs{
+	for _, v := range vs {
 		err = fsouzaCli.RemoveVolumeWithOptions(docker2.RemoveVolumeOptions{
-			Name:v.Name,
+			Name: v.Name,
 		})
 		if err != nil {
 			continue
 		}
-		logger.Info("removed ",v.Name)
+		logger.Info("removed ", v.Name)
 	}
-
 
 	//创建volume
 	vs1, err := fsouzaCli.CreateVolume(docker2.CreateVolumeOptions{
@@ -210,8 +331,8 @@ func Test_volume2(t *testing.T) {
 		Driver: "local",
 		DriverOpts: map[string]string{
 			"type":   "nfs",
-			"device": nfshost+":/home/centos/testnfs/test",
-			"o":      "addr="+nfshost+",nolock,rw,tcp",
+			"device": nfshost + ":/home/centos/testnfs/test",
+			"o":      "addr=" + nfshost + ",nolock,rw,tcp",
 		},
 	})
 
@@ -220,11 +341,10 @@ func Test_volume2(t *testing.T) {
 		Driver: "local",
 		DriverOpts: map[string]string{
 			"type":   "nfs",
-			"device": nfshost+":/home/centos/testnfs/test/common",
-			"o":      "addr="+nfshost+",nolock,rw,tcp",
+			"device": nfshost + ":/home/centos/testnfs/test/common",
+			"o":      "addr=" + nfshost + ",nolock,rw,tcp",
 		},
 	})
-
 
 	//验证挂载
 	c, err := fsouzaCli.CreateContainer(docker2.CreateContainerOptions{
@@ -235,7 +355,7 @@ func Test_volume2(t *testing.T) {
 			Image: "alpine",
 		},
 		HostConfig: &docker2.HostConfig{
-			Mounts:[]docker2.HostMount{
+			Mounts: []docker2.HostMount{
 				docker2.HostMount{
 					Type:   "volume",
 					Source: vs1.Name,
@@ -253,13 +373,8 @@ func Test_volume2(t *testing.T) {
 					Source: vs1.Name,
 					Target: "/var/hyperledger/orderer1",
 				},
-
 			},
 		},
-
-
-
-
 	})
 	if err != nil {
 		logger.Error(err)
@@ -288,7 +403,3 @@ func Test_main1(t *testing.T) {
 	}
 	logger.Info("good")
 }
-
-
-
-
