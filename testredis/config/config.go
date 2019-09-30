@@ -29,6 +29,7 @@ type QabircConfig struct {
 
 type Redis struct {
 	Address string
+	Db      int
 }
 
 var logger *logging.Logger
