@@ -120,3 +120,10 @@ func Invokeme() {
 	searchIn1 := re.ReplaceAllString(searchIn, "##.#")
 	fmt.Printf("%v", string(searchIn1))
 }
+
+func RegTest()  {
+	a := "f844d-3-幻灯片8.jpg"
+	reg, _ := regexp.Compile("幻灯片(.*?).jpg")
+	b := reg.FindStringSubmatch(a)
+	fmt.Println(b)
+}
