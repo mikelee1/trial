@@ -24,3 +24,16 @@ type User struct {
 func (t *User) TableName() string {
 	return "mathojms_user"
 }
+
+type School struct {
+	gorm.Model
+	Name      string
+	Principal int    `gorm:"index"` //属于哪个校长
+	Address   string
+	Geohash   string
+	Inuse     string `gorm:"default:'1'"`
+}
+
+func (*School) TableName() string {
+	return "mathojms_school"
+}

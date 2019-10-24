@@ -51,6 +51,7 @@ func AutoMigrate() *gorm.DB {
 	db := CreateConn()
 	if err := db.Exec("set transaction isolation level serializable").AutoMigrate(
 		&User{},
+		&School{},
 	).Error; err != nil {
 		logger.Panicf("Error auto-migrating database : %s", err)
 	}
