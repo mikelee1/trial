@@ -31,17 +31,12 @@ func Test_Main(t *testing.T)  {
 func SelectForUpdate(i int) {
 	tmp := &models.User{}
 	tx := dbClient.Begin()
-	if err := tx.Set("gorm:query_option", "FOR UPDATE").Model(&models.User{}).Find(tmp).Error; err != nil {
+	if err := tx.Set("gorm:query_option", "FOR UPDATE").Model(tmp).Where("id = ?",2).Update("role", "mike").Error; err != nil {
 		tx.Rollback()
 		logger.Info(err)
 		return
 	}
 	logger.Infof("%d got lock", i)
-	if err := tx.Model(&models.User{}).Update("role", "mike").Error; err != nil {
-		tx.Rollback()
-		logger.Info(err)
-		return
-	}
 	tx.Commit()
 	logger.Infof("%d release lock", i)
 	logger.Info(tmp.Role)
