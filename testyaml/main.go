@@ -1,70 +1,110 @@
 package main
 
 import (
-	"log"
-
-	"gopkg.in/yaml.v2"
-	"io/ioutil"
 	"fmt"
+	"gopkg.in/yaml.v3"
+	"io/ioutil"
+	"github.com/op/go-logging"
+	"golang.org/x/text/transform"
+	"golang.org/x/text/encoding/simplifiedchinese"
+	"strings"
 )
 
-var data = `
-a: Easy!
-b:
-  c: 2
-  d: [3, 4]
-`
+var logger *logging.Logger
 
-// Note: struct fields must be public in order for unmarshal to
-// correctly populate the data.
-type T struct {
-	A string `yaml:"aa"`
-	//B struct {
-	//	RenamedC int   `yaml:"c"`
-	//	D        []int `yaml:",flow"`
-	//}
-	B map[string]Info
-	C []string
-	CrossDomain bool `yaml:"CrossDomain"`
-	Routers []FromTo
+func init() {
+	logger = logging.MustGetLogger("test")
 }
 
-type FromTo struct {
-	From string
-	To string
+var basepath = "testyaml/app.yaml"
+var basepath1 = "testyaml/config/app.yaml"
+
+func writeYaml(c *yaml.Node) error {
+
+	bytes, err := yaml.Marshal(c)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	err = ioutil.WriteFile(basepath1, bytes, 0644)
+	if err != nil {
+		logger.Error(err)
+		return err
+	}
+	return err
 }
 
-
-type Info struct {
-	Name string
+func readYamlSchema(b []byte) (*yaml.Node, error) {
+	var c = yaml.Node{}
+	err := yaml.Unmarshal(b, &c)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	return &c, nil
 }
 
 func main() {
-	t := T{}
-	yamlFile, err := ioutil.ReadFile("testyaml/app.conf")
-	err = yaml.Unmarshal(yamlFile, &t)
+
+	all, err := ioutil.ReadFile(basepath)
 	if err != nil {
-		log.Fatalf("error: %v", err)
+		panic(err)
 	}
-	fmt.Println(t.CrossDomain)
-	fmt.Println(t.Routers)
+	logger.Info(string(all))
+	encoded, err := DecodeToHZGB2312(string(all))
+	if err != nil {
+		panic(err)
+	}
+	c, err := readYamlSchema([]byte(encoded))
+	if err != nil {
+		panic(err)
+	}
+	//logger.Info("c:",c.Content[0].Content)
+	logger.Info("------将中文注释decode回utf8--------")
+	for _, v := range c.Content[0].Content {
+		if v.HeadComment != "" {
+			res, err := EncodeFromHZGB2312(v.HeadComment)
+			if err != nil {
+				panic(err)
+			}
+			v.HeadComment = res
+		}
+	}
 
+	c.Content[0].Content[1].Value = "custom ec2 value" // <-dangerous
 
-	//a, err := client.ParseHostURL(t.A)
-	//fmt.Println(a, err)
+	// TODO: really should walk the yaml.Node tree and find the relevent ec2 field value
+	// TODO: all the while staying within slice bounds
 
-	//
-	//m := make(map[interface{}]interface{})
-	//
-	//err = yaml.Unmarshal([]byte(data), &m)
-	//if err != nil {
-	//	log.Fatalf("error: %v", err)
-	//}
-	//fmt.Printf("--- m:\n%v\n\n", m)
-	//
-	//d, err = yaml.Marshal(&m)
-	//if err != nil {
-	//	log.Fatalf("error: %v", err)
-	//}
-	//fmt.Printf("--- m dump:\n%s\n\n", string(d))
+	err = writeYaml(c)
+	if err != nil {
+		panic(err)
+	}
+}
+
+//utf8 -> HZGB2312
+func DecodeToHZGB2312(utf8Str string) (dst string, err error) {
+	var trans transform.Transformer = simplifiedchinese.HZGB2312.NewEncoder()
+	var reader *strings.Reader = strings.NewReader(utf8Str)
+	var transReader *transform.Reader = transform.NewReader(reader, trans)
+	bytes, err := ioutil.ReadAll(transReader)
+	if err != nil {
+		return
+	}
+	dst = string(bytes)
+	return
+}
+
+//HZGB2312 -> utf8
+func EncodeFromHZGB2312(gbkStr string) (utf8Str string, err error) {
+	var trans transform.Transformer = simplifiedchinese.HZGB2312.NewDecoder()
+	var reader *strings.Reader = strings.NewReader(gbkStr)
+	var transReader *transform.Reader = transform.NewReader(reader, trans)
+	bytes, err := ioutil.ReadAll(transReader)
+	if err != nil {
+		return
+	}
+	utf8Str = string(bytes)
+	return
 }

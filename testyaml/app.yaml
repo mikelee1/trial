@@ -8,12 +8,16 @@ c:
   - 111
   - 222
 
-CrossDomain: true
+CrossDomain: false
 routers:
    - from: orderer1:7050
      to: 127.0.0.1:30001
    - from: orderer2:7050
      to: 127.0.0.1:30002
-#b:
-#  c: 2
-#  d: [3, 4]
+# 示例看的风景
+# this is test
+bbb: # unsorted
+  name: "kjf"
+ccc:
+  name: "mike"
+  address:
