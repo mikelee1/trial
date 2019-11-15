@@ -1,9 +1,9 @@
 updatecorn: custom ec2 value
 ##swarm
 dockerclient:
-#- address: tcp://192.168.9.96:2375
-#  key: f72mhcq0f08whf99cs94fne34
-
+  - address: tcp://192.168.9.96:2375
+    key: f72mhcq0f08whf99cs94fne34
+  - address1: aaaaaaaaaaa
 ##docker
 singledocker:
     ##docker

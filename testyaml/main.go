@@ -75,16 +75,42 @@ func main() {
 	}
 }
 
-func walkDecode(node *yaml.Node)  {
-	for _, v := range node.Content {
+func walkDecode(node *yaml.Node) {
+	for k, v := range node.Content {
 		walkDecode(v)
+		if v.Value == "dockerclient" {
+			tmpnode1 := &yaml.Node{
+				Kind:   yaml.ScalarNode,
+				Tag:    "!!str",
+				Value:  "address1",
+			}
+			tmpnode2 := &yaml.Node{
+				Kind:   yaml.ScalarNode,
+				Tag:    "!!str",
+				Value:  "aaaaaaaaaaa",
+			}
+			tmpnode := &yaml.Node{
+				Kind: yaml.MappingNode,
+				Tag:  "!!map",
+				Content: []*yaml.Node{
+					tmpnode1, tmpnode2,
+				},
+			}
+
+			node.Content[k+1].Content = append(node.Content[k+1].Content, tmpnode)
+			logger.Info("tmpnode:  ", node.Content[k+1].Content)
+			for k1, vv := range node.Content[k+1].Content {
+				logger.Info("k1:", k1, vv)
+				logger.Info("next v:", vv.Content[0])
+				logger.Info("next v:", vv.Content[1])
+			}
+		}
 		if v.HeadComment != "" {
 			res, err := EncodeFromHZGB2312(v.HeadComment)
 			if err != nil {
 				panic(err)
 			}
 			v.HeadComment = res
-			logger.Info("res: ",res)
 		}
 	}
 }
