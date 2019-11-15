@@ -1,22 +1,30 @@
-aa: custom ec2 value
-b:
-    mike:
-        name: 1
-    lee:
-        name: 2
-c:
-  - 111
-  - 222
-CrossDomain: false
-routers:
-  - from: orderer1:7050
-    to: 127.0.0.1:30001
-  - from: orderer2:7050
-    to: 127.0.0.1:30002
-# 示例看的风景
-# this is test
-bbb: # unsorted
-    name: "kjf"
-ccc:
-    name: "mike"
-    address:
+updatecorn: custom ec2 value
+##swarm
+dockerclient:
+#- address: tcp://192.168.9.96:2375
+#  key: f72mhcq0f08whf99cs94fne34
+
+##docker
+singledocker:
+    ##docker
+    #dockerclient中的映射主目录，挂载方式为local的时候需要配置
+    basedir: "/home/centos/go/src/wasabi"
+    dockerclients:
+        #peer-1 为dockerclient的key，多个dockerclient时注意保持key不相同
+        peer-1:
+            endpoint: "tcp://192.168.9.82:2375"
+    #docker的server端口是否开启
+    dockertls: false
+    tlsca: ""
+    tlscert: ""
+    tlskey: ""
+router:
+    ##crossnetwork
+    crossnetwork: false
+    routers:
+      - #假设这是组织3的配置，192.168.9.103是组织3的nginxIP
+        from: orderer-0-baas1:7050
+        to: 192.168.9.103:30001
+      - from: orderer-0-baas2:7050
+        to: 192.168.9.103:30002
+    iptsimage: "alpine-ipts:latest"

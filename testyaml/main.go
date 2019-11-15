@@ -62,15 +62,7 @@ func main() {
 	}
 	//logger.Info("c:",c.Content[0].Content)
 	logger.Info("------将中文注释decode回utf8--------")
-	for _, v := range c.Content[0].Content {
-		if v.HeadComment != "" {
-			res, err := EncodeFromHZGB2312(v.HeadComment)
-			if err != nil {
-				panic(err)
-			}
-			v.HeadComment = res
-		}
-	}
+	walkDecode(c.Content[0])
 
 	c.Content[0].Content[1].Value = "custom ec2 value" // <-dangerous
 
@@ -80,6 +72,20 @@ func main() {
 	err = writeYaml(c)
 	if err != nil {
 		panic(err)
+	}
+}
+
+func walkDecode(node *yaml.Node)  {
+	for _, v := range node.Content {
+		walkDecode(v)
+		if v.HeadComment != "" {
+			res, err := EncodeFromHZGB2312(v.HeadComment)
+			if err != nil {
+				panic(err)
+			}
+			v.HeadComment = res
+			logger.Info("res: ",res)
+		}
 	}
 }
 
