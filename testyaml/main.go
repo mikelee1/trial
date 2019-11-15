@@ -83,11 +83,15 @@ func walkDecode(node *yaml.Node) {
 				Kind:   yaml.ScalarNode,
 				Tag:    "!!str",
 				Value:  "address1",
+				Line:3,
+				Column:10,
 			}
 			tmpnode2 := &yaml.Node{
 				Kind:   yaml.ScalarNode,
 				Tag:    "!!str",
 				Value:  "aaaaaaaaaaa",
+				Line:3,
+				Column:10,
 			}
 			tmpnode := &yaml.Node{
 				Kind: yaml.MappingNode,
@@ -98,7 +102,12 @@ func walkDecode(node *yaml.Node) {
 			}
 
 			node.Content[k+1].Content = append(node.Content[k+1].Content, tmpnode)
-			logger.Info("tmpnode:  ", node.Content[k+1].Content)
+			if len(node.Content[k+1].Content)==1{
+				logger.Info("tmpnode:  ", node.Content[k+1])
+				node.Content[k+1].Kind = yaml.SequenceNode
+				node.Content[k+1].Tag = "!!seq"
+			}
+
 			for k1, vv := range node.Content[k+1].Content {
 				logger.Info("k1:", k1, vv)
 				logger.Info("next v:", vv.Content[0])
