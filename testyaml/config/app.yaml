@@ -26,6 +26,7 @@ router:
       - #假设这是组织3的配置，192.168.9.103是组织3的nginxIP
         from: orderer-0-baas1:7050
         to: 192.168.9.103:30001
+        #dockerclient中的映射主目录，挂载方式为local的时候需要配置
       - from: orderer-0-baas2:7050
         to: 192.168.9.103:30002
     iptsimage: "alpine-ipts:latest"

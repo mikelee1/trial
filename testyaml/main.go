@@ -121,6 +121,20 @@ func walkDecode(node *yaml.Node) {
 			}
 			v.HeadComment = res
 		}
+		if v.FootComment != "" {
+			res, err := EncodeFromHZGB2312(v.FootComment)
+			if err != nil {
+				panic(err)
+			}
+			v.FootComment = res
+		}
+		if v.LineComment != "" {
+			res, err := EncodeFromHZGB2312(v.LineComment)
+			if err != nil {
+				panic(err)
+			}
+			v.LineComment = res
+		}
 	}
 }
 
