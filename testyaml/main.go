@@ -19,6 +19,44 @@ func init() {
 var basepath = "testyaml/app.yaml"
 var basepath1 = "testyaml/config/app.yaml"
 
+type DockerConfig struct {
+	UpdateCorn  string       `yaml:"updatecorn"`
+	SwarmClient []ClientInfo `yaml:"dockerclient"`
+	SingleDockerConfig       `yaml:"singledocker"`
+	RouterConfig             `yaml:"router"`
+}
+
+type RouterConfig struct {
+	CrossNetwork bool
+	Routers      map[string]*IntraFromTo `yaml:"innerrouters,omitempty"`
+	InnerRouters []FromTo                `yaml:"routers"` //从yaml文件中读取，内部使用上方的Routers
+	IptsImage    string                  `yaml:"iptsimage"`
+}
+type IntraFromTo struct {
+	FromIp   string
+	FromPort uint32
+	ToIp     string
+	ToPort   uint32
+}
+
+type FromTo struct {
+	From string
+	To   string
+}
+
+type SingleDockerConfig struct {
+	BaseDir       string                  `yaml:"basedir"`
+	Dockertls     bool                    `yaml:"dockertls"`
+	Tlsca         string                  `yaml:"tlsca"`
+	Tlscert       string                  `yaml:"tlscert"`
+	Tlskey        string                  `yaml:"tlskey"`
+}
+
+type ClientInfo struct {
+	Address string
+	Key     string
+}
+
 func writeYaml(c *yaml.Node) error {
 
 	bytes, err := yaml.Marshal(c)
@@ -73,6 +111,19 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+	//验证是否可读
+	dockerConfig := DockerConfig{}
+	yamlFile, err := ioutil.ReadFile(basepath1)
+	if err != nil {
+		logger.Error("Fail to read router config: ", err.Error())
+		return
+	}
+	err = yaml.Unmarshal(yamlFile, &dockerConfig)
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+	logger.Info("dockerConfig.RouterConfig.Routers:  ",dockerConfig.RouterConfig.InnerRouters)
 }
 
 func walkDecode(node *yaml.Node) {
@@ -113,6 +164,9 @@ func walkDecode(node *yaml.Node) {
 				logger.Info("next v:", vv.Content[0])
 				logger.Info("next v:", vv.Content[1])
 			}
+		}
+		if v.Value == "router"{
+			logger.Info("node.content: ",node.Content[k+1].Content[0])
 		}
 		if v.HeadComment != "" {
 			res, err := EncodeFromHZGB2312(v.HeadComment)
