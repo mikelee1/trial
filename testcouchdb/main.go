@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"github.com/zemirco/couchdb"
 	"fmt"
+	"bytes"
 )
 
 var logger *logging.Logger
@@ -38,12 +39,15 @@ func main() {
 		panic(err)
 	}
 	fmt.Println(info)
-	db1 := client.Use("publicchain_publicchaincode")
+	db1 := client.Use("channel_sdzyb1")
 	as, err := db1.AllDocs(&couchdb.QueryParameters{})
 
 	for _, a := range as.Rows {
-		fmt.Printf("id: %s, key: %v, value: %v, doc: %v \n", a.ID, a.Key, a.Value, a.Doc)
-	}
+		//fmt.Printf("id: %s, key: %v, value: %v, doc: %v \n", a.ID, a.Key, a.Value, a.Doc)
+		fmt.Println(a.ID)
+		fmt.Println([]byte(a.ID))
+		fmt.Println(string(bytes.Replace([]byte(a.ID), []byte{byte(0)}, []byte(""), -1)))
 
+	}
 
 }
