@@ -4,8 +4,7 @@ import (
 	"github.com/op/go-logging"
 	"net/url"
 	"github.com/zemirco/couchdb"
-	"fmt"
-	"bytes"
+	"time"
 )
 
 var logger *logging.Logger
@@ -14,10 +13,20 @@ func init() {
 	logger = logging.MustGetLogger("testcouchdb")
 }
 
-type dummyDocument struct {
-	couchdb.Document
-	Foo  string `json:"foo"`
-	Beep string `json:"beep"`
+type couchDoc struct {
+	ID           string
+	Rev          string
+	AccountMoney float64
+	CreateTime   time.Time
+	Name         string
+}
+
+func (c couchDoc) GetID() string {
+	return c.ID
+}
+
+func (c couchDoc) GetRev() string {
+	return c.Rev
 }
 
 // start
@@ -27,27 +36,26 @@ func main() {
 		panic(err)
 	}
 
-	// create a new client
+	// create doc new client
 	client, err := couchdb.NewAuthClient("admin", "pass", u)
 	if err != nil {
 		panic(err)
 	}
 
+	//获取couchdb的信息
 	// get some information about your CouchDB
-	info, err := client.Info()
-	if err != nil {
-		panic(err)
+	//info, err := client.Info()
+	//if err != nil {
+	//	panic(err)
+	//}
+	//fmt.Println(info)
+
+	//使用的数据库名
+	db := client.Use("channel_sdzyb1")
+	allDocs, err := db.AllDocs(&couchdb.QueryParameters{})
+	for _, doc := range allDocs.Rows {
+		cd := &couchDoc{}
+		db.Get(cd, doc.ID)
+		logger.Info(cd)
 	}
-	fmt.Println(info)
-	db1 := client.Use("channel_sdzyb1")
-	as, err := db1.AllDocs(&couchdb.QueryParameters{})
-
-	for _, a := range as.Rows {
-		//fmt.Printf("id: %s, key: %v, value: %v, doc: %v \n", a.ID, a.Key, a.Value, a.Doc)
-		fmt.Println(a.ID)
-		fmt.Println([]byte(a.ID))
-		fmt.Println(string(bytes.Replace([]byte(a.ID), []byte{byte(0)}, []byte(""), -1)))
-
-	}
-
 }
