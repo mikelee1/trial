@@ -22,7 +22,7 @@ func main() {
 
 		num, err := strconv.Atoi(numStr)
 		if err != nil {
-			return
+			break
 		}
 
 		if remain == 0 {
