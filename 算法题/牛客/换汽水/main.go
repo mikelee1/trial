@@ -1,20 +1,28 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"bufio"
+	"os"
+	"strconv"
+)
 
 func main() {
-	n := 0
-	res := ""
-
-	for range [10]int{} {
-		fmt.Scan(&n)
-		if n == 0 {
+	var res []int
+	scanner := bufio.NewScanner(os.Stdin)
+	count := 0
+	for scanner.Scan() {
+		text := scanner.Text()
+		num, err := strconv.Atoi(text)
+		if err != nil || num == 0 || count > 10 {
 			break
 		}
-
-		res += fmt.Sprintf("%d\n", MaxBottle(n))
+		count++
+		res = append(res, MaxBottle(num))
 	}
-	fmt.Printf("%s", res)
+	for _, v := range res {
+		fmt.Println(v)
+	}
 }
 
 func MaxBottle(n int) int {
