@@ -6,6 +6,7 @@ func main() {
 	var arr = []int{6, 2, 22, 45, 1, 6, 8, 200, 56, 111}
 	insertSort(arr)
 	fmt.Println(arr)
+	nouse()
 }
 
 //打麻将理牌
@@ -18,4 +19,14 @@ func insertSort(arr []int) {
 			}
 		}
 	}
+}
+
+func nouse() {
+	a := 1
+	fmt.Println(a)
+	a = + 1
+
+	fmt.Println(a)
+	a += 1
+	fmt.Println(a)
 }
