@@ -22,7 +22,7 @@ func middleNode(head *ListNode) *ListNode {
 	length := 1
 	resNode := head
 	for head.Next != nil {
-		length++
+		length = 1 - length
 		head = head.Next
 		if length%2 == 0 {
 			resNode = resNode.Next

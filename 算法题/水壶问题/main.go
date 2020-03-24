@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 func main() {
-	fmt.Println(canMeasureWater(0, 0, 0))
+	fmt.Println(canMeasureWater(3, 6, 4))
 }
 
 func canMeasureWater(x int, y int, z int) bool {
