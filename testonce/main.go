@@ -8,15 +8,16 @@ import (
 
 var (
 	once = sync.Once{}
-	a int
+	a    int
+	aSec time.Duration
 )
 
-
-
 func main() {
+	aSec = time.Second
+	fmt.Println(aSec)
 	go func() {
 		for {
-			aa := GetA()
+			aa := getA()
 			fmt.Println(aa)
 			time.Sleep(time.Second)
 		}
@@ -24,7 +25,7 @@ func main() {
 
 	go func() {
 		for {
-			aa := GetA()
+			aa := getA()
 			fmt.Println(aa)
 			time.Sleep(time.Second)
 		}
@@ -32,18 +33,16 @@ func main() {
 
 	go func() {
 		for {
-			aa := GetA()
+			aa := getA()
 			fmt.Println(aa)
 			time.Sleep(time.Second)
 		}
 	}()
 
-	select {
-
-	}
+	select {}
 }
 
-func GetA() int {
+func getA() int {
 	once.Do(func() {
 		a = 1
 		fmt.Println("once")
