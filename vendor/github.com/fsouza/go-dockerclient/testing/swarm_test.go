@@ -7,6 +7,7 @@ package testing
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -18,7 +19,7 @@ import (
 	"testing"
 
 	"github.com/docker/docker/api/types/swarm"
-	"github.com/fsouza/go-dockerclient"
+	docker "github.com/fsouza/go-dockerclient"
 )
 
 func TestSwarmInit(t *testing.T) {
@@ -29,7 +30,7 @@ func TestSwarmInit(t *testing.T) {
 	defer server.Stop()
 	server.buildMuxer()
 	recorder := httptest.NewRecorder()
-	request, _ := http.NewRequest("POST", "/swarm/init", bytes.NewReader(nil))
+	request, _ := http.NewRequest(http.MethodPost, "/swarm/init", bytes.NewReader(nil))
 	server.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("SwarmInit: wrong status. Want %d. Got %d.", http.StatusOK, recorder.Code)
@@ -65,7 +66,7 @@ func TestSwarmInitDynamicAdvertiseAddrPort(t *testing.T) {
 	server.buildMuxer()
 	data := `{"ListenAddr": "127.0.0.1:0", "AdvertiseAddr": "localhost"}`
 	recorder := httptest.NewRecorder()
-	request, _ := http.NewRequest("POST", "/swarm/init", strings.NewReader(data))
+	request, _ := http.NewRequest(http.MethodPost, "/swarm/init", strings.NewReader(data))
 	server.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("SwarmInit: wrong status. Want %d. Got %d.", http.StatusOK, recorder.Code)
@@ -89,7 +90,7 @@ func TestSwarmInitAlreadyInSwarm(t *testing.T) {
 	server.buildMuxer()
 	server.swarm = &swarm.Swarm{}
 	recorder := httptest.NewRecorder()
-	request, _ := http.NewRequest("POST", "/swarm/init", nil)
+	request, _ := http.NewRequest(http.MethodPost, "/swarm/init", nil)
 	server.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusNotAcceptable {
 		t.Fatalf("SwarmInit: wrong status. Want %d. Got %d.", http.StatusNotAcceptable, recorder.Code)
@@ -104,7 +105,7 @@ func TestSwarmJoinNoBody(t *testing.T) {
 	defer server.Stop()
 	server.buildMuxer()
 	recorder := httptest.NewRecorder()
-	request, _ := http.NewRequest("POST", "/swarm/join", bytes.NewReader(nil))
+	request, _ := http.NewRequest(http.MethodPost, "/swarm/join", bytes.NewReader(nil))
 	server.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusInternalServerError {
 		t.Fatalf("SwarmJoin: wrong status. Want %d. Got %d.", http.StatusInternalServerError, recorder.Code)
@@ -130,7 +131,7 @@ func TestSwarmJoin(t *testing.T) {
 		t.Fatal(err)
 	}
 	recorder := httptest.NewRecorder()
-	request, _ := http.NewRequest("POST", "/swarm/init", bytes.NewReader(data))
+	request, _ := http.NewRequest(http.MethodPost, "/swarm/init", bytes.NewReader(data))
 	server1.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("SwarmJoin: wrong status. Want %d. Got %d.", http.StatusOK, recorder.Code)
@@ -142,7 +143,7 @@ func TestSwarmJoin(t *testing.T) {
 		t.Fatal(err)
 	}
 	recorder = httptest.NewRecorder()
-	request, _ = http.NewRequest("POST", "/swarm/join", bytes.NewReader(data))
+	request, _ = http.NewRequest(http.MethodPost, "/swarm/join", bytes.NewReader(data))
 	server2.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("SwarmJoin: wrong status. Want %d. Got %d.", http.StatusOK, recorder.Code)
@@ -183,7 +184,7 @@ func TestSwarmJoinWithService(t *testing.T) {
 		t.Fatal(err)
 	}
 	recorder := httptest.NewRecorder()
-	request, _ := http.NewRequest("POST", "/swarm/init", bytes.NewReader(data))
+	request, _ := http.NewRequest(http.MethodPost, "/swarm/init", bytes.NewReader(data))
 	server1.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("SwarmJoin: wrong status. Want %d. Got %d.", http.StatusOK, recorder.Code)
@@ -202,7 +203,7 @@ func TestSwarmJoinWithService(t *testing.T) {
 		t.Fatalf("ServiceCreate error: %s", err.Error())
 	}
 	recorder = httptest.NewRecorder()
-	request, _ = http.NewRequest("POST", "/services/create", bytes.NewBuffer(buf))
+	request, _ = http.NewRequest(http.MethodPost, "/services/create", bytes.NewBuffer(buf))
 	server1.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("SwarmJoin: wrong status code. Want %d. Got %d.", http.StatusOK, recorder.Code)
@@ -214,7 +215,7 @@ func TestSwarmJoinWithService(t *testing.T) {
 		t.Fatal(err)
 	}
 	recorder = httptest.NewRecorder()
-	request, _ = http.NewRequest("POST", "/swarm/join", bytes.NewReader(data))
+	request, _ = http.NewRequest(http.MethodPost, "/swarm/join", bytes.NewReader(data))
 	server2.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("SwarmJoin: wrong status. Want %d. Got %d.", http.StatusOK, recorder.Code)
@@ -242,7 +243,7 @@ func TestSwarmJoinAlreadyInSwarm(t *testing.T) {
 	server.buildMuxer()
 	server.swarm = &swarm.Swarm{}
 	recorder := httptest.NewRecorder()
-	request, _ := http.NewRequest("POST", "/swarm/join", nil)
+	request, _ := http.NewRequest(http.MethodPost, "/swarm/join", nil)
 	server.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusNotAcceptable {
 		t.Fatalf("SwarmJoin: wrong status. Want %d. Got %d.", http.StatusNotAcceptable, recorder.Code)
@@ -259,7 +260,7 @@ func TestSwarmLeave(t *testing.T) {
 	server.swarm = &swarm.Swarm{}
 	server.swarmServer, _ = newSwarmServer(server, "127.0.0.1:0")
 	recorder := httptest.NewRecorder()
-	request, _ := http.NewRequest("POST", "/swarm/leave", nil)
+	request, _ := http.NewRequest(http.MethodPost, "/swarm/leave", nil)
 	server.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("SwarmLeave: wrong status. Want %d. Got %d.", http.StatusOK, recorder.Code)
@@ -277,7 +278,7 @@ func TestSwarmLeaveNotInSwarm(t *testing.T) {
 	defer server.Stop()
 	server.buildMuxer()
 	recorder := httptest.NewRecorder()
-	request, _ := http.NewRequest("POST", "/swarm/leave", nil)
+	request, _ := http.NewRequest(http.MethodPost, "/swarm/leave", nil)
 	server.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusNotAcceptable {
 		t.Fatalf("SwarmLeave: wrong status. Want %d. Got %d.", http.StatusNotAcceptable, recorder.Code)
@@ -301,7 +302,7 @@ func TestSwarmInspect(t *testing.T) {
 	}
 	server.swarm = expected
 	recorder := httptest.NewRecorder()
-	request, _ := http.NewRequest("GET", "/swarm", nil)
+	request, _ := http.NewRequest(http.MethodGet, "/swarm", nil)
 	server.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("SwarmInspect: wrong status. Want %d. Got %d.", http.StatusOK, recorder.Code)
@@ -324,7 +325,7 @@ func TestSwarmInspectNotInSwarm(t *testing.T) {
 	defer server.Stop()
 	server.buildMuxer()
 	recorder := httptest.NewRecorder()
-	request, _ := http.NewRequest("GET", "/swarm", nil)
+	request, _ := http.NewRequest(http.MethodGet, "/swarm", nil)
 	server.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusNotAcceptable {
 		t.Fatalf("SwarmInspect: wrong status. Want %d. Got %d.", http.StatusNotAcceptable, recorder.Code)
@@ -364,9 +365,8 @@ func TestServiceCreate(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ServiceCreate error: %s", err.Error())
 	}
-	var params io.Reader
-	params = bytes.NewBuffer(buf)
-	request, _ := http.NewRequest("POST", "/services/create", params)
+	var params io.Reader = bytes.NewBuffer(buf)
+	request, _ := http.NewRequest(http.MethodPost, "/services/create", params)
 	server.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("ServiceCreate: wrong status code. Want %d. Got %d.", http.StatusOK, recorder.Code)
@@ -460,9 +460,8 @@ func TestServiceCreateDynamicPort(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ServiceCreate error: %s", err.Error())
 	}
-	var params io.Reader
-	params = bytes.NewBuffer(buf)
-	request, _ := http.NewRequest("POST", "/services/create", params)
+	var params io.Reader = bytes.NewBuffer(buf)
+	request, _ := http.NewRequest(http.MethodPost, "/services/create", params)
 	server.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("ServiceCreate: wrong status code. Want %d. Got %d.", http.StatusOK, recorder.Code)
@@ -525,9 +524,8 @@ func TestServiceCreateNoContainers(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ServiceCreate error: %s", err.Error())
 	}
-	var params io.Reader
-	params = bytes.NewBuffer(buf)
-	request, _ := http.NewRequest("POST", "/services/create", params)
+	var params io.Reader = bytes.NewBuffer(buf)
+	request, _ := http.NewRequest(http.MethodPost, "/services/create", params)
 	server.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("ServiceCreate: wrong status code. Want %d. Got %d.", http.StatusOK, recorder.Code)
@@ -563,7 +561,7 @@ func TestServiceInspect(t *testing.T) {
 		t.Fatal(err)
 	}
 	recorder := httptest.NewRecorder()
-	request, _ := http.NewRequest("GET", "/services/"+srv.ID, nil)
+	request, _ := http.NewRequest(http.MethodGet, "/services/"+srv.ID, nil)
 	server.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("ServiceInspect: wrong status code. Want %d. Got %d.", http.StatusOK, recorder.Code)
@@ -587,7 +585,7 @@ func TestServiceInspectByName(t *testing.T) {
 		t.Fatal(err)
 	}
 	recorder := httptest.NewRecorder()
-	request, _ := http.NewRequest("GET", "/services/"+srv.Spec.Name, nil)
+	request, _ := http.NewRequest(http.MethodGet, "/services/"+srv.Spec.Name, nil)
 	server.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("ServiceInspect: wrong status code. Want %d. Got %d.", http.StatusOK, recorder.Code)
@@ -607,7 +605,7 @@ func TestServiceInspectNotFound(t *testing.T) {
 	defer server.Stop()
 	defer unused.Stop()
 	recorder := httptest.NewRecorder()
-	request, _ := http.NewRequest("GET", "/services/abcd", nil)
+	request, _ := http.NewRequest(http.MethodGet, "/services/abcd", nil)
 	server.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusNotFound {
 		t.Fatalf("ServiceInspect: wrong status code. Want %d. Got %d.", http.StatusNotFound, recorder.Code)
@@ -624,7 +622,7 @@ func TestTaskInspect(t *testing.T) {
 	}
 	task := server.tasks[0]
 	recorder := httptest.NewRecorder()
-	request, _ := http.NewRequest("GET", "/tasks/"+task.ID, nil)
+	request, _ := http.NewRequest(http.MethodGet, "/tasks/"+task.ID, nil)
 	server.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("TaskInspect: wrong status code. Want %d. Got %d.", http.StatusOK, recorder.Code)
@@ -644,7 +642,7 @@ func TestTaskInspectNotFound(t *testing.T) {
 	defer server.Stop()
 	defer unused.Stop()
 	recorder := httptest.NewRecorder()
-	request, _ := http.NewRequest("GET", "/tasks/abcd", nil)
+	request, _ := http.NewRequest(http.MethodGet, "/tasks/abcd", nil)
 	server.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusNotFound {
 		t.Fatalf("TaskInspect: wrong status code. Want %d. Got %d.", http.StatusNotFound, recorder.Code)
@@ -660,7 +658,7 @@ func TestServiceList(t *testing.T) {
 		t.Fatal(err)
 	}
 	recorder := httptest.NewRecorder()
-	request, _ := http.NewRequest("GET", "/services", nil)
+	request, _ := http.NewRequest(http.MethodGet, "/services", nil)
 	server.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("ServiceList: wrong status code. Want %d. Got %d.", http.StatusOK, recorder.Code)
@@ -684,7 +682,7 @@ func TestServiceListFilterID(t *testing.T) {
 		t.Fatal(err)
 	}
 	recorder := httptest.NewRecorder()
-	request, _ := http.NewRequest("GET", fmt.Sprintf(`/services?filters={"id":[%q]}`, srv.ID), nil)
+	request, _ := http.NewRequest(http.MethodGet, fmt.Sprintf(`/services?filters={"id":[%q]}`, srv.ID), nil)
 	server.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("ServiceList: wrong status code. Want %d. Got %d.", http.StatusOK, recorder.Code)
@@ -708,7 +706,7 @@ func TestServiceListFilterName(t *testing.T) {
 		t.Fatal(err)
 	}
 	recorder := httptest.NewRecorder()
-	request, _ := http.NewRequest("GET", fmt.Sprintf(`/services?filters={"name":[%q]}`, srv.Spec.Name), nil)
+	request, _ := http.NewRequest(http.MethodGet, fmt.Sprintf(`/services?filters={"name":[%q]}`, srv.Spec.Name), nil)
 	server.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("ServiceList: wrong status code. Want %d. Got %d.", http.StatusOK, recorder.Code)
@@ -732,7 +730,7 @@ func TestServiceListFilterEmpty(t *testing.T) {
 		t.Fatal(err)
 	}
 	recorder := httptest.NewRecorder()
-	request, _ := http.NewRequest("GET", "/services?filters="+url.QueryEscape(`{"id":["something"]}`), nil)
+	request, _ := http.NewRequest(http.MethodGet, "/services?filters="+url.QueryEscape(`{"id":["something"]}`), nil)
 	server.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("ServiceList: wrong status code. Want %d. Got %d.", http.StatusOK, recorder.Code)
@@ -757,7 +755,7 @@ func TestTaskList(t *testing.T) {
 	}
 	task := server.tasks[0]
 	recorder := httptest.NewRecorder()
-	request, _ := http.NewRequest("GET", "/tasks", nil)
+	request, _ := http.NewRequest(http.MethodGet, "/tasks", nil)
 	server.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("TaskList: wrong status code. Want %d. Got %d.", http.StatusOK, recorder.Code)
@@ -782,7 +780,7 @@ func TestTaskListFilterID(t *testing.T) {
 	}
 	task := server.tasks[0]
 	recorder := httptest.NewRecorder()
-	request, _ := http.NewRequest("GET", fmt.Sprintf(`/tasks?filters={"id":[%q]}`, task.ID), nil)
+	request, _ := http.NewRequest(http.MethodGet, fmt.Sprintf(`/tasks?filters={"id":[%q]}`, task.ID), nil)
 	server.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("TaskList: wrong status code. Want %d. Got %d.", http.StatusOK, recorder.Code)
@@ -807,7 +805,7 @@ func TestTaskListFilterServiceID(t *testing.T) {
 	}
 	task := server.tasks[0]
 	recorder := httptest.NewRecorder()
-	request, _ := http.NewRequest("GET", fmt.Sprintf(`/tasks?filters={"service":[%q]}`, task.ServiceID), nil)
+	request, _ := http.NewRequest(http.MethodGet, fmt.Sprintf(`/tasks?filters={"service":[%q]}`, task.ServiceID), nil)
 	server.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("TaskList: wrong status code. Want %d. Got %d.", http.StatusOK, recorder.Code)
@@ -832,7 +830,7 @@ func TestTaskListFilterServiceName(t *testing.T) {
 	}
 	task := server.tasks[0]
 	recorder := httptest.NewRecorder()
-	request, _ := http.NewRequest("GET", fmt.Sprintf(`/tasks?filters={"service":[%q]}`, srv.Spec.Name), nil)
+	request, _ := http.NewRequest(http.MethodGet, fmt.Sprintf(`/tasks?filters={"service":[%q]}`, srv.Spec.Name), nil)
 	server.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("TaskList: wrong status code. Want %d. Got %d.", http.StatusOK, recorder.Code)
@@ -857,7 +855,7 @@ func TestTaskListFilterMultipleFields(t *testing.T) {
 	}
 	task := server.tasks[0]
 	recorder := httptest.NewRecorder()
-	request, _ := http.NewRequest("GET", fmt.Sprintf(`/tasks?filters={"service":[%q], "id":[%q]}`, srv.Spec.Name, task.ID), nil)
+	request, _ := http.NewRequest(http.MethodGet, fmt.Sprintf(`/tasks?filters={"service":[%q], "id":[%q]}`, srv.Spec.Name, task.ID), nil)
 	server.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("TaskList: wrong status code. Want %d. Got %d.", http.StatusOK, recorder.Code)
@@ -882,7 +880,7 @@ func TestTaskListFilterMultipleFieldsNotFound(t *testing.T) {
 	}
 	recorder := httptest.NewRecorder()
 	filterParam := url.QueryEscape(fmt.Sprintf(`{"service":[%q], "id":["abc"]}`, srv.Spec.Name))
-	request, _ := http.NewRequest("GET", "/tasks?filters="+filterParam, nil)
+	request, _ := http.NewRequest(http.MethodGet, "/tasks?filters="+filterParam, nil)
 	server.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("TaskList: wrong status code. Want %d. Got %d.", http.StatusOK, recorder.Code)
@@ -907,7 +905,7 @@ func TestTaskListFilterNotFound(t *testing.T) {
 	}
 	recorder := httptest.NewRecorder()
 	filter := url.QueryEscape(`{"id":["something"]}`)
-	request, _ := http.NewRequest("GET", "/tasks?filters="+filter, nil)
+	request, _ := http.NewRequest(http.MethodGet, "/tasks?filters="+filter, nil)
 	server.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("TaskList: wrong status code. Want %d. Got %d.", http.StatusOK, recorder.Code)
@@ -933,7 +931,7 @@ func TestTaskListFilterLabel(t *testing.T) {
 	task := server.tasks[0]
 	recorder := httptest.NewRecorder()
 	filter := url.QueryEscape(`{"label":["mykey=myvalue"]}`)
-	request, _ := http.NewRequest("GET", "/tasks?filters="+filter, nil)
+	request, _ := http.NewRequest(http.MethodGet, "/tasks?filters="+filter, nil)
 	server.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("TaskList: wrong status code. Want %d. Got %d.", http.StatusOK, recorder.Code)
@@ -947,7 +945,7 @@ func TestTaskListFilterLabel(t *testing.T) {
 		t.Fatalf("TaskList: wrong task. Want\n%#v\nGot\n%#v", task, &taskInspect)
 	}
 	filter = url.QueryEscape(`{"label":["mykey"]}`)
-	request, _ = http.NewRequest("GET", "/tasks?filters="+filter, nil)
+	request, _ = http.NewRequest(http.MethodGet, "/tasks?filters="+filter, nil)
 	recorder = httptest.NewRecorder()
 	server.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusOK {
@@ -961,7 +959,7 @@ func TestTaskListFilterLabel(t *testing.T) {
 		t.Fatalf("TaskList: wrong task. Want\n%#v\nGot\n%#v", task, &taskInspect)
 	}
 	filter = url.QueryEscape(`{"label":["otherkey"]}`)
-	request, _ = http.NewRequest("GET", "/tasks?filters="+filter, nil)
+	request, _ = http.NewRequest(http.MethodGet, "/tasks?filters="+filter, nil)
 	recorder = httptest.NewRecorder()
 	server.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusOK {
@@ -985,7 +983,7 @@ func TestServiceDelete(t *testing.T) {
 		t.Fatal(err)
 	}
 	recorder := httptest.NewRecorder()
-	request, _ := http.NewRequest("DELETE", "/services/"+srv.ID, nil)
+	request, _ := http.NewRequest(http.MethodDelete, "/services/"+srv.ID, nil)
 	server.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("ServiceDelete: wrong status code. Want %d. Got %d.", http.StatusOK, recorder.Code)
@@ -1006,7 +1004,7 @@ func TestServiceDeleteNotFound(t *testing.T) {
 	defer server.Stop()
 	defer unused.Stop()
 	recorder := httptest.NewRecorder()
-	request, _ := http.NewRequest("DELETE", "/services/blahblah", nil)
+	request, _ := http.NewRequest(http.MethodDelete, "/services/blahblah", nil)
 	server.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusNotFound {
 		t.Fatalf("ServiceDelete: wrong status code. Want %d. Got %d.", http.StatusNotFound, recorder.Code)
@@ -1047,7 +1045,7 @@ func TestServiceUpdate(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ServiceUpdate error: %s", err.Error())
 	}
-	request, _ := http.NewRequest("POST", fmt.Sprintf("/services/%s/update", srv.ID), bytes.NewReader(buf))
+	request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("/services/%s/update", srv.ID), bytes.NewReader(buf))
 	server.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("ServiceUpdate: wrong status code. Want %d. Got %d.", http.StatusOK, recorder.Code)
@@ -1152,7 +1150,7 @@ func TestServiceUpdateMoreReplicas(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ServiceUpdate error: %s", err.Error())
 	}
-	request, _ := http.NewRequest("POST", fmt.Sprintf("/services/%s/update", srv.ID), bytes.NewReader(buf))
+	request, _ := http.NewRequest(http.MethodPost, fmt.Sprintf("/services/%s/update", srv.ID), bytes.NewReader(buf))
 	server.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("ServiceUpdate: wrong status code. Want %d. Got %d.", http.StatusOK, recorder.Code)
@@ -1192,7 +1190,7 @@ func TestServiceUpdateNotFound(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ServiceUpdate error: %s", err.Error())
 	}
-	request, _ := http.NewRequest("POST", "/services/pale/update", bytes.NewReader(buf))
+	request, _ := http.NewRequest(http.MethodPost, "/services/pale/update", bytes.NewReader(buf))
 	server.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusNotFound {
 		t.Fatalf("ServiceUpdate: wrong status code. Want %d. Got %d.", http.StatusNotFound, recorder.Code)
@@ -1205,7 +1203,7 @@ func TestNodeList(t *testing.T) {
 	defer srv2.Stop()
 	for _, srv := range []*DockerServer{srv1, srv2} {
 		recorder := httptest.NewRecorder()
-		request, _ := http.NewRequest("GET", "/nodes", nil)
+		request, _ := http.NewRequest(http.MethodGet, "/nodes", nil)
 		srv.ServeHTTP(recorder, request)
 		if recorder.Code != http.StatusOK {
 			t.Fatalf("invalid status code: %d", recorder.Code)
@@ -1230,7 +1228,7 @@ func TestNodeInfo(t *testing.T) {
 	defer srv2.Stop()
 	for _, srv := range []*DockerServer{srv1, srv2} {
 		recorder := httptest.NewRecorder()
-		request, _ := http.NewRequest("GET", "/nodes/"+srv.nodes[0].ID, nil)
+		request, _ := http.NewRequest(http.MethodGet, "/nodes/"+srv.nodes[0].ID, nil)
 		srv.ServeHTTP(recorder, request)
 		if recorder.Code != http.StatusOK {
 			t.Fatalf("invalid status code: %d", recorder.Code)
@@ -1263,7 +1261,7 @@ func TestNodeUpdate(t *testing.T) {
 			t.Fatal(err)
 		}
 		body := bytes.NewReader(data)
-		request, _ := http.NewRequest("POST", "/nodes/"+srv.nodes[0].ID+"/update", body)
+		request, _ := http.NewRequest(http.MethodPost, "/nodes/"+srv.nodes[0].ID+"/update", body)
 		srv.ServeHTTP(recorder, request)
 		if recorder.Code != http.StatusOK {
 			t.Fatalf("invalid status code: %d", recorder.Code)
@@ -1282,7 +1280,7 @@ func TestNodeDelete(t *testing.T) {
 	defer srv1.Stop()
 	defer srv2.Stop()
 	recorder := httptest.NewRecorder()
-	request, _ := http.NewRequest("DELETE", "/nodes/"+srv1.nodes[0].ID, nil)
+	request, _ := http.NewRequest(http.MethodDelete, "/nodes/"+srv1.nodes[0].ID, nil)
 	srv1.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("invalid status code: %d", recorder.Code)
@@ -1305,7 +1303,7 @@ func setUpSwarm(t *testing.T) (*DockerServer, *DockerServer) {
 		t.Fatal(err)
 	}
 	recorder := httptest.NewRecorder()
-	request, _ := http.NewRequest("POST", "/swarm/init", bytes.NewReader(nil))
+	request, _ := http.NewRequest(http.MethodPost, "/swarm/init", bytes.NewReader(nil))
 	server1.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("setUpSwarm: invalid status code swarm init %d", recorder.Code)
@@ -1317,7 +1315,7 @@ func setUpSwarm(t *testing.T) (*DockerServer, *DockerServer) {
 		t.Fatal(err)
 	}
 	recorder = httptest.NewRecorder()
-	request, _ = http.NewRequest("POST", "/swarm/join", bytes.NewReader(data))
+	request, _ = http.NewRequest(http.MethodPost, "/swarm/join", bytes.NewReader(data))
 	server2.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusOK {
 		t.Fatalf("setUpSwarm: invalid status code swarm join %d", recorder.Code)
@@ -1357,18 +1355,17 @@ func addTestService(server *DockerServer) (*swarm.Service, error) {
 	if err != nil {
 		return nil, err
 	}
-	var params io.Reader
-	params = bytes.NewBuffer(buf)
-	request, _ := http.NewRequest("POST", "/services/create", params)
+	var params io.Reader = bytes.NewBuffer(buf)
+	request, _ := http.NewRequest(http.MethodPost, "/services/create", params)
 	server.ServeHTTP(recorder, request)
 	if recorder.Code != http.StatusOK {
 		return nil, fmt.Errorf("unexpected status %d", recorder.Code)
 	}
 	if len(server.services) == 0 {
-		return nil, fmt.Errorf("no service created on server")
+		return nil, errors.New("no service created on server")
 	}
 	if len(server.tasks) == 0 {
-		return nil, fmt.Errorf("no tasks created on server")
+		return nil, errors.New("no tasks created on server")
 	}
 	return server.services[0], nil
 }
