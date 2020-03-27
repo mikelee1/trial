@@ -1,15 +1,16 @@
 package main
 
 import (
-	"fmt"
+	"testing"
 	"sync"
 	"time"
+	"fmt"
 )
 
 var lock sync.Mutex
 var count = make(map[string]int)
 
-func main() {
+func Test_Main(t *testing.T) {
 	handler("yiniaji")
 	handler("ernianji")
 	handler("sannianji")
