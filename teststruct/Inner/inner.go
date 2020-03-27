@@ -1,5 +1,11 @@
 package Inner
 
-type Test222 struct {
+import "fmt"
+
+type B struct {
 	Address string
+}
+
+func (c B) Print() {
+	fmt.Println("B")
 }

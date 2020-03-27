@@ -1,19 +1,23 @@
 package main
 
 import (
-	"myproj/try/teststruct/Inner"
 	"fmt"
 )
 
 func main() {
-	t111 := Test111{Test222:Inner.Test222{Address:"1sdf"}}
-	fmt.Println(t111)
+	a := A{
+
+	}
+	a.Print()
 }
 
-type Test111 struct {
+type A struct {
 	Name string
-	Inner.Test222
+	C
 }
 
+type C struct{}
 
-
+func (c C) Print() {
+	fmt.Println("c")
+}
