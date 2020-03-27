@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"myproj/try/teststruct/Inner"
 )
 
 func main() {
@@ -9,6 +10,7 @@ func main() {
 
 	}
 	a.Print()
+	a.B.Print()
 }
 
 type A struct {
@@ -16,7 +18,9 @@ type A struct {
 	C
 }
 
-type C struct{}
+type C struct {
+	inner.B
+}
 
 func (c C) Print() {
 	fmt.Println("c")
