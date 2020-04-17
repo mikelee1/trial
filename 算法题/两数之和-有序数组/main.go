@@ -1,12 +1,17 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"sort"
+)
 
 func main() {
-	fmt.Println(twoSum([]int{3, 3}, 6))
+	a := []int{3, 3, 2, 1, 5, 7, 4, 6, 5, 8, 9, 2}
+	sort.Ints(a)
+	fmt.Println(twoSum(a, 6))
 }
 
-// 有序数组nums
+// 有序数组nums，找到两个数加起来等于target
 func twoSum(nums []int, target int) []int {
 
 	var head, tail = 0, len(nums)-1
