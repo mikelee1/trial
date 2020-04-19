@@ -5,7 +5,7 @@ import (
 )
 
 func main() {
-	fmt.Println(minCostClimbingStairs([]int{1, 100, 1, 1, 1, 100, 1, 1, 100, 1}))
+	fmt.Println(minCostClimbingStairs([]int{1, 100, 1, 1, 1, 100, 100, 1, 100, 1}))
 }
 
 func minCostClimbingStairs(cost []int) int {

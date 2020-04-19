@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 func main() {
-	fmt.Println(massage([]int{2, 7, 9, 3, 1, 4, 5, 2, 7, 2, 1}))
+	fmt.Println(massage([]int{8, 3, 1, 4, 9, 8, 1, 5, 7, 8, 2, 3}))
 }
 
 func massage(nums []int) int {

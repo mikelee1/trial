@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 func main() {
-	fmt.Println(rob([]int{1, 3, 1}))
+	fmt.Println(rob([]int{8, 3, 1, 4, 9, 8, 1, 5, 7, 8, 2, 3}))
 }
 
 func rob(nums []int) int {

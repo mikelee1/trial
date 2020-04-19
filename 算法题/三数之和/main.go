@@ -5,7 +5,7 @@ import (
 )
 
 func main() {
-	fmt.Println(threeSum([]int{0,0,0,0,0,0,0}))
+	fmt.Println(threeSum([]int{1, -1, 3, 4, 2, -3, -2, 4, -1, -1}))
 }
 
 // 三数之和
@@ -18,7 +18,7 @@ func threeSum(nums []int) [][]int {
 	var singleIndexs = map[int][]int{}
 	for k, v := range nums {
 		if _, ok := singleIndexs[v]; ok {
-			if len(singleIndexs[v])<3{
+			if len(singleIndexs[v]) < 3 {
 				singleIndexs[v] = append(singleIndexs[v], k)
 			}
 			continue
