@@ -1,5 +1,5 @@
 // 转换为驼峰
-package main
+package trans
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 )
 
 func ToCamelCase(str string) string {
-	temp := strings.Split(str, "-")
+	temp := strings.Split(str, "_")
 	for i, r := range temp {
 		if i > 0 {
 			temp[i] = strings.Title(r)
@@ -18,6 +18,6 @@ func ToCamelCase(str string) string {
 }
 
 func main() {
-	str := "the-stealth-warrior"
+	str := "the_stealth_warrior"
 	fmt.Println(ToCamelCase(str))
 }

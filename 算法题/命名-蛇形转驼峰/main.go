@@ -3,37 +3,32 @@ package main
 import (
 	"strings"
 	"fmt"
-	"regexp"
 )
 
 //varchar(.*\)) 替换为string
 
 func main() {
 	case1 := `
-	tx_code                     string  //	交易代码
-	prod_short_name             string  //	产品简称
-	prod_code                   string  //	产品代码
-	transferor_name             string  //	出让方名称
-	transferor_acct_name        string  //	出让方资产账号
-	transferee_name             string  //	受让方名称
-	transferee_acct_name        string  //	受让方资产账号
-	tx_scale                    float64 //	交易规模
-	turnover                    float64 //	成交金额
-	loan_mngm_fee_rate          float64 //	贷款管理费率
-	loan_mngm_fee_pay_freq      string  //	贷款管理费支付频率
-	accrued_interest            float64 //	应计利息
-	accrued_interest_pay_method string  //	应计利息支付方式
-	argmt_rate                  float64 //	安排费率
-	fixture_date                string  //	成交日期
-	settlement_method           string  //	结算方式
-	settlement_date             string  //	结算日
-	description                 string  //	备注
-	sync_type                   byte    //	同步状态 0-未同步 1-同步失败 2-同步成功 9-其他
-	create_time                 string  //  创建时间
+	contract_no           string  //	信托合同编号
+	prod_code             string  //	产品代码
+	contract_name         string  //	信托合同名称
+	consignor             string  //	委托人
+	trustee               string  //	受托人
+	beneficiaries         string  //	受益人
+	principal_beneficiary float64 //	信托受益权本金（元）
+	build_date            string  //	信托设立日
+	distribution_date     string  //	信托利益分配日
+	expected_rate         float64 //	信托预期收益率（%）
+	expected_end_date     string  //	信托预期到期日
+	expiry_date           string  //	信托法定到期日
+	social_credit_code    string  //	统一社会信用代码
+	trustee_contact       string  //	受托机构联系人
+	trustee_tel           string  //	受托机构电话
+	sync_type             byte    //	同步状态 0-未同步 1-同步失败 2-同步成功 9-其他
+	create_time           string
 	`
-	//fmt.Println(Trans(case1))
+	fmt.Println(Trans(case1))
 
-	fmt.Println(ToSnakeCase(case1))
 }
 
 func Trans(snack string) string {
@@ -65,12 +60,4 @@ func Trans(snack string) string {
 		}
 	}
 	return strings.Join(res, " ")
-}
-
-var matchAllCap = regexp.MustCompile("([a-z0-9])([A-Z])")
-
-func ToSnakeCase(str string) string {
-	snake := matchAllCap.ReplaceAllString(str, "${1}_${2}")
-	fmt.Println(snake)
-	return strings.ToLower(snake)
 }

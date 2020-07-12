@@ -3,21 +3,22 @@ package main
 import "fmt"
 
 func main() {
-	fmt.Println(climbStairs(3))
+	var formatStr = "爬%d个台阶有%d种方式\n"
+	fmt.Printf(formatStr, 3, climbStairs(3))
+	fmt.Printf(formatStr, 4, climbStairs(4))
+	fmt.Printf(formatStr, 5, climbStairs(5))
+	//爬3个台阶有3种方式
+	//爬4个台阶有5种方式
+	//爬5个台阶有8种方式
 }
 
-func climbStairs(n int) int {
-	if n == 1 || n == 2 {
+func climbStairs(n int) (dp int) {
+	if n <= 2 {
 		return n
 	}
-
-	dp := 0
-	pre := 2
-	prepre := 1
+	prePre, pre := 1, 2
 	for i := 2; i < n; i++ {
-		dp = pre + prepre
-		prepre = pre
-		pre = dp
+		prePre, pre = pre, pre+prePre
 	}
-	return dp
+	return pre
 }
