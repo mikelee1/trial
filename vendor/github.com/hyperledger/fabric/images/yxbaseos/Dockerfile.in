@@ -1,9 +1,0 @@
-# Copyright Greg Haskins All Rights Reserved
-#
-# SPDX-License-Identifier: Apache-2.0
-#
-FROM _BASE_NS_/fabric-baseos:_BASE_TAG_
-ENV LD_LIBRARY_PATH /usr/local/lib
-ADD payload/include.tar.bz2 /usr/local/include/
-ADD payload/libs.tar.bz2 /usr/local/lib/
-ADD payload/libs.tar.bz2 /usr/lib/x86_64-linux-gnu/
