@@ -6,9 +6,9 @@ import (
 	"github.com/op/go-logging"
 	"github.com/openzipkin/zipkin-go"
 	"google.golang.org/grpc/metadata"
-	logger2 "myproj/try/common/logger"
-	"myproj/try/testopenzipkin/protos"
-	tracer2 "myproj/try/testopenzipkin/tracer"
+	logger2 "myproj.lee/try/common/logger"
+	"myproj.lee/try/testopenzipkin/protos"
+	tracer2 "myproj.lee/try/testopenzipkin/tracer"
 )
 
 var (

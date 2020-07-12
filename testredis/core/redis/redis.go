@@ -3,7 +3,7 @@ package redis
 import (
 	"github.com/go-redis/redis"
 	"github.com/op/go-logging"
-	"myproj/try/testredis/config"
+	"myproj.lee/try/testredis/config"
 )
 
 var client *redis.Client

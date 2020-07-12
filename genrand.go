@@ -7,7 +7,7 @@ import (
 )
 
 func CreateCaptcha() string {
-	return fmt.Sprintf("%06v", rand.New(rand.NewSource(time.Now().UnixNano())).Int31n(10))
+	return fmt.Sprintf("%06v", rand.New(rand.NewSource(time.Now().UnixNano())).Intn(1000))
 }
 func main() {
 	fmt.Println(CreateCaptcha())

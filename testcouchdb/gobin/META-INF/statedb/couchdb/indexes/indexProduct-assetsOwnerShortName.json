@@ -1,0 +1,11 @@
+
+{
+  "index": {
+    "fields": [
+      "baseProduct.assetsOwnerShortName"
+    ]
+  },
+  "ddoc": "baseProduct.assetsOwnerShortName",
+  "name": "baseProduct.assetsOwnerShortName",
+  "type": "json"
+}

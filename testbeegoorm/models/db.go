@@ -13,7 +13,7 @@ var (
 	dbname1 = "wasabi"
 	dbuser = "yunphant"
 	dbpasswd = "123456"
-	dbip = "192.168.9.67"
+	dbip = "192.168.9.87"
 	dbport = "38255"
 	dbcharset = "utf8"
 )

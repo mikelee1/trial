@@ -1,0 +1,11 @@
+
+{
+  "index": {
+    "fields": [
+      "baseProduct.uAssetPkgCode"
+    ]
+  },
+  "ddoc": "baseProduct.uAssetPkgCode",
+  "name": "baseProduct.uAssetPkgCode",
+  "type": "json"
+}

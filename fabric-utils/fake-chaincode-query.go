@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"myproj/try/common/execshell"
+	"myproj.lee/try/common/execshell"
 	"sync"
 )
 

@@ -1,0 +1,11 @@
+
+{
+  "index": {
+    "fields": [
+      "baseTransaction.raw"
+    ]
+  },
+  "ddoc": "baseTransaction.raw",
+  "name": "baseTransaction.raw",
+  "type": "json"
+}

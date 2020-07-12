@@ -9,7 +9,7 @@ package main
 
 //import (
 //	"github.com/gin-gonic/gin"
-//	"myproj/try/gin_websocket/controller"
+//	"myproj.lee/try/gin_websocket/controller"
 //	"github.com/gorilla/websocket"
 //	"net/http"
 //	"fmt"
@@ -18,7 +18,7 @@ package main
 //func main()  {
 //	router := gin.Default()
 //
-//	router.LoadHTMLGlob("/Users/leemike/go/src/myproj/try/gin_websocket/templates/*")
+//	router.LoadHTMLGlob("/Users/leemike/go/src/myproj.lee/try/gin_websocket/templates/*")
 //
 //	router.GET("/home",controller.GetHome)
 //	router.GET("/", controller.GetIndex)
@@ -66,7 +66,7 @@ func main() {
 	r.GET("/ws", func(c *gin.Context) {
 		wshandler(c.Writer, c.Request)
 	})
-	r.LoadHTMLGlob("/Users/leemike/go/src/myproj/try/gin_websocket/templates/*")
+	r.LoadHTMLGlob("/Users/leemike/go/src/myproj.lee/try/gin_websocket/templates/*")
 
 	r.GET("/", func(c *gin.Context) {
 		c.HTML(200, "index.html", nil)

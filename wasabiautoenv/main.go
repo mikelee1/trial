@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"io/ioutil"
 	"fmt"
-	"myproj/try/wasabiautoenv/models"
+	"myproj.lee/try/wasabiautoenv/models"
 )
 
 const (

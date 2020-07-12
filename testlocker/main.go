@@ -24,12 +24,14 @@ func main() {
 	mutex.Unlock()
 
 	//休息一会,等待打印结果
-	time.Sleep(time.Second)
+	time.Sleep(time.Second * 6)
 }
 
+//读的资源消耗大一点
 func read() {
 	fmt.Println("The lock is rlocked.()")
 	mutex.RLock()
+	time.Sleep(time.Second * 4)
 	defer mutex.RUnlock()
 	fmt.Println("The lock is runlock.()")
 }

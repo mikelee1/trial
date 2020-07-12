@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"github.com/op/go-logging"
 	"google.golang.org/grpc"
-	logger2 "myproj/try/common/logger"
-	"myproj/try/testopenzipkin/protos"
+	logger2 "myproj.lee/try/common/logger"
+	"myproj.lee/try/testopenzipkin/protos"
 	"net/http"
 	"sync"
 	"testing"
@@ -21,7 +21,7 @@ func init() {
 }
 
 func Test_main(t *testing.T) {
-	conn, err := grpc.Dial("127.0.0.1:1080", grpc.WithInsecure())
+	conn, err := grpc.Dial("127.0.0.1:18080", grpc.WithInsecure())
 	if err != nil {
 		logger.Error(err)
 		return
@@ -44,17 +44,17 @@ func Test_main1(t *testing.T) {
 	wg = &sync.WaitGroup{}
 	wg.Add(4)
 	go OneTime()
-	time.Sleep(10 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 	go OneTime()
-	time.Sleep(10 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 	go OneTime()
-	time.Sleep(10 * time.Millisecond)
+	time.Sleep(100 * time.Millisecond)
 	go OneTime()
 	wg.Wait()
 }
 
 func OneTime() {
-	resp, err := http.Get("http://127.0.0.1:8080/hello")
+	resp, err := http.Get("http://127.0.0.1:18080/hello")
 	if err != nil {
 		fmt.Println(err)
 		return

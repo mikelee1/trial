@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/astaxie/beego"
 	"fmt"
-	logger2 "myproj/try/common/logger"
+	logger2 "myproj.lee/try/common/logger"
 	"time"
 	"path/filepath"
 )
@@ -29,11 +29,16 @@ func main() {
 		logger.Error(err)
 		return
 	}
-	a := appconfig.String("a")
+
 	err = appconfig.SaveConfigFile("testbeegoappconf/conf/testbeego.yaml")
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println(a)
+	beego.BConfig.WebConfig.DirectoryIndex = false
+	beego.BConfig.WebConfig.StaticDir["/static"] = "testbeegoappconf/static"
+
+	beego.Run()
+
+
 }

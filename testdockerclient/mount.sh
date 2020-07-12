@@ -1,0 +1,1 @@
+echo Password | sudo mount -o nolock -o resvport 192.168.9.82:/home/centos/testnfs/test  /Users/leemike/testnfs/test

@@ -1,6 +1,17 @@
 package testcover
 
-import "math"
+import (
+	"math"
+	"fmt"
+)
+
+type BB struct {
+	Name string
+}
+
+func (a BB) Calculate() {
+	fmt.Println(a.Name)
+}
 
 func Area(p bool) float64 {
 	var r float64 = 1
@@ -15,12 +26,12 @@ func Length() float64 {
 	return math.Pi * 2 * r
 }
 
-func area1() float64 {
+func Area1() float64 {
 	var r float64 = 1
 	return math.Pi * r * r
 }
 
-func area2() float64 {
+func Area2() float64 {
 	var r float64 = 1
 	return math.Pi * r * r
 }

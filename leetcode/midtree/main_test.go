@@ -2,7 +2,7 @@ package midtree_test
 
 import (
 	"github.com/magiconair/properties/assert"
-	"myproj/try/leetcode/midtree"
+	"myproj.lee/try/leetcode/midtree"
 	"testing"
 )
 

@@ -4,7 +4,7 @@ import (
 	"os"
 	"fmt"
 	"io"
-	"myproj/try/common/file"
+	"myproj.lee/try/common/file"
 )
 
 func check(e error) {

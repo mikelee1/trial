@@ -1,0 +1,10 @@
+{
+  "index": {
+    "fields": [
+      "uAssetPkgCode"
+    ]
+  },
+  "ddoc": "indexPkduAssetPkgCodeDoc",
+  "name": "indexPkduAssetPkgCode",
+  "type": "json"
+}

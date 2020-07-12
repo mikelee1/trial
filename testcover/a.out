@@ -1,7 +1,7 @@
 mode: set
-myproj/try/testcover/main.go:5.27,7.7 2 1
-myproj/try/testcover/main.go:10.2,10.24 1 0
-myproj/try/testcover/main.go:7.7,9.3 1 1
-myproj/try/testcover/main.go:13.23,16.2 2 1
-myproj/try/testcover/main.go:18.22,21.2 2 0
-myproj/try/testcover/main.go:23.22,26.2 2 0
+myproj.lee/try/testcover/main.go:5.27,7.7 2 1
+myproj.lee/try/testcover/main.go:10.2,10.24 1 1
+myproj.lee/try/testcover/main.go:7.7,9.3 1 1
+myproj.lee/try/testcover/main.go:13.23,16.2 2 1
+myproj.lee/try/testcover/main.go:18.22,21.2 2 1
+myproj.lee/try/testcover/main.go:23.22,26.2 2 1

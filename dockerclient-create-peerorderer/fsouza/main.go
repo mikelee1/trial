@@ -6,7 +6,7 @@ import (
 	docker2 "github.com/fsouza/go-dockerclient"
 	"github.com/hyperledger/fabric/sdk"
 	"github.com/op/go-logging"
-	"myproj/try/dockerclient-create-peerorderer/fabric"
+	"myproj.lee/try/dockerclient-create-peerorderer/fabric"
 	"net/url"
 	"path"
 	_ "path"

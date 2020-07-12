@@ -6,7 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 	"mime/multipart"
-	models "myproj/try/testwasabi/model"
+	models "myproj.lee/try/testwasabi/model"
 	"net/http"
 	"os"
 	"path/filepath"

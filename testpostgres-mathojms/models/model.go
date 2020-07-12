@@ -2,6 +2,7 @@ package models
 
 import (
 	"github.com/jinzhu/gorm"
+	"time"
 )
 
 type User struct {
@@ -18,7 +19,7 @@ type User struct {
 	Longitude         float64   `gorm:"default:'0'"` //经度
 	Geohash           string
 	Onlycareselfgrade bool      `gorm:"default:false"`
-	School            int //机构或者学校
+
 }
 
 func (t *User) TableName() string {
@@ -36,4 +37,25 @@ type School struct {
 
 func (*School) TableName() string {
 	return "mathojms_school"
+}
+
+type Problem struct {
+	gorm.Model
+	Asker       string    `column:"user__user_openid"`
+	ProblemPic  string    `gorm:"default:''"`
+	ProblemPic1 string    `gorm:"default:''"`
+	ProblemPic2 string    `gorm:"default:''"`
+	ProblemPic3 string    `gorm:"default:''"`
+	Description string
+	Asktime     time.Time `gorm:"default:current_timestamp"` //提问时间
+	Grade       string    `gorm:"default:'二年级'"`             //问题的年级
+	Category    string                                       //问题所属的知识点
+	Jinxuan     string    `gorm:"default:'no'"`              //是否精选
+	Inuse       string    `gorm:"default:'1'"`
+	School      int       `gorm:"default:'0'"`        //问题属于哪个学校，方便学校进行汇总
+	Status      string    `gorm:"default:'unserved'"` //状态：unserved\served\released 是否被本机构回答了
+}
+
+func (*Problem) TableName() string {
+	return "mathojms_problem"
 }

@@ -3,7 +3,7 @@ package main
 import (
 	"io/ioutil"
 	"github.com/op/go-logging"
-	logger2 "myproj/try/common/logger"
+	logger2 "myproj.lee/try/common/logger"
 	"os"
 	"bytes"
 	"crypto/md5"

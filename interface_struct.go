@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"reflect"
 	"strconv"
-	//"myproj/try/goexample"
+	//"myproj.lee/try/goexample"
 )
 
 type Man struct {

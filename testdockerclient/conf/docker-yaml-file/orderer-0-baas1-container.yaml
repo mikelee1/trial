@@ -1,0 +1,67 @@
+Config:
+  Cmd:
+  - orderer
+  Entrypoint: null
+  Env:
+  - ORDERER_GENERAL_LISTENPORT=7050
+  - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+  - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
+  - MONITOR_TYPE=CONTAINER_ONLY
+  - FABRIC_LOGGING_SPEC=debug
+  - ORDERER_GENERAL_TLS_ENABLED=true
+  - ORDERER_GENERAL_CLUSTER_CLIENTPRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+  - ORDERER_GENERAL_CLUSTER_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
+  - ORDERER_KAFKA_TOPIC_REPLICATIONFACTOR=1
+  - ORDERER_KAFKA_RETRY_SHORTINTERVAL=1s
+  - ORDERER_KAFKA_RETRY_SHORTTOTAL=30s
+  - ORDERER_KAFKA_VERBOSE=true
+  - ORDERER_FILELEDGER_DATADUMP_ENABLED=false
+  - ORDERER_GENERAL_BCCSP_DEFAULT=GM
+  - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+  - ORDERER_GENERAL_GENESISMETHOD=file
+  - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+  - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
+  - ORDERER_GENERAL_CLUSTER_CLIENTCERTIFICATE=/var/hyperledger/orderer/tls/server.crt
+  - ORDERER_GENERAL_ISOPENYXLOG=false
+  - ORDERER_GENERAL_LOCALMSPID=baas1
+  - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
+  - cmbc_logs_order=stdout
+  - cmbc_logs_order_tags=topic=elk-ethp
+  ExposedPorts:
+    "7050": {}
+  Image: 192.168.9.87:5000/hyperledger/fabric-orderer:latest
+  Tty: true
+  Volumes:
+    /nfs/orderer: {}
+    /var/hyperledger: {}
+  WorkingDir: /opt/gopath/src/github.com/hyperledger/fabric
+Context: null
+HostConfig:
+  Binds:
+  - /home/ubuntu/go/src/wasabi/baas/msp/baas1/orderers/orderer-0-baas1/msp:/var/hyperledger/orderer/msp
+  - /home/ubuntu/go/src/wasabi/baas/msp/baas1/orderers/orderer-0-baas1/tls:/var/hyperledger/orderer/tls
+  - /home/ubuntu/go/src/wasabi/baas/msp/baas1/orderers/orderer-0-baas1:/var/hyperledger/orderer
+  - /home/ubuntu/go/src/wasabi/baas/msp/orderer.genesis.block:/var/hyperledger/orderer/orderer.genesis.block:rw
+  ConsoleSize:
+  - 0
+  - 0
+  ExtraHosts:
+  - orderer-0-baas1:192.168.9.87
+  - orderer-1-baas1:192.168.9.87
+  - orderer-2-baas1:192.168.9.87
+  - orderer-0-baas2:192.168.9.82
+  - peer-0-baas2:192.168.9.82
+  - 666:abc
+  LogConfig: {}
+  PortBindings:
+    7050/tcp:
+    - HostIp: 0.0.0.0
+      HostPort: "30020"
+  RestartPolicy:
+    Name: always
+  UsernsMode: host
+Name: aaa
+NetworkingConfig:
+  EndpointsConfig:
+    wasabi-bridge:
+      NetworkID: a310a1a94aca6838ada389a808cbee0eefbae72c993ec4b2996827b1e5f804b2

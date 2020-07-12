@@ -11,12 +11,12 @@ import (
 	"golang.org/x/net/netutil"
 	_ "golang.org/x/net/netutil"
 	"google.golang.org/grpc"
-	logger2 "myproj/try/common/logger"
-	"myproj/try/common/ratelimit"
-	"myproj/try/testopenzipkin/client"
-	"myproj/try/testopenzipkin/handler"
-	"myproj/try/testopenzipkin/protos"
-	tracer2 "myproj/try/testopenzipkin/tracer"
+	logger2 "myproj.lee/try/common/logger"
+	"myproj.lee/try/common/ratelimit"
+	"myproj.lee/try/testopenzipkin/client"
+	"myproj.lee/try/testopenzipkin/handler"
+	"myproj.lee/try/testopenzipkin/protos"
+	tracer2 "myproj.lee/try/testopenzipkin/tracer"
 	"net"
 )
 

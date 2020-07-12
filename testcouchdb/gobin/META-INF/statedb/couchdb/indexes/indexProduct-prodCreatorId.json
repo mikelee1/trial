@@ -1,0 +1,11 @@
+
+{
+  "index": {
+    "fields": [
+      "prodCreatorId"
+    ]
+  },
+  "ddoc": "prodCreatorId",
+  "name": "prodCreatorId",
+  "type": "json"
+}

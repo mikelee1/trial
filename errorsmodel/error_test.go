@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"myproj/try/errorsmodel"
+	"myproj.lee/try/errorsmodel"
 )
 
 func TestErrorInt_Code(t *testing.T) {

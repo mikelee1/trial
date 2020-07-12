@@ -1,0 +1,10 @@
+{
+  "index": {
+    "fields": [
+      "member"
+    ]
+  },
+  "ddoc": "indexMemberProdmemberDoc",
+  "name": "indexMemberProdmember",
+  "type": "json"
+}

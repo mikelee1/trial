@@ -1,7 +1,7 @@
 package testpprof__test
 
 import (
-	"myproj/try/testpprof/util"
+	"myproj.lee/try/testpprof/util"
 	"testing"
 )
 

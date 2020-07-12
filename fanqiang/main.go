@@ -2,12 +2,12 @@ package main
 
 import (
 	"github.com/op/go-logging"
-	logger2 "myproj/try/common/logger"
+	logger2 "myproj.lee/try/common/logger"
 	"net/http"
 	"net/url"
 	"time"
-	"myproj/try/fanqiang/models"
-	"myproj/try/common/fmtstruct"
+	"myproj.lee/try/fanqiang/models"
+	"myproj.lee/try/common/fmtstruct"
 	"io/ioutil"
 	"encoding/json"
 	"strconv"

@@ -1,0 +1,10 @@
+{
+  "index": {
+    "fields": [
+      "baseMember.custFullName"
+    ]
+  },
+  "ddoc": "indexMembercustFullNameDoc",
+  "name": "indexMembercustFullName",
+  "type": "json"
+}

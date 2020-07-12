@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	_ "myproj/try/testimport/pkg1"
+	_ "myproj.lee/try/testimport/pkg1"
 	"time"
 )
 

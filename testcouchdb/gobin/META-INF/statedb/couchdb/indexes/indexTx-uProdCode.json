@@ -1,0 +1,10 @@
+{
+  "index": {
+    "fields": [
+      "baseTransaction.uProdCode"
+    ]
+  },
+  "ddoc": "baseTransaction.uProdCode",
+  "name": "baseTransaction.uProdCode",
+  "type": "json"
+}

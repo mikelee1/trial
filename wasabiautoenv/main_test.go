@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"github.com/op/go-logging"
 	"io/ioutil"
-	"myproj/try/common/file"
-	logger2 "myproj/try/common/logger"
-	"myproj/try/wasabiautoenv/models"
+	"myproj.lee/try/common/file"
+	logger2 "myproj.lee/try/common/logger"
+	"myproj.lee/try/wasabiautoenv/models"
 	"net/http"
 	"os"
 	"testing"
@@ -24,11 +24,11 @@ var (
 	baas1Host      = "192.168.9.82"
 	baas2Host      = "192.168.9.87"
 
-	channel   = "channel1"
+	channel   = "channel"
 	chaincode = "example1"
 	orgname   = "org2"
-	username  = "user2"
-	password  = "12345678"
+	username  = "admin"
+	password  = "yunphant"
 
 	//ssh到baas1上的参数
 	baas1dirpath = "/home/centos"
@@ -38,6 +38,9 @@ var (
 
 	indirectid = ""
 	cchash     = "bdb2b28b8f83c06f594cd2ac20e2e126" //默认情况下examplecc的hash都一样
+
+	baas1Token = ""
+	baas2Token = ""
 )
 
 func init() {
@@ -46,16 +49,17 @@ func init() {
 
 //baas1进行setup
 func Test_Setup(t *testing.T) {
+	Test_Baas1Login(t)
 	org := baas1
 	peers := []models.PeerPorts{
 		models.PeerPorts{
 			Main:      30031,
 			Chaincode: 30032,
 		},
-		models.PeerPorts{
-			Main:      30033,
-			Chaincode: 30034,
-		},
+		//models.PeerPorts{
+		//	Main:      30033,
+		//	Chaincode: 30034,
+		//},
 	}
 	orderer0 := models.OrdererPorts{
 		Main: 30020,
@@ -90,7 +94,6 @@ func Test_Setup(t *testing.T) {
 		panic(err)
 	}
 	fmt.Println(string(ret))
-	//time.Sleep(50*time.Second)
 }
 
 //baas2创建identity -> baas1邀请、同意 -> baas2加入网络 -> 创建和加入通道
@@ -101,8 +104,8 @@ func Test_Main(t *testing.T) {
 	Test_AgreeInvitation(t)
 	Test_InviteCode(t)
 	Test_Join(t)
-	Test_ChannelJoin(t)
-	Test_CreateAndJoinChannel(t)
+	//Test_ChannelJoin(t)
+	//Test_CreateAndJoinChannel(t)
 }
 
 func Test_CreateIdentity(t *testing.T) {
@@ -117,7 +120,7 @@ func Test_CreateIdentity(t *testing.T) {
 		},
 		OrdererPorts: []models.OrdererPorts{
 			models.OrdererPorts{
-				Main:  30020,
+				Main: 30020,
 			},
 		},
 		Company:            baas2,
@@ -144,7 +147,7 @@ func Test_CreateIdentity(t *testing.T) {
 
 func Test_ScpIdentity(t *testing.T) {
 	sc := NewSshClient(baas2Host, baas2user)
-	stdout, _, _, err := sc.Run("cd "+baas2dirpath+"/go/src/wasabi && ./getidentity.sh")
+	stdout, _, _, err := sc.Run("cd " + baas2dirpath + "/go/src/wasabi && ./getidentity.sh")
 	if err != nil {
 		logger.Error("err:", err)
 		return
@@ -179,8 +182,7 @@ func Test_Invite(t *testing.T) {
 }
 
 func Test_AgreeInvitation(t *testing.T) {
-	baas0Host := "192.168.9.18"
-	resp, err := http.Get("http://" + baas0Host + ":8080/member/invitation/vote?inviter=" + baas1 + "&invitee=" + baas2 + "&accept=true")
+	resp, err := http.Get("http://" + baas1Host + ":8081/member/invitation/vote?inviter=" + baas1 + "&invitee=" + baas2 + "&accept=true")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -268,6 +270,44 @@ func Test_CreateAndJoinChannel(t *testing.T) {
 	wrt := bytes.NewBuffer(bytedata)
 
 	_, err := http.Post("http://"+baas2Host+":8081/channel/createandjoin", "application/json", wrt)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func Test_Baas1CreateAndJoinChannel(t *testing.T) {
+	data := models.InitChannelRequest{
+		ChannelName: "channel1",
+		Orgs:        []string{baas1},
+		Peers:       []string{"peer-0-" + baas1},
+	}
+	bytedata, _ := json.Marshal(data)
+
+	wrt := bytes.NewBuffer(bytedata)
+
+	_, err := http.Post("http://"+baas1Host+":8081/channel/createandjoin", "application/json", wrt)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func Test_Baas1InstallAndInstantiate(t *testing.T) {
+	data := models.InstallAndInstantiateChainCodeRequest{
+		Args:        []string{"init", "a", "100", "b", "100"},
+		CcHash:      cchash,
+		CcName:      chaincode,
+		CcPath:      "example_cc",
+		CcVersion:   "1.0.0",
+		ChannelName: "channel1",
+		PeerNodes:   []string{"peer-0-" + baas1},
+	}
+	bytedata, _ := json.Marshal(data)
+
+	wrt := bytes.NewBuffer(bytedata)
+
+	_, err := http.Post("http://"+baas2Host+":8081/chaincode/installandinstantiate", "application/json", wrt)
 
 	if err != nil {
 		t.Fatal(err)
@@ -362,19 +402,20 @@ func LoginIndirect() string {
 	}
 	bytedata, _ := json.Marshal(data)
 	wrt := bytes.NewBuffer(bytedata)
-	resp, err := http.Post("http://"+baas2Host+":8081/login", "application/json", wrt)
+	resp, err := http.Post("http://"+baas1Host+":8081/login", "application/json", wrt)
 	if err != nil {
 		return err.Error()
 	}
 	a, err := ioutil.ReadAll(resp.Body)
+	fmt.Println(string(a))
 	defer resp.Body.Close()
-	b := &models.LoginResp{}
+	b := &models.LoginResponse{}
 	err = json.Unmarshal(a, b)
 	if err != nil {
 		logger.Error(err)
 		return err.Error()
 	}
-	indirectid = b.UserId
+	indirectid = b.Data.UserName
 	return indirectid
 }
 
@@ -390,7 +431,7 @@ func Test_Invoke(t *testing.T) {
 
 	wrt := bytes.NewBuffer(bytedata)
 
-	_, err := http.Post("http://"+baas2Host+":8081/indirect/invoke", "application/json", wrt)
+	_, err := http.Post("http://"+baas1Host+":8081/indirect/invoke", "application/json", wrt)
 
 	if err != nil {
 		t.Fatal(err)
@@ -409,7 +450,7 @@ func Test_Query(t *testing.T) {
 
 	wrt := bytes.NewBuffer(bytedata)
 
-	resp, err := http.Post("http://"+baas2Host+":8081/indirect/query", "application/json", wrt)
+	resp, err := http.Post("http://"+baas1Host+":8081/indirect/query", "application/json", wrt)
 
 	if err != nil {
 		t.Fatal(err)
@@ -439,8 +480,11 @@ func NewSshClient(server, hostuser string) *easyssh.MakeConfig {
 	return ssh
 }
 
-
 //#####################以下是baas1作为被邀请组织的test####################
+func Test_Baas1(t *testing.T) {
+	Test_CreateBaas1Identity(t)
+	Test_cpBaas1Identity(t)
+}
 func Test_CreateBaas1Identity(t *testing.T) {
 	host1 := "http://" + baas1Host + ":8081/member/id"
 	ciRequest := models.SetupRequest{
@@ -453,7 +497,7 @@ func Test_CreateBaas1Identity(t *testing.T) {
 		},
 		OrdererPorts: []models.OrdererPorts{
 			models.OrdererPorts{
-				Main:  30020,
+				Main: 30020,
 			},
 		},
 		Company:            baas1,
@@ -478,10 +522,9 @@ func Test_CreateBaas1Identity(t *testing.T) {
 	fmt.Println(string(ret))
 }
 
-
 func Test_cpBaas1Identity(t *testing.T) {
 	sc := NewSshClient(baas1Host, baas1user)
-	stdout, _, _, err := sc.Run("cd "+baas1dirpath+"/go/src/wasabi && ./copyidentity.sh")
+	stdout, _, _, err := sc.Run("cd " + baas1dirpath + "/go/src/wasabi && ./copyidentity.sh")
 	if err != nil {
 		logger.Error("err:", err)
 		return
@@ -490,8 +533,230 @@ func Test_cpBaas1Identity(t *testing.T) {
 	logger.Info(string(stdout))
 }
 
-//将invitecode拷贝到本地后再执行
-func Test_Baas1Join(t *testing.T) {
+//#####################以下是baas2作为被邀请组织的test####################
+func Test_Baas2(t *testing.T) {
+	Test_CreateBaas2Identity(t)
+	Test_cpBaas2Identity(t)
+}
+func Test_CreateBaas2Identity(t *testing.T) {
+	host2 := "http://" + baas2Host + ":8081/member/id"
+	ciRequest := models.SetupRequest{
+		Consensus: "etcdraft",
+		PeerPorts: []models.PeerPorts{
+			models.PeerPorts{
+				Main:      30031,
+				Chaincode: 30032,
+			},
+		},
+		OrdererPorts: []models.OrdererPorts{
+			models.OrdererPorts{
+				Main: 30020,
+			},
+		},
+		Company:            baas2,
+		AutoGeneratedCerts: true,
+	}
+	data, err := json.Marshal(ciRequest)
+	if err != nil {
+		panic(err)
+	}
+
+	wrt := bytes.NewBuffer(data)
+
+	resp, err := http.Post(host2, "application/json", wrt)
+
+	if err != nil {
+		panic(err)
+	}
+	ret, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(ret))
+}
+
+func Test_cpBaas2Identity(t *testing.T) {
+	sc := NewSshClient(baas2Host, baas2user)
+	stdout, _, _, err := sc.Run("cd " + baas2dirpath + "/go/src/wasabi && ./copyidentity.sh")
+	if err != nil {
+		logger.Error("err:", err)
+		return
+	}
+	//创建获取命令输出管
+	logger.Info(string(stdout))
+}
+
+//##################baas2 setup baas1 join####################
+
+//baas2进行setup
+func Test_Setup1(t *testing.T) {
+	org := baas2
+	peers := []models.PeerPorts{
+		models.PeerPorts{
+			Main:      30031,
+			Chaincode: 30032,
+		},
+		models.PeerPorts{
+			Main:      30033,
+			Chaincode: 30034,
+		},
+	}
+	orderer0 := models.OrdererPorts{
+		Main: 30020,
+	}
+	orderer1 := models.OrdererPorts{
+		Main: 30022,
+	}
+	orderer2 := models.OrdererPorts{
+		Main: 30024,
+	}
+	SetupRequest := models.SetupRequest{
+		OrgName:      org,
+		PeerPorts:    peers,
+		OrdererPorts: []models.OrdererPorts{orderer0, orderer1, orderer2},
+		Consensus:    "etcdraft",
+	}
+
+	data, err := json.Marshal(SetupRequest)
+	if err != nil {
+		panic(err)
+	}
+
+	wrt := bytes.NewBuffer(data)
+
+	resp, err := http.Post("http://"+baas2Host+":8081/member/setup", "application/json", wrt)
+
+	if err != nil {
+		panic(err)
+	}
+	ret, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(ret))
+	//time.Sleep(50*time.Second)
+}
+
+//baas1创建identity -> baas2邀请、同意 -> baas1加入网络 -> 创建和加入通道
+func Test_Main1(t *testing.T) {
+	Test_CreateIdentity1(t)
+	Test_ScpIdentity1(t)
+	Test_Invite1(t)
+	Test_AgreeInvitation1(t)
+	Test_InviteCode1(t)
+	Test_Join1(t)
+}
+
+func Test_CreateIdentity1(t *testing.T) {
+	host1 := "http://" + baas1Host + ":8081/member/id"
+	ciRequest := models.SetupRequest{
+		Consensus: "etcdraft",
+		PeerPorts: []models.PeerPorts{
+			models.PeerPorts{
+				Main:      30031,
+				Chaincode: 30032,
+			},
+		},
+		OrdererPorts: []models.OrdererPorts{
+			models.OrdererPorts{
+				Main: 30020,
+			},
+		},
+		Company:            baas1,
+		AutoGeneratedCerts: true,
+	}
+	data, err := json.Marshal(ciRequest)
+	if err != nil {
+		panic(err)
+	}
+
+	wrt := bytes.NewBuffer(data)
+
+	resp, err := http.Post(host1, "application/json", wrt)
+
+	if err != nil {
+		panic(err)
+	}
+	ret, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(ret))
+}
+
+func Test_ScpIdentity1(t *testing.T) {
+	sc := NewSshClient(baas1Host, baas1user)
+	stdout, _, _, err := sc.Run("cd " + baas1dirpath + "/go/src/wasabi && ./getidentity.sh")
+	if err != nil {
+		logger.Error("err:", err)
+		return
+	}
+	//创建获取命令输出管
+	logger.Info(string(stdout))
+
+	sc = NewSshClient(baas2Host, baas2user)
+	stdout, _, _, err = sc.Run(fmt.Sprintf("cd %s/go/src/wasabi && "+
+		"docker exec wasabi mkdir -p /wasabi/%s && "+
+		"docker cp identity wasabi:/wasabi/%s", baas2dirpath, baas1, baas1),
+	)
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+	//创建获取命令输出管
+	logger.Info(string(stdout))
+}
+
+func Test_Invite1(t *testing.T) {
+	resp, err := http.Get("http://" + baas2Host + ":8081/member/invitation/start?inviter=" + baas2 + "&invitee=" + baas1)
+
+	if err != nil {
+		panic(err)
+	}
+	ret, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(ret))
+}
+
+func Test_AgreeInvitation1(t *testing.T) {
+	resp, err := http.Get("http://" + baas2Host + ":8081/member/invitation/vote?inviter=" + baas2 + "&invitee=" + baas1 + "&accept=true")
+	if err != nil {
+		t.Fatal(err)
+	}
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	fmt.Println(string(data))
+}
+
+func Test_InviteCode1(t *testing.T) {
+	dir, _ := os.Getwd()
+	logger.Info(dir)
+	resp, err := http.Get("http://" + baas2Host + ":8081/member/ic")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer resp.Body.Close()
+	inviteCode, _ := ioutil.ReadAll(resp.Body)
+	var f *os.File
+	if file.CheckFileIsExist(inviteCodeFile) { //如果文件存在
+		f, err = os.OpenFile(inviteCodeFile, os.O_TRUNC|os.O_WRONLY, 0666) //打开文件
+	} else {
+		f, err = os.Create(inviteCodeFile) //创建文件
+	}
+
+	if err != nil {
+		logger.Error(err)
+		return
+	}
+	defer f.Close()
+	f.WriteString(string(inviteCode))
+}
+
+func Test_Join1(t *testing.T) {
 	data, err := ioutil.ReadFile(inviteCodeFile)
 	if err != nil {
 		t.Fatal(err)
@@ -508,4 +773,35 @@ func Test_Baas1Join(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Log(string(ret))
+}
+
+func Test_Baas1Login(t *testing.T) {
+	host1 := "http://" + baas1Host + ":8081/login"
+	loginRequest := models.LoginRequest{
+		Username: "admin",
+		Password: "yunphant",
+	}
+	data, err := json.Marshal(loginRequest)
+	if err != nil {
+		panic(err)
+	}
+
+	wrt := bytes.NewBuffer(data)
+
+	resp, err := http.Post(host1, "application/json", wrt)
+
+	if err != nil {
+		panic(err)
+	}
+	ret, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(string(ret))
+	loginResp := &models.LoginResponse{}
+	err = json.Unmarshal(ret, loginResp)
+	if err != nil {
+		panic(err)
+	}
+	baas1Token = loginResp.Data.Token
 }

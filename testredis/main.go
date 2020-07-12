@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"github.com/op/go-logging"
-	"myproj/try/testredis/config"
-	"myproj/try/testredis/core/redis"
+	"myproj.lee/try/testredis/config"
+	"myproj.lee/try/testredis/core/redis"
 	"os"
 	"github.com/go-session/gin-session"
 	"github.com/go-session/session"

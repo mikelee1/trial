@@ -7,14 +7,14 @@ import (
 	"bytes"
 	"net/http"
 	"io/ioutil"
-	types2 "myproj/try/wasabi-simulatepost-baas1/types"
+	types2 "myproj.lee/try/wasabi-simulatepost-baas1/types"
 	"fmt"
 	"time"
 )
 
 var lresp = types2.LoginResp{}
-var baas1 = "192.168.9.87"
-var baas2 = "192.168.9.82"
+var baas1 = "192.168.9.50"
+var baas2 = "192.168.9.67"
 var inviterstr, inviteestr = "baas1", "baas2"
 //阿里云环境
 //var inviterstr, inviteestr = "baas3", "baas4"
@@ -25,7 +25,6 @@ var inviterstr, inviteestr = "baas1", "baas2"
 //var inviterstr, inviteestr = "baas1", "baas2"
 //var baas1 = "47.114.61.216"
 //var baas2 = "47.96.137.8"
-
 
 var informResp = types2.InformResp{}
 var inviteCode []byte
@@ -40,10 +39,10 @@ func init() {
 //------内网setup\生成identity-----
 func Test_init(t *testing.T) {
 	time.Now()
-	//Login(inviter)
-	//Setup(inviter)
-	Login(invitee)
-	createIdentity(invitee)
+	Login(inviter)
+	Setup(inviter)
+	//Login(invitee)
+	//createIdentity(invitee)
 }
 
 //------内网邀请-----
@@ -99,6 +98,10 @@ func Setup(ip string) {
 				Main:      30031,
 				Chaincode: 30032,
 			},
+			//types2.Peerport{
+			//	Main:      30033,
+			//	Chaincode: 30034,
+			//},
 		},
 		OrdererPorts: []types2.Ordererport{
 			types2.Ordererport{
@@ -310,5 +313,3 @@ func Test_init1(t *testing.T) {
 	Login(baas2)
 	Setup(baas2)
 }
-
-

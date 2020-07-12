@@ -1,0 +1,10 @@
+{
+  "index": {
+    "fields": [
+      "baseProduct.requestSource"
+    ]
+  },
+  "ddoc": "baseProduct.requestSource",
+  "name": "baseProduct.requestSource",
+  "type": "json"
+}

@@ -1,0 +1,11 @@
+
+{
+  "index": {
+    "fields": [
+      "baseProduct.offShelf"
+    ]
+  },
+  "ddoc": "baseProduct.offShelf",
+  "name": "baseProduct.offShelf",
+  "type": "json"
+}

@@ -1,12 +1,12 @@
 package main
 
 import (
-	"github.com/op/go-logging"
-	"github.com/hyperledger/fabric-protos-go/common"
+	"fmt"
 	"github.com/golang/protobuf/proto"
+	"github.com/hyperledger/fabric-protos-go/common"
 	"github.com/hyperledger/fabric-protos-go/peer"
 	pb "github.com/hyperledger/fabric-protos-go/peer"
-	"fmt"
+	"github.com/op/go-logging"
 )
 
 var logger1 *logging.Logger

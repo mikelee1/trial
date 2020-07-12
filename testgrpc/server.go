@@ -4,7 +4,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"log"
-	pb "myproj/try/testgrpc/user"
+	pb "myproj.lee/try/testgrpc/user"
 	"net"
 )
 

@@ -7,7 +7,7 @@ import (
 	"time"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/op/go-logging"
-	logger2 "myproj/try/common/logger"
+	logger2 "myproj.lee/try/common/logger"
 )
 
 var (
@@ -16,8 +16,9 @@ var (
 	dbname = "mathojms"
 	dbuser = "yunphant"
 	dbpasswd = "yunphant2018"
-	dbip = "127.0.0.1"
-	dbport = "5432"
+	//dbip = "127.0.0.1"
+	dbip = "118.25.123.30"
+	dbport = "15432"
 )
 
 var logger *logging.Logger
@@ -38,6 +39,7 @@ func CreateConn() *gorm.DB {
 		db, err = gorm.Open("postgres", "host="+dbip+" port="+dbport+" user="+dbuser+"" +
 			" dbname="+dbname+" password="+dbpasswd+" sslmode=disable")
 		if err != nil {
+			logger.Error(err)
 			return nil
 		}
 		db.DB().SetMaxOpenConns(0)
@@ -49,12 +51,12 @@ func CreateConn() *gorm.DB {
 
 func AutoMigrate() *gorm.DB {
 	db := CreateConn()
-	if err := db.Exec("set transaction isolation level serializable").AutoMigrate(
-		&User{},
-		&School{},
-	).Error; err != nil {
-		logger.Panicf("Error auto-migrating database : %s", err)
-	}
+	//if err := db.Exec("set transaction isolation level serializable").AutoMigrate(
+	//	&User{},
+	//	&School{},
+	//).Error; err != nil {
+	//	logger.Panicf("Error auto-migrating database : %s", err)
+	//}
 	return db
 }
 

@@ -45,11 +45,11 @@ type FromTo struct {
 }
 
 type SingleDockerConfig struct {
-	BaseDir       string                  `yaml:"basedir"`
-	Dockertls     bool                    `yaml:"dockertls"`
-	Tlsca         string                  `yaml:"tlsca"`
-	Tlscert       string                  `yaml:"tlscert"`
-	Tlskey        string                  `yaml:"tlskey"`
+	BaseDir   string `yaml:"basedir"`
+	Dockertls bool   `yaml:"dockertls"`
+	Tlsca     string `yaml:"tlsca"`
+	Tlscert   string `yaml:"tlscert"`
+	Tlskey    string `yaml:"tlskey"`
 }
 
 type ClientInfo struct {
@@ -123,7 +123,8 @@ func main() {
 		logger.Error(err)
 		return
 	}
-	logger.Info("dockerConfig.RouterConfig.Routers:  ",dockerConfig.RouterConfig.InnerRouters)
+	logger.Info("dockerConfig: ",dockerConfig.RouterConfig.InnerRouters)
+	logger.Info("--------dockerConfig.RouterConfig.Routers:  ", dockerConfig.RouterConfig.InnerRouters)
 }
 
 func walkDecode(node *yaml.Node) {
@@ -134,15 +135,15 @@ func walkDecode(node *yaml.Node) {
 				Kind:   yaml.ScalarNode,
 				Tag:    "!!str",
 				Value:  "address1",
-				Line:3,
-				Column:10,
+				Line:   3,
+				Column: 10,
 			}
 			tmpnode2 := &yaml.Node{
 				Kind:   yaml.ScalarNode,
 				Tag:    "!!str",
 				Value:  "aaaaaaaaaaa",
-				Line:3,
-				Column:10,
+				Line:   3,
+				Column: 10,
 			}
 			tmpnode := &yaml.Node{
 				Kind: yaml.MappingNode,
@@ -153,7 +154,7 @@ func walkDecode(node *yaml.Node) {
 			}
 
 			node.Content[k+1].Content = append(node.Content[k+1].Content, tmpnode)
-			if len(node.Content[k+1].Content)==1{
+			if len(node.Content[k+1].Content) == 1 {
 				logger.Info("tmpnode:  ", node.Content[k+1])
 				node.Content[k+1].Kind = yaml.SequenceNode
 				node.Content[k+1].Tag = "!!seq"
@@ -165,8 +166,8 @@ func walkDecode(node *yaml.Node) {
 				logger.Info("next v:", vv.Content[1])
 			}
 		}
-		if v.Value == "router"{
-			logger.Info("node.content: ",node.Content[k+1].Content[0])
+		if v.Value == "router" {
+			logger.Info("node.content: ", node.Content[k+1].Content[0])
 		}
 		if v.HeadComment != "" {
 			res, err := EncodeFromHZGB2312(v.HeadComment)

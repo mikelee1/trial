@@ -5,19 +5,23 @@ import (
 	"sync"
 	"github.com/jinzhu/gorm"
 	"time"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
+	//_ "github.com/jinzhu/gorm/dialects/postgres"
 	"github.com/op/go-logging"
-	logger2 "myproj/try/common/logger"
+	logger2 "myproj.lee/try/common/logger"
+	"fmt"
 )
 
 var (
 	once *sync.Once
 	Oconnect orm.Ormer
-	dbname = "edu"
+	//dbname = "edu"
+	dbname = "mathojms"
+
 	dbuser = "yunphant"
 	dbpasswd = "yunphant2018"
-	dbip = "127.0.0.1"
-	dbport = "5432"
+	//dbip = "127.0.0.1"
+	dbip = "118.25.123.30"
+	dbport = "15432"
 )
 
 var logger *logging.Logger
@@ -33,6 +37,7 @@ func InitDB() *gorm.DB {
 }
 
 func CreateConn() *gorm.DB {
+	fmt.Println("one")
 	var err error
 	if db == nil {
 		db, err = gorm.Open("postgres", "host="+dbip+" port="+dbport+" user="+dbuser+"" +
@@ -50,8 +55,10 @@ func CreateConn() *gorm.DB {
 func AutoMigrate() *gorm.DB {
 	db := CreateConn()
 	if err := db.Exec("set transaction isolation level serializable").AutoMigrate(
-		&Jiaoan{},
-		&PrincipalJiaoan{},
+		//&Jiaoan{},
+		//&PrincipalJiaoan{},
+		//&TeacherAuth{},
+		&User{},
 	).Error; err != nil {
 		logger.Panicf("Error auto-migrating database : %s", err)
 	}

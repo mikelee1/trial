@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"myproj/try/common/execshell"
+	"myproj.lee/try/common/execshell"
 )
 
 func main() {
@@ -12,4 +12,10 @@ func main() {
 		return
 	}
 	fmt.Println(res)
+
+	res, err = execshell.Run("cd cmdlinux && tar zcvf dir1.tar.gz dir1")
+	if err != nil{
+		fmt.Println(err)
+		return
+	}
 }

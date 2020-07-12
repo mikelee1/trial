@@ -6,6 +6,7 @@ import (
 	"crypto/cipher"
 	"encoding/base64"
 	"fmt"
+	"crypto/md5"
 )
 
 func PKCS5Padding(ciphertext []byte, blockSize int) []byte {
@@ -50,6 +51,11 @@ func AesDecrypt(crypted, key []byte) ([]byte, error) {
 
 func main() {
 	var aeskey = []byte("321423u9y8d2fwfl")
+
+	//md5加密
+	md5str2 := fmt.Sprintf("%x", md5.Sum(aeskey))
+	fmt.Println(md5str2)
+
 	pass := []byte("算法的")
 	xpass, err := AesEncrypt(pass, aeskey)
 	if err != nil {

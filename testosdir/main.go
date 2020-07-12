@@ -2,10 +2,11 @@ package main
 
 import (
 	"os"
-	logger2 "myproj/try/common/logger"
+	logger2 "myproj.lee/try/common/logger"
 	"github.com/op/go-logging"
 	"io/ioutil"
 	"strings"
+	"path"
 )
 
 var logger *logging.Logger
@@ -20,6 +21,12 @@ func main() {
 	logger.Info(dir)
 	//遍历当前目录下的文件
 	listFile(dir + "/testosdir")
+
+	tmpPath := "/root/lee/1.jpg"
+	//获取文件名
+	filenameWithSuffix := path.Base(tmpPath)
+	logger.Info(filenameWithSuffix)
+	logger.Info(path.Split(tmpPath))
 }
 
 func listFile(myfolder string) {
@@ -30,11 +37,11 @@ func listFile(myfolder string) {
 		} else {
 			if strings.HasSuffix(file.Name(), "jpg") {
 				logger.Info("got jpg")
-				err := os.Rename(myfolder+"/"+file.Name(), myfolder+"/"+strings.Replace(file.Name(), ".jpg", "tmp.jpg", -1))
-				if err != nil {
-					logger.Error(err)
-					return
-				}
+				//err := os.Rename(myfolder+"/"+file.Name(), myfolder+"/"+strings.Replace(file.Name(), ".jpg", "tmp.jpg", -1))
+				//if err != nil {
+				//	logger.Error(err)
+				//	return
+				//}
 			}
 			logger.Info(myfolder + "/" + file.Name())
 		}

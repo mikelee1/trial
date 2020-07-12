@@ -2,14 +2,16 @@ package main_test
 
 import (
 	"testing"
-	"myproj/try/testpostgres/models"
+	"myproj.lee/try/testpostgres/models"
 	"github.com/op/go-logging"
-	logger2 "myproj/try/common/logger"
+	logger2 "myproj.lee/try/common/logger"
 	"github.com/jinzhu/gorm"
 	"fmt"
 	"strings"
 	"jiaoan/services/admin_center/models/admin"
 	"strconv"
+
+	"github.com/gansidui/geohash"
 )
 
 var logger *logging.Logger
@@ -101,4 +103,48 @@ func Test_getoneprincipal(t *testing.T) {
 	logger.Info(sqlstr)
 	dbClient.Debug().Model(&models.Jiaoan{}).Exec(sqlstr).Find(&tmpjiaoans)
 	logger.Info(tmpjiaoans)
+}
+
+func Test_AddTeacherAuth(t *testing.T) {
+	tmp := &models.TeacherAuth{
+		Teacher: 1,
+		Auth:    []int64{1, 2},
+	}
+
+	tx := dbClient.Begin()
+	if err := tx.Debug().Model(&models.TeacherAuth{}).Create(tmp).Error; err != nil {
+		tx.Rollback()
+		logger.Info(err)
+		return
+	}
+	tx.Commit()
+
+}
+
+//location精度由6变为5以后，线上的定位数据需要相应更新
+func Test_Update_Location(t *testing.T) {
+	var err error
+	logger.Info(err)
+	users := []*models.User{}
+	if err := dbClient.Model(&models.User{}).Find(&users).Error; err != nil {
+		logger.Info(err)
+		return
+	}
+	for _, u := range users {
+		logger.Info(u.Nickname, u.Realname, u.Latitude, u.Longitude)
+		////生成hash码
+		hashs := geohash.GetNeighbors(float64(u.Latitude), float64(u.Longitude), 5)
+		tmpu := models.User{
+			Longitude:  float64(u.Longitude),
+			Latitude:   float64(u.Latitude),
+			Geohash:    hashs[0],
+			Eighthashs: strings.Join(hashs[1:], "|"),
+		}
+		if err = dbClient.Debug().Model(&models.User{}).Where("id = ?", u.ID).Updates(tmpu).Error; err != nil {
+			logger.Error(err)
+			return
+		}
+	}
+
+	logger.Info(users)
 }

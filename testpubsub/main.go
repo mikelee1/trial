@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"myproj/try/testpubsub/pubsub"
+	"myproj.lee/try/testpubsub/pubsub"
 	"strings"
 	"time"
 )

@@ -5,7 +5,7 @@ import (
 	"github.com/docker/docker/client"
 	dc "github.com/fsouza/go-dockerclient"
 	"github.com/op/go-logging"
-	logger2 "myproj/try/common/logger"
+	logger2 "myproj.lee/try/common/logger"
 	"github.com/docker/docker/api/types/volume"
 )
 
@@ -13,13 +13,13 @@ var logger = &logging.Logger{}
 
 var (
 	containerName  = "test12"
-	//host           = "http://192.168.9.83:2375"
-	//standardCli, _ = client.NewClientWithOpts(client.WithHost(host))
-	//fsouzaCli, _   = dc.NewClient(host)
+	host           = "http://192.168.9.67:2375"
+	standardCli, _ = client.NewClientWithOpts(client.WithHost(host))
+	fsouzaCli, _   = dc.NewClient(host)
 
-	host           = "http://192.168.9.82:2375"
-	standardCli, _ = client.NewClientWithOpts(client.WithHost(host),client.WithTLSClientConfig("./testdockerclient/ca.pem", "./testdockerclient/client/cert.pem","./testdockerclient/client/key.pem"))
-	fsouzaCli, _   = dc.NewTLSClient(host,"./testdockerclient/client/cert.pem","./testdockerclient/client/key.pem","./testdockerclient/ca.pem")
+	//host           = "http://192.168.9.87:2375"
+	//standardCli, _ = client.NewClientWithOpts(client.WithHost(host),client.WithTLSClientConfig("./testdockerclient/ca.pem", "./testdockerclient/client/cert.pem","./testdockerclient/client/key.pem"))
+	//fsouzaCli, _   = dc.NewTLSClient(host,"./testdockerclient/client/cert.pem","./testdockerclient/client/key.pem","./testdockerclient/ca.pem")
 )
 
 func init() {

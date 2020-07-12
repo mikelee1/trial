@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"google.golang.org/grpc"
 	"log"
-	"myproj/try/testrpc/protos"
+	"myproj.lee/try/testrpc/protos"
 )
 
 const HelloServiceName = "path/to/pkg.HelloService"

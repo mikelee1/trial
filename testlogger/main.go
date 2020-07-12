@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/op/go-logging"
-	"myproj/try/testlogger/impl"
+	"myproj.lee/try/testlogger/impl"
 	"os"
 )
 

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"myproj/try/testgrpcstream/user"
+	"myproj.lee/try/testgrpcstream/user"
 	"net"
 	"google.golang.org/grpc"
 	"fmt"

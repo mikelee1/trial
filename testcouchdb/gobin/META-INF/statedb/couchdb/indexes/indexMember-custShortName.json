@@ -1,0 +1,10 @@
+{
+  "index": {
+    "fields": [
+      "baseMember.custShortName"
+    ]
+  },
+  "ddoc": "indexMembercustShortNameDoc",
+  "name": "indexMembercustShortName",
+  "type": "json"
+}

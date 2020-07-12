@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/op/go-logging"
-	e "myproj/try/eventdispatch/core"
+	e "myproj.lee/try/eventdispatch/core"
 	"os"
 	"time"
 )

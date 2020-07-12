@@ -3,7 +3,7 @@ package main_test
 import (
 	"testing"
 	"google.golang.org/grpc"
-	"myproj/try/testgrpcstream/user"
+	"myproj.lee/try/testgrpcstream/user"
 	"context"
 	"fmt"
 	"time"

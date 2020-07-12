@@ -3,6 +3,7 @@ test1: "hello"
 test:
   test1: "world"
 clients:
-  client:
-    name: "lee"
+  - name: "lee"
+    ip: 127.0.0.1
+  - name: "mike"
     ip: 127.0.0.1

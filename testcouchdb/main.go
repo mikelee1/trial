@@ -31,7 +31,7 @@ func (c couchDoc) GetRev() string {
 
 // start
 func main() {
-	u, err := url.Parse("http://192.168.9.87:5984/")
+	u, err := url.Parse("http://192.168.9.87:31984/")
 	if err != nil {
 		panic(err)
 	}
@@ -43,7 +43,7 @@ func main() {
 	}
 
 	//获取couchdb的信息
-	// get some information about your CouchDB
+	//get some information about your CouchDB
 	//info, err := client.Info()
 	//if err != nil {
 	//	panic(err)
@@ -51,11 +51,12 @@ func main() {
 	//fmt.Println(info)
 
 	//使用的数据库名
-	db := client.Use("channel_sdzyb1")
+	db := client.Use("channel1_yd2")
 	allDocs, err := db.AllDocs(&couchdb.QueryParameters{})
 	for _, doc := range allDocs.Rows {
+		logger.Info("doc: ", doc.ID, doc.Doc, doc.Key, doc.Value)
 		cd := &couchDoc{}
 		db.Get(cd, doc.ID)
-		logger.Info(cd)
 	}
+
 }

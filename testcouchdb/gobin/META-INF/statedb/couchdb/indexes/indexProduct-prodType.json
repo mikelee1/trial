@@ -1,0 +1,11 @@
+
+{
+  "index": {
+    "fields": [
+      "baseProduct.prodType"
+    ]
+  },
+  "ddoc": "baseProduct.prodType",
+  "name": "baseProduct.prodType",
+  "type": "json"
+}

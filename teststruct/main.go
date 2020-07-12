@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"myproj/try/teststruct/Inner"
+	"myproj.lee/try/teststruct/Inner"
 )
 
 func main() {

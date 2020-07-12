@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"github.com/op/go-logging"
 	"github.com/spf13/viper"
+	"myproj.lee/try/common/flatteninterface"
+	logger2 "myproj.lee/try/common/logger"
 	"os"
-	logger2 "myproj/try/common/logger"
-	"myproj/try/common/flatteninterface"
 )
 
 var logger *logging.Logger
@@ -16,9 +16,15 @@ func init() {
 }
 
 type Config struct {
-	Mode string
+	Mode    string
 	Test
-	Test1 string
+	Test1   string
+	Clients []Client
+}
+
+type Client struct {
+	Name string
+	Ip   string
 }
 
 type Test struct {

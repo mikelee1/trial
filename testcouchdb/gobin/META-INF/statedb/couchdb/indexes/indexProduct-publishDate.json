@@ -1,0 +1,10 @@
+{
+  "index": {
+    "fields": [
+      "baseProduct.publishDate"
+    ]
+  },
+  "ddoc": "baseProduct.publishDate",
+  "name": "baseProduct.publishDate",
+  "type": "json"
+}

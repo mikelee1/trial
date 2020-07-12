@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/appleboy/easyssh-proxy"
-	"myproj/try/common/logger"
 	"github.com/op/go-logging"
+	"myproj.lee/try/common/logger"
 )
 var logger1 *logging.Logger
 

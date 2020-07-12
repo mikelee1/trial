@@ -1,0 +1,11 @@
+
+[2019-09-29 13:03:39] app.ERROR: &{ 12e00099-bf61-4ac9-8e06-a3088b1b31bd}
+Stack trace:
+goroutine 1 [running]:
+runtime/debug.Stack(0x16132c0, 0xc420121f40, 0x15a2c7a)
+	/usr/local/Cellar/go/1.10.3/libexec/src/runtime/debug/stack.go:24 +0xa7
+web/module/logger.Error(0x14ad960, 0xc420121fa0)
+	/Users/leemike/go/src/web/module/logger/logger.go:92 +0x2ba
+main.main()
+	/Users/leemike/go/src/myproj.lee/try/todel/todel.go:35 +0x18f
+

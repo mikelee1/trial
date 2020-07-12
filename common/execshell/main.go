@@ -5,7 +5,7 @@ import (
 	"bytes"
 )
 
-func Run(s string) (string, error){
+func Run(s string) (string, error) {
 	//函数返回一个*Cmd，用于使用给出的参数执行name指定的程序
 	cmd := exec.Command("/bin/bash", "-c", s)
 
