@@ -2,8 +2,8 @@ package main
 
 import (
 	"fabric/core/comm"
-	"time"
 	"fmt"
+	"time"
 )
 
 const (
@@ -19,23 +19,24 @@ type Endpoint struct {
 
 func main() {
 	e := Endpoint{
-		Address:  "47.115.132.208:31003",
+		Address:  "192.168.9.201:7051",
 		Timeout:  time.Duration(3 * time.Second),
-		Override: "orderer-2-baas3",
+		Override: "peer0.org1.example.com",
+		//ca.crt文件
 		TLS: []byte(`-----BEGIN CERTIFICATE-----
-MIICVjCCAf2gAwIBAgIQM4cSyjj1If5qbjxewBm7KzAKBggqhkjOPQQDAjB2MQsw
-CQYDVQQGEwJDTjERMA8GA1UECBMIWmhlamlhbmcxETAPBgNVBAcTCEhhbmd6aG91
-MRAwDgYDVQQJEwdjb21wYW55MQ8wDQYDVQQREwYzMTAwMDAxDjAMBgNVBAoTBWJh
-YXMzMQ4wDAYDVQQDEwViYWFzMzAeFw0yMDAzMTEwNTE1MDBaFw0zMDAzMDkwNTE1
-MDBaMHYxCzAJBgNVBAYTAkNOMREwDwYDVQQIEwhaaGVqaWFuZzERMA8GA1UEBxMI
-SGFuZ3pob3UxEDAOBgNVBAkTB2NvbXBhbnkxDzANBgNVBBETBjMxMDAwMDEOMAwG
-A1UEChMFYmFhczMxDjAMBgNVBAMTBWJhYXMzMFkwEwYHKoZIzj0CAQYIKoZIzj0D
-AQcDQgAEOrn2GiKcc0c7H5Cz6qxQSzvd/Njk+mCKpsTlPtsQ1FBBICGsZH1Gjejz
-qbKGda6+bOCnBKEL9Twbd92eVeHiqaNtMGswDgYDVR0PAQH/BAQDAgGmMB0GA1Ud
-JQQWMBQGCCsGAQUFBwMCBggrBgEFBQcDATAPBgNVHRMBAf8EBTADAQH/MCkGA1Ud
-DgQiBCC9mhtUPgLLrOWyTmbS2QGSfCHmpPk1p92IOZABTU1FLTAKBggqhkjOPQQD
-AgNHADBEAiAcJo7xvpFVd4UMwvZkROMvaHdD8TUQHM/YFLtAZ03yBwIgIsBHzydj
-2AxnRavDs087VL39rtpdLjubs78FsF3Tsmw=
+MIICVzCCAf6gAwIBAgIRAKL86iZxDvzlNj6oHvAVSIMwCgYIKoZIzj0EAwIwdjEL
+MAkGA1UEBhMCVVMxEzARBgNVBAgTCkNhbGlmb3JuaWExFjAUBgNVBAcTDVNhbiBG
+cmFuY2lzY28xGTAXBgNVBAoTEG9yZzEuZXhhbXBsZS5jb20xHzAdBgNVBAMTFnRs
+c2NhLm9yZzEuZXhhbXBsZS5jb20wHhcNMjAwOTIzMDY1MDAwWhcNMzAwOTIxMDY1
+MDAwWjB2MQswCQYDVQQGEwJVUzETMBEGA1UECBMKQ2FsaWZvcm5pYTEWMBQGA1UE
+BxMNU2FuIEZyYW5jaXNjbzEZMBcGA1UEChMQb3JnMS5leGFtcGxlLmNvbTEfMB0G
+A1UEAxMWdGxzY2Eub3JnMS5leGFtcGxlLmNvbTBZMBMGByqGSM49AgEGCCqGSM49
+AwEHA0IABAjbuBtIwlJSoDZZ47XQfj/xzUtQ1uTYhe0GrtpBeIJKepZc/p/MCRoh
+JknoZsN2SIsARsc+VzH3SUQWaUVYvbCjbTBrMA4GA1UdDwEB/wQEAwIBpjAdBgNV
+HSUEFjAUBggrBgEFBQcDAgYIKwYBBQUHAwEwDwYDVR0TAQH/BAUwAwEB/zApBgNV
+HQ4EIgQg5F4m43UdAwFumR3h3L+AMy5rCkHEaYUixaLzDfcfmWMwCgYIKoZIzj0E
+AwIDRwAwRAIgaYhucnY7TVex07CysWpU7XEuNBWyhMvXVUzJ3/msIUMCIH/G8lO4
+UyW3k69HDpsNoMBkrfvaE9f1DBJl1z2asS7G
 -----END CERTIFICATE-----
 `),
 	}
@@ -45,7 +46,7 @@ AgNHADBEAiAcJo7xvpFVd4UMwvZkROMvaHdD8TUQHM/YFLtAZ03yBwIgIsBHzydj
 	}
 }
 
-func getClient(endpoint *Endpoint) (error) {
+func getClient(endpoint *Endpoint) error {
 	clientConfig := comm.ClientConfig{}
 	timeout := endpoint.Timeout
 	if timeout == time.Duration(0) {
@@ -65,7 +66,7 @@ func getClient(endpoint *Endpoint) (error) {
 		fmt.Println("Fail to new")
 		return err
 	}
-	fmt.Println(endpoint)
+	//fmt.Println(endpoint)
 	_, err = gClient.NewConnection(endpoint.Address, endpoint.Override)
 	return err
 }
